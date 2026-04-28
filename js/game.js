@@ -36,7 +36,7 @@ export function createGame(characters) {
     state.grid = buildGrid(state.character.color.hex, {
       rows: GRID_SIZE,
       cols: GRID_SIZE,
-      seed: i + 1,
+      seed: Math.floor(Math.random() * 0x7fffffff),
     });
   }
 
