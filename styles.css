@@ -138,13 +138,13 @@ body {
 .col-headers {
   grid-row: 1; grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--gap);
 }
 .row-headers {
   grid-row: 2; grid-column: 1;
   display: grid;
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
   gap: var(--gap);
 }
 
@@ -160,13 +160,23 @@ body {
   border: 1px solid #c8cdd6;
   box-shadow: 0 1px 0 rgba(0,0,0,0.2);
   min-height: 22px;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+/* Subtle hint: this row/column contains the correct cell. Surfaced after
+   the second wrong guess so the player has a nudge — soft mint, not a
+   shouting green. */
+.hdr--hint {
+  background: #dff5ea;
+  color: #1f6f4a;
+  border-color: #a9dfc4;
 }
 
 .grid {
   grid-row: 2; grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
   gap: var(--gap);
   padding: var(--gap);
   background: #1c2230;

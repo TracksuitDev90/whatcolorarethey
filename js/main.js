@@ -1,8 +1,8 @@
 import { loadCharacters } from './characters.js';
 import { createGame } from './game.js';
 
-const COL_LABELS = ['A', 'B', 'C', 'D'];
-const GRID_SIZE = 4;
+const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
+const GRID_SIZE = 5;
 
 const els = {
   img: document.getElementById('character-img'),
@@ -40,9 +40,32 @@ async function init() {
 
 function renderHeaders() {
   els.colHeaders.innerHTML = COL_LABELS
-    .map(l => `<span class="hdr">${l}</span>`).join('');
+    .map((l, i) => `<span class="hdr" data-col="${i}">${l}</span>`).join('');
   els.rowHeaders.innerHTML = Array.from({ length: GRID_SIZE }, (_, i) =>
-    `<span class="hdr">${i + 1}</span>`).join('');
+    `<span class="hdr" data-row="${i}">${i + 1}</span>`).join('');
+}
+
+function clearHints() {
+  for (const h of document.querySelectorAll('.hdr--hint')) {
+    h.classList.remove('hdr--hint');
+  }
+}
+
+function applyAxisHints() {
+  const s = game.snapshot();
+  const { correctRow, correctCol } = s.grid;
+  for (const w of s.wrongCells) {
+    if (w.row === correctRow) {
+      els.rowHeaders
+        .querySelector(`.hdr[data-row="${w.row}"]`)
+        ?.classList.add('hdr--hint');
+    }
+    if (w.col === correctCol) {
+      els.colHeaders
+        .querySelector(`.hdr[data-col="${w.col}"]`)
+        ?.classList.add('hdr--hint');
+    }
+  }
 }
 
 function renderRound() {
@@ -56,6 +79,7 @@ function renderRound() {
   els.next.hidden = true;
   els.restart.hidden = true;
   els.status.textContent = 'What color are they? Pick a swatch.';
+  clearHints();
 
   // Build grid cells
   els.grid.innerHTML = '';
@@ -138,6 +162,7 @@ function submitGuess(r, c, btn) {
     btn.classList.add('cell--wrong');
     flash(els.photoFrame, 'shake');
     els.status.textContent = `Not quite. ${result.guessesLeft} guess${result.guessesLeft === 1 ? '' : 'es'} left.`;
+    if (result.guessesLeft === 1) applyAxisHints();
     updateChips();
   } else if (result.kind === 'exhausted') {
     btn.classList.add('cell--wrong');

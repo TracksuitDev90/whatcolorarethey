@@ -1,4 +1,4 @@
-// Shade-grid generator. Builds a 4x4 (or arbitrary) board of shades around
+// Shade-grid generator. Builds a 5x5 (or arbitrary) board of shades around
 // a correct hex color, with the correct cell at a seeded random position.
 // Lightness sweeps top-to-bottom; saturation/hue sweep left-to-right —
 // matching the reference photo's gradient feel.
@@ -62,19 +62,29 @@ function mulberry32(seed) {
   };
 }
 
-// Per-step deltas. Tuned so the full 4x4 grid spans roughly:
-//   lightness ±21, saturation ±8, hue ±6
-// — close enough that adjacent cells are distinguishable but the family
-// reads as one color (like the reference photo's teal sweep).
-const LIGHT_STEP = 7;     // per row away from correct
-const SAT_STEP = 2.5;     // per col away from correct
-const HUE_STEP = 2;       // per col away from correct, applied subtly
+// Per-step delta ranges. The exact step within each range is rolled per
+// round (seeded), so consecutive rounds don't reuse the same gradient.
+const LIGHT_STEP_MIN = 5;
+const LIGHT_STEP_MAX = 9;
+const SAT_STEP_MIN = 1.5;
+const SAT_STEP_MAX = 3.5;
+const HUE_STEP_MIN = 1.5;
+const HUE_STEP_MAX = 3.5;
 
-export function buildGrid(correctHex, { rows = 4, cols = 4, seed = 0 } = {}) {
+export function buildGrid(correctHex, { rows = 5, cols = 5, seed = 0 } = {}) {
   const base = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 17);
   const correctRow = Math.floor(rng() * rows);
   const correctCol = Math.floor(rng() * cols);
+
+  // Randomize gradient orientation + magnitude so the surrounding shades
+  // shift each round — sometimes lighter on top, sometimes on the bottom;
+  // sometimes a wider hue sweep, sometimes a tight one.
+  const lightDir = rng() < 0.5 ? -1 : 1;
+  const hueDir = rng() < 0.5 ? -1 : 1;
+  const lightStep = LIGHT_STEP_MIN + rng() * (LIGHT_STEP_MAX - LIGHT_STEP_MIN);
+  const satStep = SAT_STEP_MIN + rng() * (SAT_STEP_MAX - SAT_STEP_MIN);
+  const hueStep = HUE_STEP_MIN + rng() * (HUE_STEP_MAX - HUE_STEP_MIN);
 
   const cells = [];
   for (let r = 0; r < rows; r++) {
@@ -84,14 +94,11 @@ export function buildGrid(correctHex, { rows = 4, cols = 4, seed = 0 } = {}) {
         row.push({ row: r, col: c, hex: correctHex.toUpperCase(), isCorrect: true });
         continue;
       }
-      const dRow = r - correctRow; // negative = above (lighter), positive = below (darker)
+      const dRow = r - correctRow;
       const dCol = c - correctCol;
-      // Lightness gradient: rows above the correct row are lighter, rows below are darker.
-      const l = clamp(base.l - dRow * LIGHT_STEP, 8, 96);
-      // Saturation drops symmetrically as you move away from the correct column,
-      // and hue drifts a touch left/right of base — same family, slight sweep.
-      const s = clamp(base.s - Math.abs(dCol) * SAT_STEP, 5, 100);
-      const h = base.h + dCol * HUE_STEP;
+      const l = clamp(base.l - lightDir * dRow * lightStep, 8, 96);
+      const s = clamp(base.s - Math.abs(dCol) * satStep, 5, 100);
+      const h = base.h + hueDir * dCol * hueStep;
       row.push({
         row: r,
         col: c,

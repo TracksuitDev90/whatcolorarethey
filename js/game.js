@@ -9,7 +9,7 @@ const STORAGE_KEYS = {
 };
 
 const MAX_GUESSES = 3;
-const GRID_SIZE = 4;
+const GRID_SIZE = 5;
 
 export function createGame(characters) {
   if (!characters?.length) throw new Error('createGame: no characters');
@@ -36,7 +36,7 @@ export function createGame(characters) {
     state.grid = buildGrid(state.character.color.hex, {
       rows: GRID_SIZE,
       cols: GRID_SIZE,
-      seed: i + 1,
+      seed: Math.floor(Math.random() * 0x7fffffff),
     });
   }
 
