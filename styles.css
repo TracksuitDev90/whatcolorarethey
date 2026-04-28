@@ -160,6 +160,16 @@ body {
   border: 1px solid #c8cdd6;
   box-shadow: 0 1px 0 rgba(0,0,0,0.2);
   min-height: 22px;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+/* Subtle hint: this row/column contains the correct cell. Surfaced after
+   the second wrong guess so the player has a nudge — soft mint, not a
+   shouting green. */
+.hdr--hint {
+  background: #dff5ea;
+  color: #1f6f4a;
+  border-color: #a9dfc4;
 }
 
 .grid {
