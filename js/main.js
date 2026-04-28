@@ -1,8 +1,8 @@
 import { loadCharacters } from './characters.js';
 import { createGame } from './game.js';
 
-const COL_LABELS = ['A', 'B', 'C', 'D'];
-const GRID_SIZE = 4;
+const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
+const GRID_SIZE = 5;
 
 const els = {
   img: document.getElementById('character-img'),

@@ -9,7 +9,7 @@ const STORAGE_KEYS = {
 };
 
 const MAX_GUESSES = 3;
-const GRID_SIZE = 4;
+const GRID_SIZE = 5;
 
 export function createGame(characters) {
   if (!characters?.length) throw new Error('createGame: no characters');
