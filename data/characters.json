@@ -1,0 +1,162 @@
+[
+  {
+    "id": "winnie-the-pooh",
+    "name": "Winnie the Pooh",
+    "color": { "hex": "#FCD667", "name": "Pooh Yellow" },
+    "colorSource": "https://colorfrompic.com/what-color-is-winnie-the-pooh/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Winnie-the-Pooh_(Disney_character)",
+    "verified": true
+  },
+  {
+    "id": "homer-simpson",
+    "name": "Homer Simpson",
+    "color": { "hex": "#FFD90F", "name": "Simpsons Yellow" },
+    "colorSource": "https://www.colourlovers.com/color/FFD90F/the_simpsons_yellow",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Homer_Simpson",
+    "verified": true
+  },
+  {
+    "id": "spongebob-squarepants",
+    "name": "SpongeBob SquarePants",
+    "color": { "hex": "#F7E948", "name": "SpongeBob Yellow (Pantone)" },
+    "colorSource": "https://www.pantone.com/articles/press-releases/nickelodeon-and-the-pantone-color-institute-launch-spongebob-yellow-and-patrick-star-pink",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/SpongeBob_SquarePants_(character)",
+    "verified": true
+  },
+  {
+    "id": "pikachu",
+    "name": "Pikachu",
+    "color": { "hex": "#FFCB05", "name": "Pokémon Yellow" },
+    "colorSource": "https://brandpalettes.com/pokemon-color-codes/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Pikachu",
+    "verified": true
+  },
+  {
+    "id": "garfield",
+    "name": "Garfield",
+    "color": { "hex": "#FF8604", "name": "Garfield Orange" },
+    "colorSource": "https://www.colourlovers.com/color/FF8604/garfield_orange",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Garfield",
+    "verified": true
+  },
+  {
+    "id": "tigger",
+    "name": "Tigger",
+    "color": { "hex": "#DC6605", "name": "Tigger Orange" },
+    "colorSource": "https://encycolorpedia.com/dc6605",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Tigger",
+    "verified": true
+  },
+  {
+    "id": "smurfs",
+    "name": "Smurfs",
+    "color": { "hex": "#4695D6", "name": "Smurf Blue (PMS 318C)" },
+    "colorSource": "https://www.color-name.com/smurf.color",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Smurfs",
+    "verified": true
+  },
+  {
+    "id": "sonic",
+    "name": "Sonic the Hedgehog",
+    "color": { "hex": "#1A50BC", "name": "Sonic Blue" },
+    "colorSource": "https://www.deviantart.com/trishrowdy/journal/Sonic-Characters-Color-Values-299581130",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Sonic_the_Hedgehog",
+    "verified": true
+  },
+  {
+    "id": "donald-duck",
+    "name": "Donald Duck",
+    "color": { "hex": "#1F77B4", "name": "Donald Sailor Blue" },
+    "colorSource": "https://www.schemecolor.com/donald-duck-mickey-mouse-cartoon-colors.php",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Donald_Duck",
+    "verified": true
+  },
+  {
+    "id": "mickey-mouse",
+    "name": "Mickey Mouse",
+    "color": { "hex": "#C43A36", "name": "Mickey's Pants Red (Disney 2B-80)" },
+    "colorSource": "https://encycolorpedia.com/c43a36",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Mickey_Mouse",
+    "verified": true
+  },
+  {
+    "id": "elmo",
+    "name": "Elmo",
+    "color": { "hex": "#D6292D", "name": "Elmo Red (Alizarin)" },
+    "colorSource": "https://www.schemecolor.com/elmo-sesame-street-colors.php",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Elmo",
+    "verified": true
+  },
+  {
+    "id": "kermit",
+    "name": "Kermit the Frog",
+    "color": { "hex": "#5CB200", "name": "Kermit Green" },
+    "colorSource": "https://icolorpalette.com/color/5cb200",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Kermit_the_Frog",
+    "verified": true
+  },
+  {
+    "id": "shrek",
+    "name": "Shrek",
+    "color": { "hex": "#C1D82F", "name": "Shrek Green" },
+    "colorSource": "https://colorcodes.io/green/shrek-green-color-codes/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Shrek_(character)",
+    "verified": true
+  },
+  {
+    "id": "barney",
+    "name": "Barney the Dinosaur",
+    "color": { "hex": "#B2008B", "name": "Barney Purple (PMS 2405 C)" },
+    "colorSource": "https://brandpalettes.com/barney-friends-color-codes/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Barney_(character)",
+    "verified": true
+  },
+  {
+    "id": "marge-simpson",
+    "name": "Marge Simpson",
+    "color": { "hex": "#107DC0", "name": "Marge Hair Blue (Horizon)" },
+    "colorSource": "https://www.schemecolor.com/marge-the-simpsons-cartoon-colors.php",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Marge_Simpson",
+    "verified": true
+  },
+  {
+    "id": "patrick-star",
+    "name": "Patrick Star",
+    "color": { "hex": "#FF808B", "name": "Patrick Star Pink (Pantone)" },
+    "colorSource": "https://www.pantone.com/articles/press-releases/nickelodeon-and-the-pantone-color-institute-launch-spongebob-yellow-and-patrick-star-pink",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Patrick_Star",
+    "verified": true
+  },
+  {
+    "id": "beast-boy",
+    "name": "Beast Boy",
+    "color": { "hex": "#8CC871", "name": "Beast Boy Green" },
+    "colorSource": "https://www.color-hex.com/color-palette/72954",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Beast_Boy",
+    "verified": true
+  },
+  {
+    "id": "squidward",
+    "name": "Squidward Tentacles",
+    "color": { "hex": "#54DBC2", "name": "Squidward Cyan (PMS 333)" },
+    "colorSource": "https://brandpalettes.com/spongebob-squarepants-color-codes/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Squidward_Tentacles",
+    "verified": true
+  },
+  {
+    "id": "scooby-doo",
+    "name": "Scooby-Doo",
+    "color": { "hex": "#974D12", "name": "Scooby-Doo Brown" },
+    "colorSource": "https://www.colourlovers.com/color/974D12/Scooby-Doo_Brown",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Scooby-Doo_(character)",
+    "verified": true
+  },
+  {
+    "id": "bugs-bunny",
+    "name": "Bugs Bunny",
+    "color": { "hex": "#99A2A4", "name": "Bugs Sea Gray" },
+    "colorSource": "https://www.schemecolor.com/bugs-bunny-looney-tunes-cartoon-colors.php",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Bugs_Bunny",
+    "verified": true
+  }
+]
