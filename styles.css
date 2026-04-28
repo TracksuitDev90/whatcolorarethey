@@ -138,13 +138,13 @@ body {
 .col-headers {
   grid-row: 1; grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--gap);
 }
 .row-headers {
   grid-row: 2; grid-column: 1;
   display: grid;
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: var(--gap);
 }
 
@@ -165,8 +165,8 @@ body {
 .grid {
   grid-row: 2; grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: var(--gap);
   padding: var(--gap);
   background: #1c2230;

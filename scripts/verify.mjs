@@ -11,7 +11,7 @@ for (let i = 0; i < chars.length; i++) {
     console.error('BAD HEX', c.id, c.color.hex);
     errors++; continue;
   }
-  const g = buildGrid(c.color.hex, { rows: 6, cols: 6, seed: i + 1 });
+  const g = buildGrid(c.color.hex, { rows: 4, cols: 4, seed: i + 1 });
   const cc = g.cells[g.correctRow][g.correctCol];
   const want = c.color.hex.toUpperCase();
   if (cc.hex !== want) {
@@ -25,7 +25,7 @@ for (let i = 0; i < chars.length; i++) {
     console.error(`NEIGHBOR EQUAL ${c.id}`);
     errors++;
   }
-  console.log(`#${String(i + 1).padStart(2, '0')} ${c.name.padEnd(24)} ${want}  correct@(r${g.correctRow},c${g.correctCol})  topleft=${g.cells[0][0].hex}  bottomright=${g.cells[5][5].hex}`);
+  console.log(`#${String(i + 1).padStart(2, '0')} ${c.name.padEnd(24)} ${want}  correct@(r${g.correctRow},c${g.correctCol})  topleft=${g.cells[0][0].hex}  bottomright=${g.cells[3][3].hex}`);
 }
 console.log(errors ? `\nFAIL ${errors}` : '\nALL OK');
 process.exit(errors ? 1 : 0);

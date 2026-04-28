@@ -1,7 +1,8 @@
 import { loadCharacters } from './characters.js';
 import { createGame } from './game.js';
 
-const COL_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
+const COL_LABELS = ['A', 'B', 'C', 'D'];
+const GRID_SIZE = 4;
 
 const els = {
   img: document.getElementById('character-img'),
@@ -40,7 +41,7 @@ async function init() {
 function renderHeaders() {
   els.colHeaders.innerHTML = COL_LABELS
     .map(l => `<span class="hdr">${l}</span>`).join('');
-  els.rowHeaders.innerHTML = Array.from({ length: 6 }, (_, i) =>
+  els.rowHeaders.innerHTML = Array.from({ length: GRID_SIZE }, (_, i) =>
     `<span class="hdr">${i + 1}</span>`).join('');
 }
 
@@ -97,9 +98,9 @@ function onKeyDown(e) {
   const r = Number(e.currentTarget.dataset.row);
   const c = Number(e.currentTarget.dataset.col);
   switch (e.key) {
-    case 'ArrowRight': moveFocus(r, Math.min(5, c + 1)); break;
+    case 'ArrowRight': moveFocus(r, Math.min(GRID_SIZE - 1, c + 1)); break;
     case 'ArrowLeft':  moveFocus(r, Math.max(0, c - 1)); break;
-    case 'ArrowDown':  moveFocus(Math.min(5, r + 1), c); break;
+    case 'ArrowDown':  moveFocus(Math.min(GRID_SIZE - 1, r + 1), c); break;
     case 'ArrowUp':    moveFocus(Math.max(0, r - 1), c); break;
     case 'Enter':
     case ' ':

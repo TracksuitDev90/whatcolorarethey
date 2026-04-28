@@ -1,21 +1,22 @@
-// Game state machine. Pure-ish: no DOM access. Persists best streak +
-// resume index via localStorage so a refresh mid-game picks up where left off.
+// Game state machine. Pure-ish: no DOM access. Persists best streak across
+// sessions; round order is reshuffled each fresh page load so similar colors
+// don't cluster together.
 
 import { buildGrid } from './grid.js';
 
 const STORAGE_KEYS = {
   bestStreak: 'wcat:bestStreak',
-  resumeRound: 'wcat:lastRoundIndex',
 };
 
 const MAX_GUESSES = 3;
+const GRID_SIZE = 4;
 
 export function createGame(characters) {
   if (!characters?.length) throw new Error('createGame: no characters');
 
   const state = {
-    characters,
-    roundIndex: clampInt(readStorage(STORAGE_KEYS.resumeRound, 0), 0, characters.length - 1),
+    characters: shuffle(characters.slice()),
+    roundIndex: 0,
     streak: 0,
     bestStreak: clampInt(readStorage(STORAGE_KEYS.bestStreak, 0), 0, 9999),
     guessesLeft: MAX_GUESSES,
@@ -33,11 +34,10 @@ export function createGame(characters) {
     state.wrongCells = [];
     state.character = state.characters[i];
     state.grid = buildGrid(state.character.color.hex, {
-      rows: 6,
-      cols: 6,
+      rows: GRID_SIZE,
+      cols: GRID_SIZE,
       seed: i + 1,
     });
-    writeStorage(STORAGE_KEYS.resumeRound, i);
   }
 
   function guess(row, col) {
@@ -66,7 +66,6 @@ export function createGame(characters) {
     const last = state.characters.length - 1;
     if (state.roundIndex >= last) {
       state.finished = true;
-      writeStorage(STORAGE_KEYS.resumeRound, 0);
       return { kind: 'finished' };
     }
     loadRound(state.roundIndex + 1);
@@ -76,6 +75,7 @@ export function createGame(characters) {
   function restart() {
     state.streak = 0;
     state.finished = false;
+    state.characters = shuffle(state.characters.slice());
     loadRound(0);
   }
 
@@ -118,4 +118,12 @@ function writeStorage(key, value) {
 function clampInt(n, lo, hi) {
   if (!Number.isFinite(n)) return lo;
   return Math.max(lo, Math.min(hi, Math.trunc(n)));
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
