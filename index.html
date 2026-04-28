@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e1116" />
+  <title>What Color Are They?</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <h1 class="title">What Color Are They?</h1>
+    <div class="scoreboard" aria-live="polite">
+      <span class="chip" id="round-chip">Round 1 / 20</span>
+      <span class="chip" id="streak-chip">Streak 0</span>
+      <span class="chip" id="best-chip">Best 0</span>
+      <span class="chip chip--guesses" id="guesses-chip">Guesses 3</span>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <section class="card" id="character-card" aria-label="Character">
+      <figure class="photo" id="photo-frame">
+        <img id="character-img" alt="" />
+        <figcaption class="photo-caption" id="character-name">&nbsp;</figcaption>
+      </figure>
+    </section>
+
+    <section class="board" aria-label="Color choices">
+      <div class="board-corner" aria-hidden="true"></div>
+      <div class="col-headers" id="col-headers" aria-hidden="true"></div>
+      <div class="row-headers" id="row-headers" aria-hidden="true"></div>
+      <div class="grid" id="grid" role="grid" aria-label="6 by 6 color grid"></div>
+    </section>
+
+    <section class="status" id="status" aria-live="polite"></section>
+
+    <div class="actions">
+      <button id="next-btn" class="btn btn--primary" hidden>Next round &rarr;</button>
+      <button id="restart-btn" class="btn btn--ghost" hidden>Play again</button>
+    </div>
+  </main>
+
+  <footer class="bottombar">
+    <small>Pick the swatch that matches the character's iconic color. Three guesses per round.</small>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
