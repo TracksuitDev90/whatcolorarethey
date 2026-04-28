@@ -134,5 +134,109 @@
     "colorSource": "https://www.schemecolor.com/bugs-bunny-looney-tunes-cartoon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Bugs_Bunny",
     "verified": true
+  },
+  {
+    "id": "kirby",
+    "name": "Kirby",
+    "color": { "hex": "#D74894", "name": "Kirby Pink (Pantone 239 C)" },
+    "colorSource": "https://colorswall.com/color/d74894",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Kirby_(character)",
+    "verified": true
+  },
+  {
+    "id": "yoshi",
+    "name": "Yoshi",
+    "color": { "hex": "#6FD251", "name": "Yoshi Green" },
+    "colorSource": "https://htmlcolors.com/palette/71/yoshi",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Yoshi",
+    "verified": true
+  },
+  {
+    "id": "stitch",
+    "name": "Stitch",
+    "color": { "hex": "#62B1CF", "name": "Stitch Blue" },
+    "colorSource": "https://www.color-hex.com/color-palette/19591",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Stitch_(Lilo_%26_Stitch)",
+    "verified": true
+  },
+  {
+    "id": "crash-bandicoot",
+    "name": "Crash Bandicoot",
+    "color": { "hex": "#FF6522", "name": "Crash Orange" },
+    "colorSource": "https://colorshexa.com/palette/crash-bandicoot-logo",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Crash_Bandicoot_(character)",
+    "verified": true
+  },
+  {
+    "id": "charizard",
+    "name": "Charizard",
+    "color": { "hex": "#F08030", "name": "Charizard Orange" },
+    "colorSource": "https://www.schemecolor.com/charizard-pokemon-colors.php",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Charizard",
+    "verified": true
+  },
+  {
+    "id": "squirtle",
+    "name": "Squirtle",
+    "color": { "hex": "#55A3AB", "name": "Squirtle Blue-Green" },
+    "colorSource": "https://www.schemecolor.com/squirtle-pokemon-colors.php",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Squirtle",
+    "verified": true
+  },
+  {
+    "id": "jigglypuff",
+    "name": "Jigglypuff",
+    "color": { "hex": "#FFAAFF", "name": "Jigglypuff Pink" },
+    "colorSource": "https://colorswall.com/color/ffaaff",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Jigglypuff",
+    "verified": true
+  },
+  {
+    "id": "grimace",
+    "name": "Grimace",
+    "color": { "hex": "#6E2073", "name": "Grimace Purple" },
+    "colorSource": "https://www.colourlovers.com/color/6E2073/Grimace_purple",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Grimace_(character)",
+    "verified": true
+  },
+  {
+    "id": "hulk",
+    "name": "The Hulk",
+    "color": { "hex": "#54B951", "name": "Hulk Green" },
+    "colorSource": "https://brandpalettes.com/hulk-color-codes/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Hulk",
+    "verified": true
+  },
+  {
+    "id": "sulley",
+    "name": "Sulley",
+    "color": { "hex": "#5AC0CB", "name": "Sulley Fur Blue (Disney WDMU02)" },
+    "colorSource": "https://www.myperfectcolor.com/paint/414372-disney-wdmu02-sulleys-fur",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/James_P._Sullivan",
+    "verified": true
+  },
+  {
+    "id": "mr-krabs",
+    "name": "Mr. Krabs",
+    "color": { "hex": "#FF3B3B", "name": "Mr. Krabs Red" },
+    "colorSource": "https://colorswall.com/color/ff3b3b",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Mr._Krabs",
+    "verified": true
+  },
+  {
+    "id": "cookie-monster",
+    "name": "Cookie Monster",
+    "color": { "hex": "#0F98DC", "name": "Cookie Monster Blue" },
+    "colorSource": "https://brandpalettes.com/sesame-street-color-codes/",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Cookie_Monster",
+    "verified": true
+  },
+  {
+    "id": "tweety",
+    "name": "Tweety",
+    "color": { "hex": "#FFF700", "name": "Tweety Bird Yellow" },
+    "colorSource": "https://rgb.to/color/18018/tweety-bird-yellow",
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Tweety",
+    "verified": true
   }
 ]
