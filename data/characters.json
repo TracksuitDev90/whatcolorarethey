@@ -64,22 +64,6 @@
     "verified": true
   },
   {
-    "id": "donald-duck",
-    "name": "Donald Duck",
-    "color": { "hex": "#1F77B4", "name": "Donald Sailor Blue" },
-    "colorSource": "https://www.schemecolor.com/donald-duck-mickey-mouse-cartoon-colors.php",
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Donald_Duck",
-    "verified": true
-  },
-  {
-    "id": "mickey-mouse",
-    "name": "Mickey Mouse",
-    "color": { "hex": "#C43A36", "name": "Mickey's Pants Red (Disney 2B-80)" },
-    "colorSource": "https://encycolorpedia.com/c43a36",
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Mickey_Mouse",
-    "verified": true
-  },
-  {
     "id": "elmo",
     "name": "Elmo",
     "color": { "hex": "#D6292D", "name": "Elmo Red (Alizarin)" },
@@ -109,14 +93,6 @@
     "color": { "hex": "#B2008B", "name": "Barney Purple (PMS 2405 C)" },
     "colorSource": "https://brandpalettes.com/barney-friends-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Barney_(character)",
-    "verified": true
-  },
-  {
-    "id": "marge-simpson",
-    "name": "Marge Simpson",
-    "color": { "hex": "#107DC0", "name": "Marge Hair Blue (Horizon)" },
-    "colorSource": "https://www.schemecolor.com/marge-the-simpsons-cartoon-colors.php",
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Marge_Simpson",
     "verified": true
   },
   {
