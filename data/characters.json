@@ -21,6 +21,7 @@
     "color": { "hex": "#F7E948", "name": "SpongeBob Yellow (Pantone)" },
     "colorSource": "https://www.pantone.com/articles/press-releases/nickelodeon-and-the-pantone-color-institute-launch-spongebob-yellow-and-patrick-star-pink",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/SpongeBob_SquarePants_(character)",
+    "image": "assets/IMG_0359.webp",
     "verified": true
   },
   {
@@ -29,6 +30,7 @@
     "color": { "hex": "#FFCB05", "name": "Pokémon Yellow" },
     "colorSource": "https://brandpalettes.com/pokemon-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pikachu",
+    "image": "assets/IMG_0362.jpeg",
     "verified": true
   },
   {
@@ -37,6 +39,7 @@
     "color": { "hex": "#FF8604", "name": "Garfield Orange" },
     "colorSource": "https://www.colourlovers.com/color/FF8604/garfield_orange",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Garfield",
+    "image": "assets/IMG_0363.jpeg",
     "verified": true
   },
   {
