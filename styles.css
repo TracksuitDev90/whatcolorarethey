@@ -90,7 +90,7 @@ body {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
-  background: #11151c;
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
@@ -102,7 +102,7 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   filter: grayscale(1) contrast(1.05);
   transition: filter 600ms ease;
 }
@@ -163,13 +163,30 @@ body {
   transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
-/* Subtle hint: this row/column contains the correct cell. Surfaced after
-   the second wrong guess so the player has a nudge — soft mint, not a
-   shouting green. */
+/* Hint: this row/column contains the correct cell. Surfaced after the
+   second wrong guess — vivid green so it's unmistakable. */
 .hdr--hint {
-  background: #dff5ea;
-  color: #1f6f4a;
-  border-color: #a9dfc4;
+  background: #21c47a;
+  color: #062420;
+  border-color: #15a05f;
+  font-weight: 900;
+  box-shadow:
+    0 0 0 2px rgba(33, 196, 122, 0.45),
+    0 0 14px rgba(33, 196, 122, 0.65);
+  animation: hint-pulse 1400ms ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(33, 196, 122, 0.45),
+      0 0 14px rgba(33, 196, 122, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(33, 196, 122, 0.7),
+      0 0 22px rgba(33, 196, 122, 0.95);
+  }
 }
 
 .grid {

@@ -45,7 +45,9 @@ async function init() {
   try {
     const chars = await loadCharacters();
     dateKey = getUtcDateKey();
-    const daily = pickDailyCharacters(chars, dateKey, 3);
+    // Daily cap removed for now — play every character each day. Re-enable
+    // by passing a smaller count (e.g. 3) once we ship publicly.
+    const daily = pickDailyCharacters(chars, dateKey, chars.length);
     game = createDailyGame(daily, dateKey);
     renderHeaders();
     if (game.snapshot().finished) {
