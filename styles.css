@@ -256,6 +256,32 @@ body {
   cursor: default;
 }
 
+/* ---------- Share card ---------- */
+.share {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.share-card {
+  width: 100%;
+  max-width: 540px;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  background: #0e1116;
+}
+
+.countdown {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(12px, 1.6vw, 14px);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.4em;
+}
+
 /* ---------- Status / actions ---------- */
 .status {
   text-align: center;

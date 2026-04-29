@@ -1,5 +1,12 @@
 import { loadCharacters } from './characters.js';
-import { createGame } from './game.js';
+import { createDailyGame } from './game.js';
+import {
+  getUtcDateKey,
+  pickDailyCharacters,
+  msUntilNextUtcDay,
+  formatCountdown,
+} from './daily.js';
+import { renderShareCard, shareCanvas, shareText } from './share.js';
 
 const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
 const GRID_SIZE = 5;
@@ -13,7 +20,12 @@ const els = {
   rowHeaders: document.getElementById('row-headers'),
   status: document.getElementById('status'),
   next: document.getElementById('next-btn'),
-  restart: document.getElementById('restart-btn'),
+  share: document.getElementById('share-btn'),
+  copyResult: document.getElementById('copy-btn'),
+  shareSlot: document.getElementById('share-slot'),
+  countdown: document.getElementById('countdown'),
+  characterCard: document.getElementById('character-card'),
+  board: document.getElementById('board'),
   roundChip: document.getElementById('round-chip'),
   streakChip: document.getElementById('streak-chip'),
   bestChip: document.getElementById('best-chip'),
@@ -21,17 +33,26 @@ const els = {
 };
 
 let game;
+let dateKey;
 let focusRow = 0;
 let focusCol = 0;
+let countdownTimer = null;
+let cachedShareCanvas = null;
 
 init();
 
 async function init() {
   try {
     const chars = await loadCharacters();
-    game = createGame(chars);
+    dateKey = getUtcDateKey();
+    const daily = pickDailyCharacters(chars, dateKey, 3);
+    game = createDailyGame(daily, dateKey);
     renderHeaders();
-    renderRound();
+    if (game.snapshot().finished) {
+      showFinished();
+    } else {
+      renderRound();
+    }
   } catch (err) {
     console.error(err);
     els.status.textContent = `Failed to start: ${err.message}`;
@@ -69,19 +90,23 @@ function applyAxisHints() {
 }
 
 function renderRound() {
+  hideShareSlot();
   const s = game.snapshot();
   const c = s.character;
+  const round = s.rounds[s.roundIndex];
 
+  els.characterCard.hidden = false;
+  els.board.hidden = false;
   els.img.src = c.imageSrc;
   els.img.alt = `Cartoon character (grayscale until revealed)`;
   els.name.innerHTML = '&nbsp;';
   els.photoFrame.classList.remove('revealed');
   els.next.hidden = true;
-  els.restart.hidden = true;
+  els.share.hidden = true;
+  if (els.copyResult) els.copyResult.hidden = true;
   els.status.textContent = 'What color are they? Pick a swatch.';
   clearHints();
 
-  // Build grid cells
   els.grid.innerHTML = '';
   for (let r = 0; r < s.grid.rows; r++) {
     for (let col = 0; col < s.grid.cols; col++) {
@@ -93,8 +118,7 @@ function renderRound() {
       btn.dataset.row = r;
       btn.dataset.col = col;
       btn.setAttribute('role', 'gridcell');
-      btn.setAttribute('aria-label',
-        `Row ${r + 1} column ${COL_LABELS[col]}`);
+      btn.setAttribute('aria-label', `Row ${r + 1} column ${COL_LABELS[col]}`);
       btn.tabIndex = (r === 0 && col === 0) ? 0 : -1;
       btn.addEventListener('pointerdown', onPointerDown);
       btn.addEventListener('keydown', onKeyDown);
@@ -103,13 +127,25 @@ function renderRound() {
   }
   focusRow = 0;
   focusCol = 0;
-  updateChips();
 
-  // For dev: confirm correct cell carries exact hex.
-  if (typeof window !== 'undefined' && window.location?.search?.includes('debug')) {
-    const cc = s.grid.cells[s.grid.correctRow][s.grid.correctCol];
-    console.log(`[round ${s.roundIndex}] ${c.name} expects ${c.color.hex}; correct cell @ r${s.grid.correctRow}c${s.grid.correctCol} = ${cc.hex}`);
+  // Replay any saved guesses for this round so refreshing mid-puzzle keeps state.
+  for (const g of round.guesses) {
+    const btn = cellButton(g.row, g.col);
+    if (!btn) continue;
+    btn.classList.add(g.correct ? 'cell--correct' : 'cell--wrong');
   }
+
+  if (s.revealed) {
+    revealRound(/*lost*/ round.lost === true, /*announce*/ false);
+  } else if (s.wrongCells.length >= 2) {
+    applyAxisHints();
+  }
+
+  updateChips();
+}
+
+function cellButton(row, col) {
+  return els.grid.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
 }
 
 function onPointerDown(e) {
@@ -148,8 +184,7 @@ function moveFocus(r, c) {
     const bc = Number(btn.dataset.col);
     btn.tabIndex = (br === r && bc === c) ? 0 : -1;
   }
-  const target = els.grid.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-  target?.focus();
+  cellButton(r, c)?.focus();
 }
 
 function submitGuess(r, c, btn) {
@@ -157,7 +192,7 @@ function submitGuess(r, c, btn) {
   const result = game.guess(r, c);
   if (result.kind === 'correct') {
     btn.classList.add('cell--correct');
-    revealRound(result.cell, /*lost*/ false);
+    revealRound(/*lost*/ false);
   } else if (result.kind === 'wrong') {
     btn.classList.add('cell--wrong');
     flash(els.photoFrame, 'shake');
@@ -166,29 +201,39 @@ function submitGuess(r, c, btn) {
     updateChips();
   } else if (result.kind === 'exhausted') {
     btn.classList.add('cell--wrong');
-    revealRound(result.correctCell, /*lost*/ true);
+    revealRound(/*lost*/ true);
   }
 }
 
-function revealRound(correctCell, lost) {
+function revealRound(lost, announce = true) {
   const s = game.snapshot();
   els.photoFrame.classList.add('revealed');
   els.name.textContent = s.character.name;
-  // Mark the correct cell
-  const correctBtn = els.grid.querySelector(
-    `.cell[data-row="${correctCell.row}"][data-col="${correctCell.col}"]`);
+  const correctBtn = cellButton(s.grid.correctRow, s.grid.correctCol);
   correctBtn?.classList.add('cell--correct');
-  // Disable interactions
   for (const btn of els.grid.querySelectorAll('.cell')) {
     if (!btn.classList.contains('cell--wrong') && !btn.classList.contains('cell--correct')) {
       btn.classList.add('cell--dim');
     }
   }
-  els.status.textContent = lost
-    ? `Out of guesses. ${s.character.name}'s color is ${s.character.color.name || s.character.color.hex}.`
-    : `Correct! ${s.character.name} — ${s.character.color.name || s.character.color.hex}.`;
-  els.next.hidden = false;
-  els.next.focus();
+  if (announce) {
+    els.status.textContent = lost
+      ? `Out of guesses. ${s.character.name}'s color is ${s.character.color.name || s.character.color.hex}.`
+      : `Correct! ${s.character.name} — ${s.character.color.name || s.character.color.hex}.`;
+  } else {
+    els.status.textContent = lost
+      ? `${s.character.name} — ${s.character.color.name || s.character.color.hex}.`
+      : `${s.character.name} — ${s.character.color.name || s.character.color.hex}.`;
+  }
+  if (s.roundIndex >= s.totalRounds - 1) {
+    els.next.hidden = true;
+    if (s.finished && announce) {
+      setTimeout(showFinished, 1100);
+    }
+  } else {
+    els.next.hidden = false;
+    els.next.focus();
+  }
   updateChips();
 }
 
@@ -202,31 +247,95 @@ function updateChips() {
 
 els.next.addEventListener('click', () => {
   const r = game.next();
-  if (r.kind === 'finished') {
+  if (r.kind === 'finished' || game.snapshot().finished) {
     showFinished();
   } else {
     renderRound();
   }
 });
 
-els.restart.addEventListener('click', () => {
-  game.restart();
-  renderRound();
-});
+if (els.share) {
+  els.share.addEventListener('click', async () => {
+    if (!cachedShareCanvas) return;
+    els.share.disabled = true;
+    try {
+      await shareCanvas(cachedShareCanvas, game.snapshot());
+    } catch (err) {
+      console.error(err);
+      els.status.textContent = `Could not share: ${err.message}`;
+    } finally {
+      els.share.disabled = false;
+    }
+  });
+}
 
-function showFinished() {
+if (els.copyResult) {
+  els.copyResult.addEventListener('click', async () => {
+    const text = shareText(game.snapshot());
+    try {
+      await navigator.clipboard.writeText(text);
+      els.copyResult.textContent = 'Copied!';
+      setTimeout(() => { els.copyResult.textContent = 'Copy text'; }, 1800);
+    } catch {
+      els.copyResult.textContent = 'Copy failed';
+    }
+  });
+}
+
+async function showFinished() {
   const s = game.snapshot();
-  els.status.textContent = `All ${s.totalRounds} rounds complete. Best streak this run: ${s.bestStreak}.`;
-  els.grid.innerHTML = '';
+  els.characterCard.hidden = true;
+  els.board.hidden = true;
   els.next.hidden = true;
-  els.restart.hidden = false;
-  els.restart.focus();
-  els.photoFrame.classList.add('revealed');
+  els.status.textContent = '';
+
+  const wins = s.rounds.filter(r => r.won).length;
+  const summary = `${wins} of ${s.totalRounds} solved today.`;
+  els.status.textContent = summary;
+  updateChips();
+
+  els.shareSlot.hidden = false;
+  els.shareSlot.innerHTML = '';
+  cachedShareCanvas = await renderShareCard(s);
+  cachedShareCanvas.classList.add('share-card');
+  els.shareSlot.appendChild(cachedShareCanvas);
+
+  els.share.hidden = false;
+  els.share.disabled = false;
+  if (els.copyResult) els.copyResult.hidden = false;
+  startCountdown();
+}
+
+function hideShareSlot() {
+  if (els.shareSlot) {
+    els.shareSlot.hidden = true;
+    els.shareSlot.innerHTML = '';
+  }
+  cachedShareCanvas = null;
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  if (els.countdown) els.countdown.textContent = '';
+}
+
+function startCountdown() {
+  if (!els.countdown) return;
+  const tick = () => {
+    const ms = msUntilNextUtcDay();
+    els.countdown.textContent = `Next puzzle in ${formatCountdown(ms)} (UTC)`;
+    if (ms <= 0) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+      window.location.reload();
+    }
+  };
+  tick();
+  countdownTimer = setInterval(tick, 1000);
 }
 
 function flash(el, cls) {
   el.classList.remove(cls);
-  // force reflow so animation re-fires
   void el.offsetWidth;
   el.classList.add(cls);
   setTimeout(() => el.classList.remove(cls), 500);
