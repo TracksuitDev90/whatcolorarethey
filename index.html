@@ -12,7 +12,7 @@
   <header class="topbar" role="banner">
     <h1 class="title">What Color Are They?</h1>
     <div class="scoreboard" aria-live="polite">
-      <span class="chip" id="round-chip">Round 1 / 30</span>
+      <span class="chip" id="round-chip">Round 1 / 3</span>
       <span class="chip" id="streak-chip">Streak 0</span>
       <span class="chip" id="best-chip">Best 0</span>
       <span class="chip chip--guesses" id="guesses-chip">Guesses 3</span>
@@ -27,7 +27,7 @@
       </figure>
     </section>
 
-    <section class="board" aria-label="Color choices">
+    <section class="board" id="board" aria-label="Color choices">
       <div class="board-corner" aria-hidden="true"></div>
       <div class="col-headers" id="col-headers" aria-hidden="true"></div>
       <div class="row-headers" id="row-headers" aria-hidden="true"></div>
@@ -36,14 +36,19 @@
 
     <section class="status" id="status" aria-live="polite"></section>
 
+    <section class="share" id="share-slot" hidden aria-label="Today's result"></section>
+
+    <p class="countdown" id="countdown" aria-live="polite"></p>
+
     <div class="actions">
       <button id="next-btn" class="btn btn--primary" hidden>Next round &rarr;</button>
-      <button id="restart-btn" class="btn btn--ghost" hidden>Play again</button>
+      <button id="share-btn" class="btn btn--primary" hidden>Share result</button>
+      <button id="copy-btn" class="btn btn--ghost" hidden>Copy text</button>
     </div>
   </main>
 
   <footer class="bottombar">
-    <small>Pick the swatch that matches the character's iconic color. Three guesses per round.</small>
+    <small>Three characters a day. Three guesses each. Resets at UTC midnight.</small>
   </footer>
 
   <script type="module" src="js/main.js"></script>
