@@ -104,11 +104,14 @@ body {
   height: 100%;
   object-fit: contain;
   filter: grayscale(1) contrast(1.05);
-  transition: filter 600ms ease;
 }
 
+/* Transition only on the reveal direction. Without this scoping, removing
+   `revealed` between rounds animates color → grayscale over 600ms, which
+   briefly shows the next photo (or lingering old photo) in color. */
 .photo.revealed img {
   filter: grayscale(0) contrast(1);
+  transition: filter 600ms ease;
 }
 
 .photo-caption {

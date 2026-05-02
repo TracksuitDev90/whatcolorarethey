@@ -43,6 +43,7 @@ init();
 
 async function init() {
   try {
+    els.status.textContent = 'Loading photos…';
     const chars = await loadCharacters();
     dateKey = getUtcDateKey();
     // Daily cap removed for now — play every character each day. Re-enable
@@ -99,10 +100,12 @@ function renderRound() {
 
   els.characterCard.hidden = false;
   els.board.hidden = false;
+  // Drop `revealed` before swapping src so the next paint always shows the
+  // new image already grayscale — no momentary color flash between rounds.
+  els.photoFrame.classList.remove('revealed');
   els.img.src = c.imageSrc;
   els.img.alt = `Cartoon character (grayscale until revealed)`;
   els.name.innerHTML = '&nbsp;';
-  els.photoFrame.classList.remove('revealed');
   els.next.hidden = true;
   els.share.hidden = true;
   if (els.copyResult) els.copyResult.hidden = true;
