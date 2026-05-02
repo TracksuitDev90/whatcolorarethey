@@ -64,12 +64,12 @@ function mulberry32(seed) {
 
 // Per-step delta ranges. The exact step within each range is rolled per
 // round (seeded), so consecutive rounds don't reuse the same gradient.
-const LIGHT_STEP_MIN = 5;
-const LIGHT_STEP_MAX = 9;
-const SAT_STEP_MIN = 1.5;
-const SAT_STEP_MAX = 3.5;
-const HUE_STEP_MIN = 1.5;
-const HUE_STEP_MAX = 3.5;
+const LIGHT_STEP_MIN = 8;
+const LIGHT_STEP_MAX = 12;
+const SAT_STEP_MIN = 3;
+const SAT_STEP_MAX = 5;
+const HUE_STEP_MIN = 3;
+const HUE_STEP_MAX = 5;
 
 export function buildGrid(correctHex, { rows = 5, cols = 5, seed = 0 } = {}) {
   const base = hexToHsl(correctHex);
