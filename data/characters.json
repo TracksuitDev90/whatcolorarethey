@@ -5,6 +5,7 @@
     "color": { "hex": "#FCD667", "name": "Pooh Yellow" },
     "colorSource": "https://colorfrompic.com/what-color-is-winnie-the-pooh/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Winnie-the-Pooh_(Disney_character)",
+    "image": "assets/photos/winnie-the-pooh.png",
     "verified": true
   },
   {
@@ -21,7 +22,7 @@
     "color": { "hex": "#F7E948", "name": "SpongeBob Yellow (Pantone)" },
     "colorSource": "https://www.pantone.com/articles/press-releases/nickelodeon-and-the-pantone-color-institute-launch-spongebob-yellow-and-patrick-star-pink",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/SpongeBob_SquarePants_(character)",
-    "image": "assets/IMG_0359.webp",
+    "image": "assets/photos/spongebob-squarepants.png",
     "verified": true
   },
   {
@@ -30,7 +31,7 @@
     "color": { "hex": "#FFCB05", "name": "Pokémon Yellow" },
     "colorSource": "https://brandpalettes.com/pokemon-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pikachu",
-    "image": "assets/IMG_0362.jpeg",
+    "image": "assets/photos/pikachu.png",
     "verified": true
   },
   {
@@ -39,7 +40,7 @@
     "color": { "hex": "#FF8604", "name": "Garfield Orange" },
     "colorSource": "https://www.colourlovers.com/color/FF8604/garfield_orange",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Garfield",
-    "image": "assets/IMG_0363.jpeg",
+    "image": "assets/photos/garfield.png",
     "verified": true
   },
   {
@@ -48,6 +49,7 @@
     "color": { "hex": "#DC6605", "name": "Tigger Orange" },
     "colorSource": "https://encycolorpedia.com/dc6605",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Tigger",
+    "image": "assets/photos/tigger.png",
     "verified": true
   },
   {
@@ -56,7 +58,7 @@
     "color": { "hex": "#4695D6", "name": "Smurf Blue (PMS 318C)" },
     "colorSource": "https://www.color-name.com/smurf.color",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Smurfs",
-    "image": "assets/IMG_0375.png",
+    "image": "assets/photos/smurfs.png",
     "verified": true
   },
   {
@@ -65,6 +67,7 @@
     "color": { "hex": "#1A50BC", "name": "Sonic Blue" },
     "colorSource": "https://www.deviantart.com/trishrowdy/journal/Sonic-Characters-Color-Values-299581130",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Sonic_the_Hedgehog",
+    "image": "assets/photos/sonic.png",
     "verified": true
   },
   {
@@ -73,7 +76,7 @@
     "color": { "hex": "#D6292D", "name": "Elmo Red (Alizarin)" },
     "colorSource": "https://www.schemecolor.com/elmo-sesame-street-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Elmo",
-    "image": "assets/IMG_0380.jpeg",
+    "image": "assets/photos/elmo.png",
     "verified": true
   },
   {
@@ -82,6 +85,7 @@
     "color": { "hex": "#5CB200", "name": "Kermit Green" },
     "colorSource": "https://icolorpalette.com/color/5cb200",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Kermit_the_Frog",
+    "image": "assets/photos/kermit.png",
     "verified": true
   },
   {
@@ -90,7 +94,7 @@
     "color": { "hex": "#C1D82F", "name": "Shrek Green" },
     "colorSource": "https://colorcodes.io/green/shrek-green-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Shrek_(character)",
-    "image": "assets/IMG_0378.jpeg",
+    "image": "assets/photos/shrek.png",
     "verified": true
   },
   {
@@ -99,7 +103,7 @@
     "color": { "hex": "#B2008B", "name": "Barney Purple (PMS 2405 C)" },
     "colorSource": "https://brandpalettes.com/barney-friends-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Barney_(character)",
-    "image": "assets/IMG_0377.jpeg",
+    "image": "assets/photos/barney.png",
     "verified": true
   },
   {
@@ -108,7 +112,7 @@
     "color": { "hex": "#FF808B", "name": "Patrick Star Pink (Pantone)" },
     "colorSource": "https://www.pantone.com/articles/press-releases/nickelodeon-and-the-pantone-color-institute-launch-spongebob-yellow-and-patrick-star-pink",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Patrick_Star",
-    "image": "assets/IMG_0381.jpeg",
+    "image": "assets/photos/patrick-star.png",
     "verified": true
   },
   {
@@ -125,7 +129,7 @@
     "color": { "hex": "#54DBC2", "name": "Squidward Cyan (PMS 333)" },
     "colorSource": "https://brandpalettes.com/spongebob-squarepants-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Squidward_Tentacles",
-    "image": "assets/IMG_0379.png",
+    "image": "assets/photos/squidward.png",
     "verified": true
   },
   {
@@ -134,6 +138,7 @@
     "color": { "hex": "#974D12", "name": "Scooby-Doo Brown" },
     "colorSource": "https://www.colourlovers.com/color/974D12/Scooby-Doo_Brown",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Scooby-Doo_(character)",
+    "image": "assets/photos/scooby-doo.png",
     "verified": true
   },
   {
@@ -142,7 +147,7 @@
     "color": { "hex": "#99A2A4", "name": "Bugs Sea Gray" },
     "colorSource": "https://www.schemecolor.com/bugs-bunny-looney-tunes-cartoon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Bugs_Bunny",
-    "image": "assets/IMG_0373.png",
+    "image": "assets/photos/bugs-bunny.png",
     "verified": true
   },
   {
@@ -151,6 +156,7 @@
     "color": { "hex": "#D74894", "name": "Kirby Pink (Pantone 239 C)" },
     "colorSource": "https://colorswall.com/color/d74894",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Kirby_(character)",
+    "image": "assets/photos/kirby.png",
     "verified": true
   },
   {
@@ -159,6 +165,7 @@
     "color": { "hex": "#6FD251", "name": "Yoshi Green" },
     "colorSource": "https://htmlcolors.com/palette/71/yoshi",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Yoshi",
+    "image": "assets/photos/yoshi.png",
     "verified": true
   },
   {
@@ -175,7 +182,7 @@
     "color": { "hex": "#FF6522", "name": "Crash Orange" },
     "colorSource": "https://colorshexa.com/palette/crash-bandicoot-logo",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Crash_Bandicoot_(character)",
-    "image": "assets/IMG_0372.png",
+    "image": "assets/photos/crash-bandicoot.png",
     "verified": true
   },
   {
@@ -184,7 +191,7 @@
     "color": { "hex": "#F08030", "name": "Charizard Orange" },
     "colorSource": "https://www.schemecolor.com/charizard-pokemon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Charizard",
-    "image": "assets/IMG_0376.webp",
+    "image": "assets/photos/charizard.png",
     "verified": true
   },
   {
@@ -193,7 +200,7 @@
     "color": { "hex": "#55A3AB", "name": "Squirtle Blue-Green" },
     "colorSource": "https://www.schemecolor.com/squirtle-pokemon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Squirtle",
-    "image": "assets/IMG_0374.webp",
+    "image": "assets/photos/squirtle.png",
     "verified": true
   },
   {
@@ -210,7 +217,7 @@
     "color": { "hex": "#6E2073", "name": "Grimace Purple" },
     "colorSource": "https://www.colourlovers.com/color/6E2073/Grimace_purple",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Grimace_(character)",
-    "image": "assets/IMG_0366.webp",
+    "image": "assets/photos/grimace.png",
     "verified": true
   },
   {
@@ -227,6 +234,7 @@
     "color": { "hex": "#5AC0CB", "name": "Sulley Fur Blue (Disney WDMU02)" },
     "colorSource": "https://www.myperfectcolor.com/paint/414372-disney-wdmu02-sulleys-fur",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/James_P._Sullivan",
+    "image": "assets/photos/sulley.png",
     "verified": true
   },
   {
@@ -235,7 +243,7 @@
     "color": { "hex": "#FF3B3B", "name": "Mr. Krabs Red" },
     "colorSource": "https://colorswall.com/color/ff3b3b",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Mr._Krabs",
-    "image": "assets/IMG_0371.png",
+    "image": "assets/photos/mr-krabs.png",
     "verified": true
   },
   {
@@ -252,7 +260,7 @@
     "color": { "hex": "#FFF700", "name": "Tweety Bird Yellow" },
     "colorSource": "https://rgb.to/color/18018/tweety-bird-yellow",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Tweety",
-    "image": "assets/IMG_0368.png",
+    "image": "assets/photos/tweety.png",
     "verified": true
   }
 ]
