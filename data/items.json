@@ -5,7 +5,8 @@
     "name": "Yogi Bear's tie",
     "show": "The Yogi Bear Show",
     "color": { "hex": "#6FB04A", "name": "Yogi Tie Green" },
-    "verified": false
+    "image": "assets/photos/yogi-bears-tie.png",
+    "verified": true
   },
   {
     "id": "boo-boos-bowtie",
@@ -13,7 +14,8 @@
     "name": "Boo-Boo's bowtie",
     "show": "The Yogi Bear Show",
     "color": { "hex": "#2D6FBC", "name": "Boo-Boo Bowtie Blue" },
-    "verified": false
+    "image": "assets/photos/boo-boos-bowtie.png",
+    "verified": true
   },
   {
     "id": "snagglepuss-fur",
@@ -21,7 +23,8 @@
     "name": "Snagglepuss's fur",
     "show": "The Yogi Bear Show",
     "color": { "hex": "#FFAFC8", "name": "Snagglepuss Pink" },
-    "verified": false
+    "image": "assets/photos/snagglepuss-fur.png",
+    "verified": true
   },
   {
     "id": "magilla-gorilla-bowtie",
@@ -29,7 +32,8 @@
     "name": "Magilla Gorilla's bowtie",
     "show": "The Magilla Gorilla Show",
     "color": { "hex": "#D33B3B", "name": "Magilla Bowtie Red" },
-    "verified": false
+    "image": "assets/photos/magilla-gorilla-bowtie.png",
+    "verified": true
   },
   {
     "id": "speed-racer-emblem",
@@ -37,7 +41,8 @@
     "name": "Speed Racer's “M” emblem",
     "show": "Speed Racer",
     "color": { "hex": "#DC2F2F", "name": "Mach 5 Red" },
-    "verified": false
+    "image": "assets/photos/speed-racer-emblem.png",
+    "verified": true
   },
   {
     "id": "penelope-pitstop-suit",
@@ -45,7 +50,8 @@
     "name": "Penelope Pitstop's racing suit",
     "show": "The Perils of Penelope Pitstop",
     "color": { "hex": "#FF8FB3", "name": "Penelope Pink" },
-    "verified": false
+    "image": "assets/photos/penelope-pitstop-suit.png",
+    "verified": true
   },
   {
     "id": "scooby-doo-collar",
@@ -61,7 +67,8 @@
     "name": "Shaggy's shirt",
     "show": "Scooby-Doo, Where Are You!",
     "color": { "hex": "#8FC73E", "name": "Shaggy Shirt Green" },
-    "verified": false
+    "image": "assets/photos/shaggy-shirt.png",
+    "verified": true
   },
   {
     "id": "daphne-dress",
@@ -69,7 +76,8 @@
     "name": "Daphne's dress",
     "show": "Scooby-Doo, Where Are You!",
     "color": { "hex": "#B07FBA", "name": "Daphne Lilac" },
-    "verified": false
+    "image": "assets/photos/daphne-dress.png",
+    "verified": true
   },
   {
     "id": "velma-sweater",
@@ -77,7 +85,8 @@
     "name": "Velma's sweater",
     "show": "Scooby-Doo, Where Are You!",
     "color": { "hex": "#DD7B30", "name": "Velma Sweater Orange" },
-    "verified": false
+    "image": "assets/photos/velma-sweater.png",
+    "verified": true
   },
   {
     "id": "arnolds-hat",
@@ -85,7 +94,8 @@
     "name": "Arnold's hat",
     "show": "Hey Arnold!",
     "color": { "hex": "#5BA8D9", "name": "Arnold Hat Blue" },
-    "verified": false
+    "image": "assets/photos/arnolds-hat.png",
+    "verified": true
   },
   {
     "id": "helga-bow",
@@ -93,7 +103,8 @@
     "name": "Helga's bow",
     "show": "Hey Arnold!",
     "color": { "hex": "#FF69B4", "name": "Helga Bow Pink" },
-    "verified": false
+    "image": "assets/photos/helga-bow.png",
+    "verified": true
   },
   {
     "id": "tommy-pickles-shirt",
@@ -101,7 +112,8 @@
     "name": "Tommy Pickles's shirt",
     "show": "Rugrats",
     "color": { "hex": "#4A8FCB", "name": "Tommy Shirt Blue" },
-    "verified": false
+    "image": "assets/photos/tommy-pickles-shirt.png",
+    "verified": true
   },
   {
     "id": "chuckie-hair",
@@ -109,7 +121,8 @@
     "name": "Chuckie's hair",
     "show": "Rugrats",
     "color": { "hex": "#D63E1B", "name": "Chuckie Red" },
-    "verified": false
+    "image": "assets/photos/chuckie-hair.png",
+    "verified": true
   },
   {
     "id": "doug-funnie-sweater",
@@ -117,7 +130,8 @@
     "name": "Doug Funnie's sweater",
     "show": "Doug",
     "color": { "hex": "#6FB073", "name": "Doug Sweater Green" },
-    "verified": false
+    "image": "assets/photos/doug-funnie-sweater.png",
+    "verified": true
   },
   {
     "id": "daria-jacket",
@@ -125,15 +139,17 @@
     "name": "Daria's jacket",
     "show": "Daria",
     "color": { "hex": "#3F5E3A", "name": "Daria Jacket Green" },
-    "verified": false
+    "image": "assets/photos/daria-jacket.png",
+    "verified": true
   },
   {
     "id": "dexter-gloves",
     "type": "item",
     "name": "Dexter's gloves",
     "show": "Dexter's Laboratory",
-    "color": { "hex": "#1A1A1A", "name": "Dexter Glove Black" },
-    "verified": false
+    "color": { "hex": "#A57BBE", "name": "Dexter Glove Purple" },
+    "image": "assets/photos/dexter-gloves.png",
+    "verified": true
   },
   {
     "id": "dee-dee-tutu",
@@ -141,7 +157,8 @@
     "name": "Dee Dee's tutu",
     "show": "Dexter's Laboratory",
     "color": { "hex": "#FFB6C1", "name": "Dee Dee Pink" },
-    "verified": false
+    "image": "assets/photos/dee-dee-tutu.png",
+    "verified": true
   },
   {
     "id": "eddy-shirt",
@@ -149,7 +166,8 @@
     "name": "Eddy's shirt",
     "show": "Ed, Edd n Eddy",
     "color": { "hex": "#F2C94C", "name": "Eddy Shirt Yellow" },
-    "verified": false
+    "image": "assets/photos/eddy-shirt.png",
+    "verified": true
   },
   {
     "id": "johnny-bravo-shirt",
@@ -157,7 +175,8 @@
     "name": "Johnny Bravo's shirt",
     "show": "Johnny Bravo",
     "color": { "hex": "#1A1A1A", "name": "Johnny Bravo Black" },
-    "verified": false
+    "image": "assets/photos/johnny-bravo-shirt.png",
+    "verified": true
   },
   {
     "id": "blossom-bow",
@@ -165,7 +184,8 @@
     "name": "Blossom's bow",
     "show": "The Powerpuff Girls",
     "color": { "hex": "#E63946", "name": "Blossom Bow Red" },
-    "verified": false
+    "image": "assets/photos/blossom-bow.png",
+    "verified": true
   },
   {
     "id": "buttercup-dress",
@@ -173,7 +193,8 @@
     "name": "Buttercup's dress",
     "show": "The Powerpuff Girls",
     "color": { "hex": "#2ECC71", "name": "Buttercup Green" },
-    "verified": false
+    "image": "assets/photos/buttercup-dress.png",
+    "verified": true
   },
   {
     "id": "stimpy-body",
@@ -181,7 +202,26 @@
     "name": "Stimpy's body",
     "show": "The Ren & Stimpy Show",
     "color": { "hex": "#C84A52", "name": "Stimpy Red" },
-    "verified": false
+    "image": "assets/photos/stimpy-body.png",
+    "verified": true
+  },
+  {
+    "id": "heffer-hair",
+    "type": "item",
+    "name": "Heffer's hair",
+    "show": "Rocko's Modern Life",
+    "color": { "hex": "#6FA641", "name": "Heffer Hair Green" },
+    "image": "assets/photos/heffer-hair.png",
+    "verified": true
+  },
+  {
+    "id": "reggie-shirt",
+    "type": "item",
+    "name": "Reggie Rocket's shirt",
+    "show": "Rocket Power",
+    "color": { "hex": "#C8156A", "name": "Reggie Shirt Pink" },
+    "image": "assets/photos/reggie-shirt.png",
+    "verified": true
   },
   {
     "id": "muriel-apron",

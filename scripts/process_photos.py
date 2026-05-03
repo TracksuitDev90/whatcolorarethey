@@ -33,10 +33,14 @@ PRECROP = {
     "IMG_0384.webp": {"bottom": 0.10},   # Scooby - GalleryPops watermark
     "IMG_0390.webp": {"bottom": 0.08},   # Winnie - GalleryPops watermark
     "IMG_0388.png":  {"left": 0.04, "right": 0.04},  # Sonic - jpeg edge artefacts
+    "IMG_0399.jpeg": {"bottom": 0.07},   # Speed Racer - "SPEED RACER" watermark
 }
 
-# Mapping of every character ID to its source file.
+# Mapping of every character/item ID to its source file. Character entries
+# come from characters.json (full-body, played as 5x5 grid). Item entries
+# come from items.json (scene + specific item, played as 4-swatch quad).
 ASSIGNMENTS = {
+    # ---- Characters (grid mode) ----
     "spongebob-squarepants": "IMG_0359.webp",
     "pikachu":               "IMG_0362.jpeg",
     "garfield":              "IMG_0363.jpeg",
@@ -61,6 +65,31 @@ ASSIGNMENTS = {
     "winnie-the-pooh":       "IMG_0390.webp",
     "tigger":                "IMG_0392.png",
     "kirby":                 "IMG_0393.png",
+    # ---- Items (quad mode), 60s/90s cartoons ----
+    "yogi-bears-tie":         "IMG_0394.png",
+    "boo-boos-bowtie":        "IMG_0395.png",
+    "snagglepuss-fur":        "IMG_0396.jpeg",
+    "magilla-gorilla-bowtie": "IMG_0397.png",
+    "speed-racer-emblem":     "IMG_0399.jpeg",
+    "penelope-pitstop-suit":  "IMG_0400.png",
+    "shaggy-shirt":           "IMG_0402.jpeg",
+    "velma-sweater":          "IMG_0403.png",
+    "daphne-dress":           "IMG_0404.png",
+    "arnolds-hat":            "IMG_0405.webp",
+    "helga-bow":              "IMG_0406.jpeg",
+    "tommy-pickles-shirt":    "IMG_0407.jpeg",
+    "chuckie-hair":           "IMG_0409.png",
+    "doug-funnie-sweater":    "IMG_0410.webp",
+    "daria-jacket":           "IMG_0411.webp",
+    "dexter-gloves":          "IMG_0412.jpeg",
+    "dee-dee-tutu":           "IMG_0413.webp",
+    "eddy-shirt":             "IMG_0414.jpeg",
+    "johnny-bravo-shirt":     "IMG_0415.jpeg",
+    "blossom-bow":            "IMG_0416.jpeg",
+    "buttercup-dress":        "IMG_0417.png",
+    "stimpy-body":            "IMG_0418.webp",
+    "heffer-hair":            "IMG_0419.jpeg",
+    "reggie-shirt":           "IMG_0420.jpeg",
 }
 
 
