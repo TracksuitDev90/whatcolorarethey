@@ -1,6 +1,8 @@
-// Renders the end-of-day share card to a canvas: one row per character,
-// each row a portrait next to three boxes — X for wrong guesses, ✓ for
-// the winning guess, dimmed for unused slots.
+// Renders the end-of-day share card to a canvas: one row per round,
+// each row a portrait next to N guess boxes — X for wrong, ✓ for win,
+// dimmed for unused slots. N varies per row (3 for grid, 1 for quad).
+
+import { maxGuessesFor } from './game.js';
 
 const W = 1080;
 const H = 1080;
@@ -8,7 +10,6 @@ const PADDING = 60;
 const ROW_GAP = 36;
 
 const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
-const MAX_GUESSES = 3;
 
 // Render at 2x backing resolution so the share image stays crisp on
 // retina screens and after social-network re-encoding.
@@ -72,6 +73,7 @@ function drawFooter(ctx, snapshot) {
 async function drawRow(ctx, snapshot, i, x, y, w, h) {
   const round = snapshot.rounds[i];
   const character = snapshot.characters[i];
+  const max = maxGuessesFor(character);
 
   const portraitSize = h;
   const portraitX = x;
@@ -87,19 +89,21 @@ async function drawRow(ctx, snapshot, i, x, y, w, h) {
   ctx.fillStyle = '#e6ebf2';
   ctx.font = '900 34px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textBaseline = 'top';
-  ctx.fillText(truncate(ctx, character.name, rightW), rightX, y + 6);
+  ctx.fillText(truncate(ctx, displayName(character), rightW), rightX, y + 6);
 
-  const subtitle = roundLabel(round);
+  const subtitle = roundLabel(round, max);
   ctx.fillStyle = '#8b95a7';
   ctx.font = '600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText(subtitle, rightX, y + 52);
 
   const boxGap = 18;
-  const boxSize = Math.min(120, (rightW - boxGap * (MAX_GUESSES - 1)) / MAX_GUESSES);
-  const boxesY = y + h - boxSize;
-  for (let b = 0; b < MAX_GUESSES; b++) {
-    const bx = rightX + b * (boxSize + boxGap);
-    drawGuessBox(ctx, round, b, bx, boxesY, boxSize);
+  // Always reserve the same slot width as a 3-guess row so quad rows don't
+  // produce a single huge box that dwarfs the portrait next to it.
+  const slotSize = Math.min(120, (rightW - boxGap * 2) / 3);
+  const boxesY = y + h - slotSize;
+  for (let b = 0; b < max; b++) {
+    const bx = rightX + b * (slotSize + boxGap);
+    drawGuessBox(ctx, round, b, bx, boxesY, slotSize);
   }
 }
 
@@ -182,6 +186,8 @@ function drawGuessBox(ctx, round, idx, x, y, size) {
 
 function drawBoxLabel(ctx, guess, x, y, size) {
   if (!guess) return;
+  // Grid guesses get the cell coordinate (A1, B3); quad guesses don't.
+  if (!Number.isInteger(guess.col) || !Number.isInteger(guess.row)) return;
   ctx.fillStyle = guess.correct ? 'rgba(6,36,32,0.85)' : 'rgba(180,190,206,0.95)';
   ctx.textBaseline = 'top';
   ctx.font = '800 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -248,14 +254,19 @@ function truncate(ctx, text, maxWidth) {
   return text.slice(0, Math.max(0, lo - 1)) + ell;
 }
 
-function roundLabel(round) {
+function displayName(c) {
+  if (c.type === 'item' && c.show) return `${c.name} — ${c.show}`;
+  return c.name;
+}
+
+function roundLabel(round, max) {
   if (round.won) {
     const n = round.guesses.length;
     return `Solved in ${n} ${n === 1 ? 'guess' : 'guesses'}`;
   }
   if (round.lost) return 'Out of guesses';
   if (round.guesses.length === 0) return 'Not played';
-  const left = MAX_GUESSES - round.guesses.length;
+  const left = max - round.guesses.length;
   return `${left} guess${left === 1 ? '' : 'es'} left`;
 }
 
@@ -296,10 +307,11 @@ export function shareText(snapshot) {
   const wins = snapshot.rounds.filter(r => r.won).length;
   const total = snapshot.rounds.length;
   const line = snapshot.rounds
-    .map(r => {
-      if (!r.guesses.length) return '⬜⬜⬜';
-      const cells = Array.from({ length: MAX_GUESSES }, (_, i) => {
-        const g = r.guesses[i];
+    .map((r, i) => {
+      const max = maxGuessesFor(snapshot.characters[i]);
+      if (!r.guesses.length) return '⬜'.repeat(max);
+      const cells = Array.from({ length: max }, (_, k) => {
+        const g = r.guesses[k];
         if (!g) return '⬜';
         return g.correct ? '🟩' : '🟥';
       });
