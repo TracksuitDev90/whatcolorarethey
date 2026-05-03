@@ -149,6 +149,14 @@ body {
   gap: var(--gap);
 }
 
+/* `display: grid` above has the same specificity as the UA `[hidden]`
+   rule, so we need an explicit override to honor the `hidden` attribute
+   when the round is using the quad board instead. */
+.board[hidden],
+.quad[hidden] {
+  display: none;
+}
+
 .board-corner { grid-row: 1; grid-column: 1; }
 .col-headers {
   grid-row: 1; grid-column: 2;
