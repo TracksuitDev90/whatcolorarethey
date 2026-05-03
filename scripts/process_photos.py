@@ -90,6 +90,25 @@ ASSIGNMENTS = {
     "stimpy-body":            "IMG_0418.webp",
     "heffer-hair":            "IMG_0419.jpeg",
     "reggie-shirt":           "IMG_0420.jpeg",
+    # ---- Items (quad mode), 2000s cartoons ----
+    "muriel-apron":           "IMG_0422.jpeg",
+    "mac-shirt":              "IMG_0424.jpeg",
+    "dora-shirt":             "IMG_0425.jpeg",
+    "boots-stomach":          "IMG_0426.jpeg",
+    "cosmo-mom-hair":         "IMG_0427.jpeg",
+    "timmy-turner-hat":       "IMG_0428.webp",
+    "aang-arrow":             "IMG_0429.webp",
+    "inspector-gadget-coat":  "IMG_0430.jpeg",
+    "arthur-sweater":         "IMG_0431.webp",
+    "ferb-hair":              "IMG_0432.jpeg",
+    "phineas-hair":           "IMG_0433.jpeg",
+    "kim-possible-hair":      "IMG_0434.jpeg",
+    "numbuh-1-shirt":         "IMG_0435.webp",
+    "numbuh-4-hoodie":        "IMG_0436.webp",
+    "krumm-lips":             "IMG_0437.webp",
+    "danny-phantom-eyes":     "IMG_0438.jpeg",
+    # Scooby collar reuses the same source as the full-body Scooby photo.
+    "scooby-doo-collar":      "IMG_0384.webp",
 }
 
 
