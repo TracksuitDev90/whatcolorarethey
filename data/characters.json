@@ -262,5 +262,173 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Tweety",
     "image": "assets/photos/tweety.png",
     "verified": true
+  },
+  {
+    "id": "he-man",
+    "name": "He-Man",
+    "era": "80s",
+    "color": { "hex": "#E0A87E", "name": "He-Man Tan" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/He-Man",
+    "verified": false
+  },
+  {
+    "id": "heathcliff",
+    "name": "Heathcliff",
+    "era": "80s",
+    "color": { "hex": "#F39C5C", "name": "Heathcliff Orange" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Heathcliff_(comics)",
+    "verified": false
+  },
+  {
+    "id": "slimer",
+    "name": "Slimer",
+    "era": "80s",
+    "color": { "hex": "#A4D65E", "name": "Slimer Ectoplasm Green" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Slimer",
+    "verified": false
+  },
+  {
+    "id": "strawberry-shortcake",
+    "name": "Strawberry Shortcake",
+    "era": "80s",
+    "color": { "hex": "#E03A3E", "name": "Strawberry Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Strawberry_Shortcake",
+    "verified": false
+  },
+  {
+    "id": "inspector-gadget",
+    "name": "Inspector Gadget",
+    "era": "80s",
+    "color": { "hex": "#7F8C8D", "name": "Gadget Coat Gray" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Inspector_Gadget_(character)",
+    "verified": false
+  },
+  {
+    "id": "pink-panther",
+    "name": "Pink Panther",
+    "era": "80s",
+    "color": { "hex": "#FF7CB6", "name": "Pink Panther Pink" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Pink_Panther_(character)",
+    "verified": false
+  },
+  {
+    "id": "optimus-prime",
+    "name": "Optimus Prime",
+    "era": "80s",
+    "color": { "hex": "#C8102E", "name": "Optimus Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Optimus_Prime",
+    "verified": false
+  },
+  {
+    "id": "arthur-read",
+    "name": "Arthur Read",
+    "era": "90s",
+    "color": { "hex": "#F0C419", "name": "Arthur Sweater Yellow" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Arthur_Read",
+    "verified": false
+  },
+  {
+    "id": "rocko",
+    "name": "Rocko",
+    "era": "90s",
+    "color": { "hex": "#E8AD3E", "name": "Rocko Wallaby Yellow" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Rocko%27s_Modern_Life",
+    "verified": false
+  },
+  {
+    "id": "courage",
+    "name": "Courage the Cowardly Dog",
+    "era": "90s",
+    "color": { "hex": "#F4B7B7", "name": "Courage Pink" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Courage_the_Cowardly_Dog",
+    "verified": false
+  },
+  {
+    "id": "catdog",
+    "name": "CatDog",
+    "era": "90s",
+    "color": { "hex": "#F4A12B", "name": "CatDog Orange-Yellow" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/CatDog",
+    "verified": false
+  },
+  {
+    "id": "darkwing-duck",
+    "name": "Darkwing Duck",
+    "era": "90s",
+    "color": { "hex": "#7341A6", "name": "Darkwing Purple" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Darkwing_Duck",
+    "verified": false
+  },
+  {
+    "id": "the-brain",
+    "name": "The Brain",
+    "era": "90s",
+    "color": { "hex": "#A8A29A", "name": "Brain Mouse Gray" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Pinky_and_the_Brain",
+    "verified": false
+  },
+  {
+    "id": "the-mask",
+    "name": "The Mask",
+    "era": "90s",
+    "color": { "hex": "#7FB539", "name": "Mask Green" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Mask_(character)",
+    "verified": false
+  },
+  {
+    "id": "bloo",
+    "name": "Bloo",
+    "era": "00s",
+    "color": { "hex": "#7FAFD6", "name": "Bloo Blue" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Foster%27s_Home_for_Imaginary_Friends",
+    "verified": false
+  },
+  {
+    "id": "phineas",
+    "name": "Phineas Flynn",
+    "era": "00s",
+    "color": { "hex": "#E94E1B", "name": "Phineas Orange" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Phineas_Flynn",
+    "verified": false
+  },
+  {
+    "id": "ferb",
+    "name": "Ferb Fletcher",
+    "era": "00s",
+    "color": { "hex": "#5C9F5C", "name": "Ferb Hair Green" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Ferb_Fletcher",
+    "verified": false
+  },
+  {
+    "id": "kim-possible",
+    "name": "Kim Possible",
+    "era": "00s",
+    "color": { "hex": "#D6402F", "name": "Kim Possible Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Kim_Possible_(character)",
+    "verified": false
+  },
+  {
+    "id": "jenny-xj9",
+    "name": "Jenny Wakeman",
+    "era": "00s",
+    "color": { "hex": "#6FAEDB", "name": "XJ-9 Blue" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/My_Life_as_a_Teenage_Robot",
+    "verified": false
+  },
+  {
+    "id": "numbuh-1",
+    "name": "Numbuh 1",
+    "era": "00s",
+    "color": { "hex": "#D6322F", "name": "Numbuh 1 Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Codename:_Kids_Next_Door",
+    "verified": false
+  },
+  {
+    "id": "perry-the-platypus",
+    "name": "Perry the Platypus",
+    "era": "00s",
+    "color": { "hex": "#3F8DAD", "name": "Perry Teal" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Perry_the_Platypus",
+    "verified": false
   }
 ]
