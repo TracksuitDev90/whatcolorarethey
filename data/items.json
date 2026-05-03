@@ -278,5 +278,53 @@
     "show": "Avatar: The Last Airbender",
     "color": { "hex": "#2A6FB5", "name": "Aang Arrow Blue" },
     "verified": false
+  },
+  {
+    "id": "inspector-gadget-coat",
+    "type": "item",
+    "name": "Inspector Gadget's coat",
+    "show": "Inspector Gadget",
+    "color": { "hex": "#7F8C8D", "name": "Gadget Coat Gray" },
+    "verified": false
+  },
+  {
+    "id": "arthur-sweater",
+    "type": "item",
+    "name": "Arthur's sweater",
+    "show": "Arthur",
+    "color": { "hex": "#F0C419", "name": "Arthur Sweater Yellow" },
+    "verified": false
+  },
+  {
+    "id": "phineas-hair",
+    "type": "item",
+    "name": "Phineas's hair",
+    "show": "Phineas and Ferb",
+    "color": { "hex": "#E94E1B", "name": "Phineas Hair Orange" },
+    "verified": false
+  },
+  {
+    "id": "ferb-hair",
+    "type": "item",
+    "name": "Ferb's hair",
+    "show": "Phineas and Ferb",
+    "color": { "hex": "#7BB661", "name": "Ferb Hair Green" },
+    "verified": false
+  },
+  {
+    "id": "kim-possible-hair",
+    "type": "item",
+    "name": "Kim Possible's hair",
+    "show": "Kim Possible",
+    "color": { "hex": "#D6402F", "name": "Kim Possible Red" },
+    "verified": false
+  },
+  {
+    "id": "numbuh-1-shirt",
+    "type": "item",
+    "name": "Numbuh 1's shirt",
+    "show": "Codename: Kids Next Door",
+    "color": { "hex": "#D6322F", "name": "Numbuh 1 Red" },
+    "verified": false
   }
 ]
