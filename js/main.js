@@ -15,9 +15,11 @@ const els = {
   img: document.getElementById('character-img'),
   name: document.getElementById('character-name'),
   photoFrame: document.getElementById('photo-frame'),
+  board: document.getElementById('board'),
   grid: document.getElementById('grid'),
   colHeaders: document.getElementById('col-headers'),
   rowHeaders: document.getElementById('row-headers'),
+  quad: document.getElementById('quad'),
   status: document.getElementById('status'),
   next: document.getElementById('next-btn'),
   share: document.getElementById('share-btn'),
@@ -25,7 +27,6 @@ const els = {
   shareSlot: document.getElementById('share-slot'),
   countdown: document.getElementById('countdown'),
   characterCard: document.getElementById('character-card'),
-  board: document.getElementById('board'),
   roundChip: document.getElementById('round-chip'),
   streakChip: document.getElementById('streak-chip'),
   bestChip: document.getElementById('best-chip'),
@@ -85,8 +86,9 @@ function clearHints() {
 
 function applyAxisHints() {
   const s = game.snapshot();
-  const { correctRow, correctCol } = s.grid;
-  for (const w of s.wrongCells) {
+  if (s.board.kind !== 'grid') return;
+  const { correctRow, correctCol } = s.board;
+  for (const w of s.wrongGuesses) {
     if (w.row === correctRow) {
       els.rowHeaders
         .querySelector(`.hdr[data-row="${w.row}"]`)
@@ -100,6 +102,10 @@ function applyAxisHints() {
   }
 }
 
+function isItemRound(s) {
+  return s?.character?.type === 'item';
+}
+
 function renderRound() {
   hideShareSlot();
   const s = game.snapshot();
@@ -107,28 +113,69 @@ function renderRound() {
   const round = s.rounds[s.roundIndex];
 
   els.characterCard.hidden = false;
-  els.board.hidden = false;
   // Drop `revealed` before swapping src so the next paint always shows the
   // new image already grayscale — no momentary color flash between rounds.
   els.photoFrame.classList.remove('revealed');
   els.img.decoding = 'async';
   els.img.fetchPriority = 'high';
   els.img.src = c.imageSrc;
-  els.img.alt = `Cartoon character (grayscale until revealed)`;
+  els.img.alt = isItemRound(s)
+    ? `Scene from ${c.show || c.name} (grayscale until revealed)`
+    : `Cartoon character (grayscale until revealed)`;
   // Warm the next character's photo while this one is being played.
   const nextChar = s.characters[s.roundIndex + 1];
   if (nextChar) prefetchImage(nextChar.imageSrc);
-  els.name.innerHTML = '&nbsp;';
+
+  // Title slot doubles as the question for quad rounds (so the player
+  // knows which item they're identifying) and as the reveal for both.
+  els.name.innerHTML = isItemRound(s) ? promptText(c) : '&nbsp;';
+
   els.next.hidden = true;
   els.share.hidden = true;
   if (els.copyResult) els.copyResult.hidden = true;
-  els.status.textContent = 'What color are they? Pick a swatch.';
+  els.status.textContent = isItemRound(s)
+    ? 'Pick the correct color.'
+    : 'What color are they? Pick a swatch.';
   clearHints();
 
+  if (s.board.kind === 'quad') {
+    renderQuadBoard(s);
+  } else {
+    renderGridBoard(s);
+  }
+
+  // Replay any saved guesses for this round so refreshing mid-puzzle keeps state.
+  for (const g of round.guesses) {
+    const btn = guessButton(s, g);
+    if (!btn) continue;
+    btn.classList.add(g.correct ? 'cell--correct' : 'cell--wrong');
+  }
+
+  if (s.revealed) {
+    revealRound(/*lost*/ round.lost === true, /*announce*/ false);
+  } else if (s.board.kind === 'grid' && s.wrongGuesses.length >= 2) {
+    applyAxisHints();
+  }
+
+  updateChips();
+}
+
+function promptText(c) {
+  return `What color is ${c.name}?`;
+}
+
+function revealText(c) {
+  if (c.type === 'item' && c.show) return `${c.name} — ${c.show}`;
+  return c.name;
+}
+
+function renderGridBoard(s) {
+  els.board.hidden = false;
+  els.quad.hidden = true;
   els.grid.innerHTML = '';
-  for (let r = 0; r < s.grid.rows; r++) {
-    for (let col = 0; col < s.grid.cols; col++) {
-      const cell = s.grid.cells[r][col];
+  for (let r = 0; r < s.board.rows; r++) {
+    for (let col = 0; col < s.board.cols; col++) {
+      const cell = s.board.cells[r][col];
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'cell';
@@ -138,52 +185,66 @@ function renderRound() {
       btn.setAttribute('role', 'gridcell');
       btn.setAttribute('aria-label', `Row ${r + 1} column ${COL_LABELS[col]}`);
       btn.tabIndex = (r === 0 && col === 0) ? 0 : -1;
-      btn.addEventListener('pointerdown', onPointerDown);
-      btn.addEventListener('keydown', onKeyDown);
+      btn.addEventListener('pointerdown', onGridPointerDown);
+      btn.addEventListener('keydown', onGridKeyDown);
       els.grid.appendChild(btn);
     }
   }
   focusRow = 0;
   focusCol = 0;
+}
 
-  // Replay any saved guesses for this round so refreshing mid-puzzle keeps state.
-  for (const g of round.guesses) {
-    const btn = cellButton(g.row, g.col);
-    if (!btn) continue;
-    btn.classList.add(g.correct ? 'cell--correct' : 'cell--wrong');
+function renderQuadBoard(s) {
+  els.board.hidden = true;
+  els.quad.hidden = false;
+  els.quad.innerHTML = '';
+  for (const box of s.board.boxes) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cell quad-cell';
+    btn.style.background = box.hex;
+    btn.dataset.index = box.index;
+    btn.setAttribute('aria-label', `Color choice ${box.index + 1}`);
+    btn.tabIndex = box.index === 0 ? 0 : -1;
+    btn.addEventListener('pointerdown', onQuadPointerDown);
+    btn.addEventListener('keydown', onQuadKeyDown);
+    els.quad.appendChild(btn);
   }
+}
 
-  if (s.revealed) {
-    revealRound(/*lost*/ round.lost === true, /*announce*/ false);
-  } else if (s.wrongCells.length >= 2) {
-    applyAxisHints();
+function guessButton(s, g) {
+  if (s.board.kind === 'quad') {
+    return els.quad.querySelector(`.quad-cell[data-index="${g.index}"]`);
   }
-
-  updateChips();
+  return cellButton(g.row, g.col);
 }
 
 function cellButton(row, col) {
   return els.grid.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
 }
 
-function onPointerDown(e) {
-  e.preventDefault();
-  const btn = e.currentTarget;
-  submitGuess(Number(btn.dataset.row), Number(btn.dataset.col), btn);
+function quadButton(index) {
+  return els.quad.querySelector(`.quad-cell[data-index="${index}"]`);
 }
 
-function onKeyDown(e) {
+function onGridPointerDown(e) {
+  e.preventDefault();
+  const btn = e.currentTarget;
+  submitGuess({ row: Number(btn.dataset.row), col: Number(btn.dataset.col) }, btn);
+}
+
+function onGridKeyDown(e) {
   const r = Number(e.currentTarget.dataset.row);
   const c = Number(e.currentTarget.dataset.col);
   switch (e.key) {
-    case 'ArrowRight': moveFocus(r, Math.min(GRID_SIZE - 1, c + 1)); break;
-    case 'ArrowLeft':  moveFocus(r, Math.max(0, c - 1)); break;
-    case 'ArrowDown':  moveFocus(Math.min(GRID_SIZE - 1, r + 1), c); break;
-    case 'ArrowUp':    moveFocus(Math.max(0, r - 1), c); break;
+    case 'ArrowRight': moveGridFocus(r, Math.min(GRID_SIZE - 1, c + 1)); break;
+    case 'ArrowLeft':  moveGridFocus(r, Math.max(0, c - 1)); break;
+    case 'ArrowDown':  moveGridFocus(Math.min(GRID_SIZE - 1, r + 1), c); break;
+    case 'ArrowUp':    moveGridFocus(Math.max(0, r - 1), c); break;
     case 'Enter':
     case ' ':
       e.preventDefault();
-      submitGuess(r, c, e.currentTarget);
+      submitGuess({ row: r, col: c }, e.currentTarget);
       break;
     case 'n':
     case 'N':
@@ -194,7 +255,36 @@ function onKeyDown(e) {
   e.preventDefault();
 }
 
-function moveFocus(r, c) {
+function onQuadPointerDown(e) {
+  e.preventDefault();
+  const btn = e.currentTarget;
+  submitGuess({ index: Number(btn.dataset.index) }, btn);
+}
+
+function onQuadKeyDown(e) {
+  // Indices are laid out as a 2x2: 0 1 / 2 3.
+  // Horizontal flip: idx XOR 1. Vertical flip: idx XOR 2.
+  const idx = Number(e.currentTarget.dataset.index);
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowLeft':  moveQuadFocus(idx ^ 1); break;
+    case 'ArrowDown':
+    case 'ArrowUp':    moveQuadFocus(idx ^ 2); break;
+    case 'Enter':
+    case ' ':
+      e.preventDefault();
+      submitGuess({ index: idx }, e.currentTarget);
+      break;
+    case 'n':
+    case 'N':
+      if (!els.next.hidden) els.next.click();
+      break;
+    default: return;
+  }
+  e.preventDefault();
+}
+
+function moveGridFocus(r, c) {
   focusRow = r;
   focusCol = c;
   for (const btn of els.grid.querySelectorAll('.cell')) {
@@ -205,9 +295,16 @@ function moveFocus(r, c) {
   cellButton(r, c)?.focus();
 }
 
-function submitGuess(r, c, btn) {
+function moveQuadFocus(idx) {
+  for (const btn of els.quad.querySelectorAll('.quad-cell')) {
+    btn.tabIndex = Number(btn.dataset.index) === idx ? 0 : -1;
+  }
+  quadButton(idx)?.focus();
+}
+
+function submitGuess(pos, btn) {
   if (btn.classList.contains('cell--wrong') || btn.classList.contains('cell--correct')) return;
-  const result = game.guess(r, c);
+  const result = game.guess(pos);
   if (result.kind === 'correct') {
     btn.classList.add('cell--correct');
     revealRound(/*lost*/ false);
@@ -225,23 +322,35 @@ function submitGuess(r, c, btn) {
 
 function revealRound(lost, announce = true) {
   const s = game.snapshot();
+  const c = s.character;
   els.photoFrame.classList.add('revealed');
-  els.name.textContent = s.character.name;
-  const correctBtn = cellButton(s.grid.correctRow, s.grid.correctCol);
-  correctBtn?.classList.add('cell--correct');
-  for (const btn of els.grid.querySelectorAll('.cell')) {
-    if (!btn.classList.contains('cell--wrong') && !btn.classList.contains('cell--correct')) {
-      btn.classList.add('cell--dim');
+  els.name.textContent = revealText(c);
+
+  if (s.board.kind === 'quad') {
+    const correctBtn = quadButton(s.board.correctIndex);
+    correctBtn?.classList.add('cell--correct');
+    for (const btn of els.quad.querySelectorAll('.quad-cell')) {
+      if (!btn.classList.contains('cell--wrong') && !btn.classList.contains('cell--correct')) {
+        btn.classList.add('cell--dim');
+      }
+    }
+  } else {
+    const correctBtn = cellButton(s.board.correctRow, s.board.correctCol);
+    correctBtn?.classList.add('cell--correct');
+    for (const btn of els.grid.querySelectorAll('.cell')) {
+      if (!btn.classList.contains('cell--wrong') && !btn.classList.contains('cell--correct')) {
+        btn.classList.add('cell--dim');
+      }
     }
   }
+
+  const colorLabel = c.color.name || c.color.hex;
   if (announce) {
     els.status.textContent = lost
-      ? `Out of guesses. ${s.character.name}'s color is ${s.character.color.name || s.character.color.hex}.`
-      : `Correct! ${s.character.name} — ${s.character.color.name || s.character.color.hex}.`;
+      ? `Out of guesses. ${revealText(c)} — ${colorLabel}.`
+      : `Correct! ${revealText(c)} — ${colorLabel}.`;
   } else {
-    els.status.textContent = lost
-      ? `${s.character.name} — ${s.character.color.name || s.character.color.hex}.`
-      : `${s.character.name} — ${s.character.color.name || s.character.color.hex}.`;
+    els.status.textContent = `${revealText(c)} — ${colorLabel}.`;
   }
   if (s.roundIndex >= s.totalRounds - 1) {
     els.next.hidden = true;
@@ -304,6 +413,7 @@ async function showFinished() {
   const s = game.snapshot();
   els.characterCard.hidden = true;
   els.board.hidden = true;
+  els.quad.hidden = true;
   els.next.hidden = true;
   els.status.textContent = '';
 

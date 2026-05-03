@@ -1,25 +1,39 @@
-// Loads characters.json and resolves each character's image source. The
-// `color.hex` field in the JSON is the canonical, verified base color
-// (Pantone or a cited brand-palette source) — we never sample pixels off
-// the photo to override it. Photo pixels are dominated by clothing,
-// shadows, and backgrounds, which is the wrong signal for "what is this
-// character's color".
+// Loads characters.json + items.json and merges them into a single pool.
+// `color.hex` is the canonical base color — we never sample pixels off the
+// photo to override it. Photos are dominated by clothing, shadows, and
+// backgrounds, which is the wrong signal for "what is this color".
+//
+// Each entry has a `type`:
+//   "grid"  — full-character color, played on the 5x5 shade grid (3 guesses)
+//   "item"  — specific item from a scene, played on a 4-swatch quad (1 guess)
 
 export async function loadCharacters() {
-  const res = await fetch('data/characters.json', { cache: 'no-cache' });
-  if (!res.ok) throw new Error(`characters.json: ${res.status}`);
-  const list = await res.json();
-  validate(list);
-  return list.map(c => ({ ...c, imageSrc: resolveImage(c) }));
+  const [chars, items] = await Promise.all([
+    fetchJson('data/characters.json'),
+    fetchJson('data/items.json').catch(() => []),
+  ]);
+  validate(chars, 'characters.json');
+  validate(items, 'items.json', /*allowEmpty*/ true);
+  const merged = [
+    ...chars.map(c => ({ ...c, type: c.type || 'grid' })),
+    ...items.map(c => ({ ...c, type: 'item' })),
+  ];
+  return merged.map(c => ({ ...c, imageSrc: resolveImage(c) }));
 }
 
-function validate(list) {
-  if (!Array.isArray(list) || list.length === 0) {
-    throw new Error('characters.json must be a non-empty array');
+async function fetchJson(path) {
+  const res = await fetch(path, { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`${path}: ${res.status}`);
+  return res.json();
+}
+
+function validate(list, label, allowEmpty = false) {
+  if (!Array.isArray(list) || (!allowEmpty && list.length === 0)) {
+    throw new Error(`${label} must be a non-empty array`);
   }
   for (const c of list) {
     if (!c.id || !c.name || !c.color?.hex) {
-      throw new Error(`Invalid character entry: ${JSON.stringify(c)}`);
+      throw new Error(`Invalid entry in ${label}: ${JSON.stringify(c)}`);
     }
     if (!/^#?[0-9a-fA-F]{6}$/.test(c.color.hex)) {
       throw new Error(`Bad hex for ${c.id}: ${c.color.hex}`);

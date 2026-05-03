@@ -229,6 +229,23 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ---------- Quad board (4 distinct color choices, 1 guess) ---------- */
+.quad {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(10px, 1.8vw, 16px);
+  padding: clamp(10px, 1.8vw, 16px);
+  width: 100%;
+  background: #1c2230;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.quad-cell {
+  border-radius: 12px;
+}
+
 @media (hover: hover) {
   .cell:hover {
     transform: scale(1.04);

@@ -1,0 +1,242 @@
+[
+  {
+    "id": "yogi-bears-tie",
+    "type": "item",
+    "name": "Yogi Bear's tie",
+    "show": "The Yogi Bear Show",
+    "color": { "hex": "#6FB04A", "name": "Yogi Tie Green" },
+    "verified": false
+  },
+  {
+    "id": "boo-boos-bowtie",
+    "type": "item",
+    "name": "Boo-Boo's bowtie",
+    "show": "The Yogi Bear Show",
+    "color": { "hex": "#2D6FBC", "name": "Boo-Boo Bowtie Blue" },
+    "verified": false
+  },
+  {
+    "id": "snagglepuss-fur",
+    "type": "item",
+    "name": "Snagglepuss's fur",
+    "show": "The Yogi Bear Show",
+    "color": { "hex": "#FFAFC8", "name": "Snagglepuss Pink" },
+    "verified": false
+  },
+  {
+    "id": "magilla-gorilla-bowtie",
+    "type": "item",
+    "name": "Magilla Gorilla's bowtie",
+    "show": "The Magilla Gorilla Show",
+    "color": { "hex": "#D33B3B", "name": "Magilla Bowtie Red" },
+    "verified": false
+  },
+  {
+    "id": "speed-racer-emblem",
+    "type": "item",
+    "name": "Speed Racer's “M” emblem",
+    "show": "Speed Racer",
+    "color": { "hex": "#DC2F2F", "name": "Mach 5 Red" },
+    "verified": false
+  },
+  {
+    "id": "penelope-pitstop-suit",
+    "type": "item",
+    "name": "Penelope Pitstop's racing suit",
+    "show": "The Perils of Penelope Pitstop",
+    "color": { "hex": "#FF8FB3", "name": "Penelope Pink" },
+    "verified": false
+  },
+  {
+    "id": "scooby-doo-collar",
+    "type": "item",
+    "name": "Scooby-Doo's collar",
+    "show": "Scooby-Doo, Where Are You!",
+    "color": { "hex": "#2BAEDB", "name": "Scooby Collar Blue" },
+    "verified": false
+  },
+  {
+    "id": "shaggy-shirt",
+    "type": "item",
+    "name": "Shaggy's shirt",
+    "show": "Scooby-Doo, Where Are You!",
+    "color": { "hex": "#8FC73E", "name": "Shaggy Shirt Green" },
+    "verified": false
+  },
+  {
+    "id": "daphne-dress",
+    "type": "item",
+    "name": "Daphne's dress",
+    "show": "Scooby-Doo, Where Are You!",
+    "color": { "hex": "#B07FBA", "name": "Daphne Lilac" },
+    "verified": false
+  },
+  {
+    "id": "velma-sweater",
+    "type": "item",
+    "name": "Velma's sweater",
+    "show": "Scooby-Doo, Where Are You!",
+    "color": { "hex": "#DD7B30", "name": "Velma Sweater Orange" },
+    "verified": false
+  },
+  {
+    "id": "arnolds-hat",
+    "type": "item",
+    "name": "Arnold's hat",
+    "show": "Hey Arnold!",
+    "color": { "hex": "#5BA8D9", "name": "Arnold Hat Blue" },
+    "verified": false
+  },
+  {
+    "id": "helga-bow",
+    "type": "item",
+    "name": "Helga's bow",
+    "show": "Hey Arnold!",
+    "color": { "hex": "#FF69B4", "name": "Helga Bow Pink" },
+    "verified": false
+  },
+  {
+    "id": "tommy-pickles-shirt",
+    "type": "item",
+    "name": "Tommy Pickles's shirt",
+    "show": "Rugrats",
+    "color": { "hex": "#4A8FCB", "name": "Tommy Shirt Blue" },
+    "verified": false
+  },
+  {
+    "id": "chuckie-hair",
+    "type": "item",
+    "name": "Chuckie's hair",
+    "show": "Rugrats",
+    "color": { "hex": "#D63E1B", "name": "Chuckie Red" },
+    "verified": false
+  },
+  {
+    "id": "doug-funnie-sweater",
+    "type": "item",
+    "name": "Doug Funnie's sweater",
+    "show": "Doug",
+    "color": { "hex": "#6FB073", "name": "Doug Sweater Green" },
+    "verified": false
+  },
+  {
+    "id": "daria-jacket",
+    "type": "item",
+    "name": "Daria's jacket",
+    "show": "Daria",
+    "color": { "hex": "#3F5E3A", "name": "Daria Jacket Green" },
+    "verified": false
+  },
+  {
+    "id": "dexter-gloves",
+    "type": "item",
+    "name": "Dexter's gloves",
+    "show": "Dexter's Laboratory",
+    "color": { "hex": "#1A1A1A", "name": "Dexter Glove Black" },
+    "verified": false
+  },
+  {
+    "id": "dee-dee-tutu",
+    "type": "item",
+    "name": "Dee Dee's tutu",
+    "show": "Dexter's Laboratory",
+    "color": { "hex": "#FFB6C1", "name": "Dee Dee Pink" },
+    "verified": false
+  },
+  {
+    "id": "eddy-shirt",
+    "type": "item",
+    "name": "Eddy's shirt",
+    "show": "Ed, Edd n Eddy",
+    "color": { "hex": "#F2C94C", "name": "Eddy Shirt Yellow" },
+    "verified": false
+  },
+  {
+    "id": "johnny-bravo-shirt",
+    "type": "item",
+    "name": "Johnny Bravo's shirt",
+    "show": "Johnny Bravo",
+    "color": { "hex": "#1A1A1A", "name": "Johnny Bravo Black" },
+    "verified": false
+  },
+  {
+    "id": "blossom-bow",
+    "type": "item",
+    "name": "Blossom's bow",
+    "show": "The Powerpuff Girls",
+    "color": { "hex": "#E63946", "name": "Blossom Bow Red" },
+    "verified": false
+  },
+  {
+    "id": "buttercup-dress",
+    "type": "item",
+    "name": "Buttercup's dress",
+    "show": "The Powerpuff Girls",
+    "color": { "hex": "#2ECC71", "name": "Buttercup Green" },
+    "verified": false
+  },
+  {
+    "id": "stimpy-body",
+    "type": "item",
+    "name": "Stimpy's body",
+    "show": "The Ren & Stimpy Show",
+    "color": { "hex": "#C84A52", "name": "Stimpy Red" },
+    "verified": false
+  },
+  {
+    "id": "muriel-apron",
+    "type": "item",
+    "name": "Muriel's apron",
+    "show": "Courage the Cowardly Dog",
+    "color": { "hex": "#F4D03F", "name": "Muriel Apron Yellow" },
+    "verified": false
+  },
+  {
+    "id": "mac-shirt",
+    "type": "item",
+    "name": "Mac's shirt",
+    "show": "Foster's Home for Imaginary Friends",
+    "color": { "hex": "#E63946", "name": "Mac Shirt Red" },
+    "verified": false
+  },
+  {
+    "id": "dora-shirt",
+    "type": "item",
+    "name": "Dora's shirt",
+    "show": "Dora the Explorer",
+    "color": { "hex": "#DD3F8A", "name": "Dora Shirt Pink" },
+    "verified": false
+  },
+  {
+    "id": "boots-boots",
+    "type": "item",
+    "name": "Boots's boots",
+    "show": "Dora the Explorer",
+    "color": { "hex": "#DC2F2F", "name": "Boots Red" },
+    "verified": false
+  },
+  {
+    "id": "cosmo-hair",
+    "type": "item",
+    "name": "Cosmo's hair",
+    "show": "The Fairly OddParents",
+    "color": { "hex": "#2ECC71", "name": "Cosmo Green" },
+    "verified": false
+  },
+  {
+    "id": "timmy-turner-hat",
+    "type": "item",
+    "name": "Timmy Turner's hat",
+    "show": "The Fairly OddParents",
+    "color": { "hex": "#FF69B4", "name": "Timmy Hat Pink" },
+    "verified": false
+  },
+  {
+    "id": "aang-arrow",
+    "type": "item",
+    "name": "Aang's arrow tattoo",
+    "show": "Avatar: The Last Airbender",
+    "color": { "hex": "#2A6FB5", "name": "Aang Arrow Blue" },
+    "verified": false
+  }
+]

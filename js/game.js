@@ -1,8 +1,13 @@
-// Daily-mode game state. Three rounds locked to the UTC date, with
+// Daily-mode game state. Plays N rounds locked to the UTC date, with
 // per-round guess history persisted to localStorage so refreshing
 // preserves progress until the next UTC day.
+//
+// Two board kinds, mixed within the same daily run:
+//   grid — 5x5 shade picker, 3 guesses, axis hints after the 2nd miss
+//   quad — 4 distinct color swatches, 1 guess, no hints
 
 import { buildGrid } from './grid.js';
+import { buildQuad } from './quad.js';
 import { gridSeedFor } from './daily.js';
 
 const STORAGE_KEYS = {
@@ -10,8 +15,13 @@ const STORAGE_KEYS = {
   daily: (date) => `wcat:daily:${date}`,
 };
 
-const MAX_GUESSES = 3;
+const GRID_MAX_GUESSES = 3;
+const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 5;
+
+export function maxGuessesFor(character) {
+  return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;
+}
 
 export function createDailyGame(dailyCharacters, dateKey) {
   if (!dailyCharacters?.length) throw new Error('createDailyGame: no characters');
@@ -25,7 +35,7 @@ export function createDailyGame(dailyCharacters, dateKey) {
     currentIndex: clampInt(persisted?.currentIndex ?? 0, 0, dailyCharacters.length - 1),
     streak: clampInt(persisted?.streak ?? 0, 0, 9999),
     bestStreak: clampInt(readStorage(STORAGE_KEYS.bestStreak, 0), 0, 9999),
-    grid: null,
+    board: null,
     revealed: false,
   };
 
@@ -42,11 +52,15 @@ export function createDailyGame(dailyCharacters, dateKey) {
 
   function loadCurrent() {
     const c = state.characters[state.currentIndex];
-    state.grid = buildGrid(c.color.hex, {
-      rows: GRID_SIZE,
-      cols: GRID_SIZE,
-      seed: gridSeedFor(state.date, c.id),
-    });
+    const seed = gridSeedFor(state.date, c.id);
+    if (c.type === 'item') {
+      state.board = buildQuad(c.color.hex, { seed });
+    } else {
+      state.board = {
+        kind: 'grid',
+        ...buildGrid(c.color.hex, { rows: GRID_SIZE, cols: GRID_SIZE, seed }),
+      };
+    }
     const round = state.rounds[state.currentIndex];
     state.revealed = isRoundDone(round);
   }
@@ -59,11 +73,16 @@ export function createDailyGame(dailyCharacters, dateKey) {
     });
   }
 
-  function guess(row, col) {
+  function currentMaxGuesses() {
+    return maxGuessesFor(state.characters[state.currentIndex]);
+  }
+
+  function guess(pos) {
     if (state.revealed || isComplete()) return { kind: 'noop' };
     const round = state.rounds[state.currentIndex];
-    const cell = state.grid.cells[row][col];
-    round.guesses.push({ row, col, correct: cell.isCorrect });
+    const cell = cellAt(pos);
+    if (!cell) return { kind: 'noop' };
+    round.guesses.push({ ...pos, correct: cell.isCorrect });
     if (cell.isCorrect) {
       round.won = true;
       state.revealed = true;
@@ -75,7 +94,7 @@ export function createDailyGame(dailyCharacters, dateKey) {
       persist();
       return { kind: 'correct', cell };
     }
-    if (round.guesses.length >= MAX_GUESSES) {
+    if (round.guesses.length >= currentMaxGuesses()) {
       round.lost = true;
       state.revealed = true;
       state.streak = 0;
@@ -83,7 +102,7 @@ export function createDailyGame(dailyCharacters, dateKey) {
       return { kind: 'exhausted', correctCell: correctCell() };
     }
     persist();
-    return { kind: 'wrong', cell, guessesLeft: MAX_GUESSES - round.guesses.length };
+    return { kind: 'wrong', cell, guessesLeft: currentMaxGuesses() - round.guesses.length };
   }
 
   function next() {
@@ -96,8 +115,18 @@ export function createDailyGame(dailyCharacters, dateKey) {
     return { kind: 'round', round: state.currentIndex };
   }
 
+  function cellAt(pos) {
+    if (state.board.kind === 'quad') {
+      return state.board.boxes[pos.index];
+    }
+    return state.board.cells[pos.row]?.[pos.col];
+  }
+
   function correctCell() {
-    return state.grid.cells[state.grid.correctRow][state.grid.correctCol];
+    if (state.board.kind === 'quad') {
+      return state.board.boxes[state.board.correctIndex];
+    }
+    return state.board.cells[state.board.correctRow][state.board.correctCol];
   }
 
   function isComplete() {
@@ -106,6 +135,7 @@ export function createDailyGame(dailyCharacters, dateKey) {
 
   function snapshot() {
     const round = state.rounds[state.currentIndex];
+    const max = currentMaxGuesses();
     return {
       date: state.date,
       characters: state.characters,
@@ -115,12 +145,12 @@ export function createDailyGame(dailyCharacters, dateKey) {
       totalRounds: state.characters.length,
       streak: state.streak,
       bestStreak: state.bestStreak,
-      guessesLeft: MAX_GUESSES - round.guesses.length,
+      guessesLeft: max - round.guesses.length,
       revealed: state.revealed,
       finished: isComplete(),
-      wrongCells: round.guesses.filter(g => !g.correct).map(g => ({ row: g.row, col: g.col })),
-      grid: state.grid,
-      maxGuesses: MAX_GUESSES,
+      wrongGuesses: round.guesses.filter(g => !g.correct),
+      board: state.board,
+      maxGuesses: max,
     };
   }
 
@@ -140,21 +170,23 @@ function hydrateRounds(saved, dailyCharacters) {
   return fresh.map(r => {
     const match = saved.find(s => s?.charId === r.charId);
     if (!match) return r;
+    const character = dailyCharacters.find(c => c.id === r.charId);
+    const max = maxGuessesFor(character);
     const guesses = Array.isArray(match.guesses) ? match.guesses.filter(isValidGuess) : [];
     return {
       charId: r.charId,
-      guesses: guesses.slice(0, MAX_GUESSES),
+      guesses: guesses.slice(0, max),
       won: !!match.won && guesses.some(g => g.correct),
-      lost: !!match.lost && guesses.length >= MAX_GUESSES && !guesses.some(g => g.correct),
+      lost: !!match.lost && guesses.length >= max && !guesses.some(g => g.correct),
     };
   });
 }
 
 function isValidGuess(g) {
-  return g
-    && Number.isInteger(g.row)
-    && Number.isInteger(g.col)
-    && typeof g.correct === 'boolean';
+  if (!g || typeof g.correct !== 'boolean') return false;
+  // grid guess: row + col integers; quad guess: index integer
+  if (Number.isInteger(g.index)) return true;
+  return Number.isInteger(g.row) && Number.isInteger(g.col);
 }
 
 function isRoundDone(round) {
