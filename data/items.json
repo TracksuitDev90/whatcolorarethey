@@ -58,8 +58,9 @@
     "type": "item",
     "name": "Scooby-Doo's collar",
     "show": "Scooby-Doo, Where Are You!",
-    "color": { "hex": "#2BAEDB", "name": "Scooby Collar Blue" },
-    "verified": false
+    "color": { "hex": "#27B8B3", "name": "Scooby Collar Teal" },
+    "image": "assets/photos/scooby-doo-collar.png",
+    "verified": true
   },
   {
     "id": "shaggy-shirt",
@@ -206,6 +207,15 @@
     "verified": true
   },
   {
+    "id": "krumm-lips",
+    "type": "item",
+    "name": "Krumm's lips",
+    "show": "Aaahh!!! Real Monsters",
+    "color": { "hex": "#5780B5", "name": "Krumm Lip Blue" },
+    "image": "assets/photos/krumm-lips.png",
+    "verified": true
+  },
+  {
     "id": "heffer-hair",
     "type": "item",
     "name": "Heffer's hair",
@@ -228,40 +238,45 @@
     "type": "item",
     "name": "Muriel's apron",
     "show": "Courage the Cowardly Dog",
-    "color": { "hex": "#F4D03F", "name": "Muriel Apron Yellow" },
-    "verified": false
+    "color": { "hex": "#E0E96C", "name": "Muriel Apron Yellow" },
+    "image": "assets/photos/muriel-apron.png",
+    "verified": true
   },
   {
     "id": "mac-shirt",
     "type": "item",
     "name": "Mac's shirt",
     "show": "Foster's Home for Imaginary Friends",
-    "color": { "hex": "#E63946", "name": "Mac Shirt Red" },
-    "verified": false
+    "color": { "hex": "#D2292A", "name": "Mac Shirt Red" },
+    "image": "assets/photos/mac-shirt.png",
+    "verified": true
   },
   {
     "id": "dora-shirt",
     "type": "item",
     "name": "Dora's shirt",
     "show": "Dora the Explorer",
-    "color": { "hex": "#DD3F8A", "name": "Dora Shirt Pink" },
-    "verified": false
+    "color": { "hex": "#F371AC", "name": "Dora Shirt Pink" },
+    "image": "assets/photos/dora-shirt.png",
+    "verified": true
   },
   {
-    "id": "boots-boots",
+    "id": "boots-stomach",
     "type": "item",
-    "name": "Boots's boots",
+    "name": "Boots's stomach",
     "show": "Dora the Explorer",
-    "color": { "hex": "#DC2F2F", "name": "Boots Red" },
-    "verified": false
+    "color": { "hex": "#E1E175", "name": "Boots Belly Yellow" },
+    "image": "assets/photos/boots-stomach.png",
+    "verified": true
   },
   {
-    "id": "cosmo-hair",
+    "id": "cosmo-mom-hair",
     "type": "item",
-    "name": "Cosmo's hair",
+    "name": "Cosmo's Mom's hair",
     "show": "The Fairly OddParents",
-    "color": { "hex": "#2ECC71", "name": "Cosmo Green" },
-    "verified": false
+    "color": { "hex": "#91F5AC", "name": "Cosmo's Mom Teal" },
+    "image": "assets/photos/cosmo-mom-hair.png",
+    "verified": true
   },
   {
     "id": "timmy-turner-hat",
@@ -269,7 +284,8 @@
     "name": "Timmy Turner's hat",
     "show": "The Fairly OddParents",
     "color": { "hex": "#FF69B4", "name": "Timmy Hat Pink" },
-    "verified": false
+    "image": "assets/photos/timmy-turner-hat.png",
+    "verified": true
   },
   {
     "id": "aang-arrow",
@@ -277,23 +293,26 @@
     "name": "Aang's arrow tattoo",
     "show": "Avatar: The Last Airbender",
     "color": { "hex": "#2A6FB5", "name": "Aang Arrow Blue" },
-    "verified": false
+    "image": "assets/photos/aang-arrow.png",
+    "verified": true
   },
   {
     "id": "inspector-gadget-coat",
     "type": "item",
     "name": "Inspector Gadget's coat",
     "show": "Inspector Gadget",
-    "color": { "hex": "#7F8C8D", "name": "Gadget Coat Gray" },
-    "verified": false
+    "color": { "hex": "#ADA1C8", "name": "Gadget Coat Lavender" },
+    "image": "assets/photos/inspector-gadget-coat.png",
+    "verified": true
   },
   {
     "id": "arthur-sweater",
     "type": "item",
     "name": "Arthur's sweater",
     "show": "Arthur",
-    "color": { "hex": "#F0C419", "name": "Arthur Sweater Yellow" },
-    "verified": false
+    "color": { "hex": "#F3D949", "name": "Arthur Sweater Yellow" },
+    "image": "assets/photos/arthur-sweater.png",
+    "verified": true
   },
   {
     "id": "phineas-hair",
@@ -301,30 +320,52 @@
     "name": "Phineas's hair",
     "show": "Phineas and Ferb",
     "color": { "hex": "#E94E1B", "name": "Phineas Hair Orange" },
-    "verified": false
+    "image": "assets/photos/phineas-hair.png",
+    "verified": true
   },
   {
     "id": "ferb-hair",
     "type": "item",
     "name": "Ferb's hair",
     "show": "Phineas and Ferb",
-    "color": { "hex": "#7BB661", "name": "Ferb Hair Green" },
-    "verified": false
+    "color": { "hex": "#32B336", "name": "Ferb Hair Green" },
+    "image": "assets/photos/ferb-hair.png",
+    "verified": true
   },
   {
     "id": "kim-possible-hair",
     "type": "item",
     "name": "Kim Possible's hair",
     "show": "Kim Possible",
-    "color": { "hex": "#D6402F", "name": "Kim Possible Red" },
-    "verified": false
+    "color": { "hex": "#D8631D", "name": "Kim Possible Orange" },
+    "image": "assets/photos/kim-possible-hair.png",
+    "verified": true
   },
   {
     "id": "numbuh-1-shirt",
     "type": "item",
     "name": "Numbuh 1's shirt",
     "show": "Codename: Kids Next Door",
-    "color": { "hex": "#D6322F", "name": "Numbuh 1 Red" },
-    "verified": false
+    "color": { "hex": "#CA0D41", "name": "Numbuh 1 Red" },
+    "image": "assets/photos/numbuh-1-shirt.png",
+    "verified": true
+  },
+  {
+    "id": "numbuh-4-hoodie",
+    "type": "item",
+    "name": "Numbuh 4's hoodie",
+    "show": "Codename: Kids Next Door",
+    "color": { "hex": "#E2780B", "name": "Numbuh 4 Orange" },
+    "image": "assets/photos/numbuh-4-hoodie.png",
+    "verified": true
+  },
+  {
+    "id": "danny-phantom-eyes",
+    "type": "item",
+    "name": "Danny Phantom's ghost eyes",
+    "show": "Danny Phantom",
+    "color": { "hex": "#87D737", "name": "Danny Phantom Green" },
+    "image": "assets/photos/danny-phantom-eyes.png",
+    "verified": true
   }
 ]

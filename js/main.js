@@ -31,8 +31,15 @@ const els = {
   streakChip: document.getElementById('streak-chip'),
   bestChip: document.getElementById('best-chip'),
   guessesChip: document.getElementById('guesses-chip'),
+  tabItems: document.getElementById('tab-items'),
+  tabGrid: document.getElementById('tab-grid'),
 };
 
+// Each tab is a separate experience: items use the 4-swatch quad and
+// characters use the 5x5 shade grid. The two games run in parallel; switching
+// tabs swaps which one is being played without touching the other's progress.
+const games = { items: null, grid: null };
+let mode = 'items';
 let game;
 let dateKey;
 let focusRow = 0;
@@ -48,17 +55,36 @@ async function init() {
     dateKey = getUtcDateKey();
     // Daily cap removed for now — play every character each day. Re-enable
     // by passing a smaller count (e.g. 3) once we ship publicly.
-    const daily = pickDailyCharacters(chars, dateKey, chars.length);
-    game = createDailyGame(daily, dateKey);
+    const itemPool = chars.filter(c => c.type === 'item');
+    const gridPool = chars.filter(c => c.type !== 'item');
+    games.items = itemPool.length
+      ? createDailyGame(pickDailyCharacters(itemPool, dateKey, itemPool.length), dateKey)
+      : null;
+    games.grid = gridPool.length
+      ? createDailyGame(pickDailyCharacters(gridPool, dateKey, gridPool.length), dateKey)
+      : null;
     renderHeaders();
-    if (game.snapshot().finished) {
-      showFinished();
-    } else {
-      renderRound();
-    }
+    setMode(games.items ? 'items' : 'grid');
   } catch (err) {
     console.error(err);
     els.status.textContent = `Failed to start: ${err.message}`;
+  }
+}
+
+function setMode(next) {
+  if (next !== 'items' && next !== 'grid') return;
+  if (!games[next]) return;
+  mode = next;
+  game = games[mode];
+  els.tabItems.classList.toggle('tab--active', mode === 'items');
+  els.tabItems.setAttribute('aria-selected', mode === 'items' ? 'true' : 'false');
+  els.tabGrid.classList.toggle('tab--active', mode === 'grid');
+  els.tabGrid.setAttribute('aria-selected', mode === 'grid' ? 'true' : 'false');
+  hideShareSlot();
+  if (game.snapshot().finished) {
+    showFinished();
+  } else {
+    renderRound();
   }
 }
 
@@ -371,6 +397,9 @@ function updateChips() {
   els.bestChip.textContent = `Best ${s.bestStreak}`;
   els.guessesChip.textContent = `Guesses ${s.guessesLeft}`;
 }
+
+els.tabItems.addEventListener('click', () => setMode('items'));
+els.tabGrid.addEventListener('click', () => setMode('grid'));
 
 els.next.addEventListener('click', () => {
   const r = game.next();
