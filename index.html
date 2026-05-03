@@ -6,6 +6,9 @@
   <meta name="theme-color" content="#0e1116" />
   <title>What Color Are They?</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -23,9 +26,10 @@
     <section class="card" id="character-card" aria-label="Character">
       <figure class="photo" id="photo-frame">
         <img id="character-img" alt="" decoding="async" fetchpriority="high" />
-        <figcaption class="photo-caption" id="character-name">&nbsp;</figcaption>
       </figure>
     </section>
+
+    <h2 class="character-title" id="character-name">&nbsp;</h2>
 
     <section class="board" id="board" aria-label="Color choices">
       <div class="board-corner" aria-hidden="true"></div>

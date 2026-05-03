@@ -10,11 +10,18 @@ const ROW_GAP = 36;
 const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
 const MAX_GUESSES = 3;
 
+// Render at 2x backing resolution so the share image stays crisp on
+// retina screens and after social-network re-encoding.
+const PIXEL_RATIO = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
+
 export async function renderShareCard(snapshot) {
   const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W * PIXEL_RATIO;
+  canvas.height = H * PIXEL_RATIO;
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
 
   drawBackground(ctx);
   drawHeader(ctx, snapshot);
@@ -44,20 +51,20 @@ function drawBackground(ctx) {
 function drawHeader(ctx, snapshot) {
   ctx.textBaseline = 'top';
   ctx.fillStyle = '#e6ebf2';
-  ctx.font = 'bold 56px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '900 60px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText('What Color Are They?', PADDING, 60);
 
   ctx.fillStyle = '#8b95a7';
-  ctx.font = '28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '600 28px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const wonCount = snapshot.rounds.filter(r => r.won).length;
   const summary = `Daily ${snapshot.date} · ${wonCount} / ${snapshot.rounds.length}`;
-  ctx.fillText(summary, PADDING, 130);
+  ctx.fillText(summary, PADDING, 132);
 }
 
 function drawFooter(ctx, snapshot) {
   ctx.fillStyle = '#8b95a7';
   ctx.textBaseline = 'bottom';
-  ctx.font = '24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText('whatcolorarethey · play today\'s puzzle', PADDING, H - 50);
   ctx.textBaseline = 'top';
 }
@@ -78,14 +85,14 @@ async function drawRow(ctx, snapshot, i, x, y, w, h) {
   const rightW = w - portraitSize - 32;
 
   ctx.fillStyle = '#e6ebf2';
-  ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '900 34px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textBaseline = 'top';
   ctx.fillText(truncate(ctx, character.name, rightW), rightX, y + 6);
 
   const subtitle = roundLabel(round);
   ctx.fillStyle = '#8b95a7';
-  ctx.font = '24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(subtitle, rightX, y + 50);
+  ctx.font = '600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(subtitle, rightX, y + 52);
 
   const boxGap = 18;
   const boxSize = Math.min(120, (rightW - boxGap * (MAX_GUESSES - 1)) / MAX_GUESSES);
@@ -177,7 +184,7 @@ function drawBoxLabel(ctx, guess, x, y, size) {
   if (!guess) return;
   ctx.fillStyle = guess.correct ? 'rgba(6,36,32,0.85)' : 'rgba(180,190,206,0.95)';
   ctx.textBaseline = 'top';
-  ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '800 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const tag = `${COL_LABELS[guess.col] ?? '?'}${guess.row + 1}`;
   ctx.fillText(tag, x + 10, y + 8);
 }
@@ -186,7 +193,7 @@ function drawGlyph(ctx, ch, cx, cy, size, color) {
   ctx.fillStyle = color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = `900 ${Math.round(size * 0.55)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.font = `900 ${Math.round(size * 0.55)}px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
   ctx.fillText(ch, cx, cy + 2);
   ctx.textAlign = 'start';
 }
