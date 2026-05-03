@@ -42,13 +42,6 @@ export function pickDailyCharacters(allCharacters, dateKey, count = CHARACTERS_P
   return pool.slice(0, Math.min(count, pool.length));
 }
 
-// Per-character grid seed: stable for the day so refreshes don't reroll
-// the layout, but the next day's puzzle (and any future re-pick of this
-// character) gets a fresh arrangement.
-export function gridSeedFor(dateKey, charId) {
-  return hashString(`grid:${dateKey}:${charId}`) >>> 0;
-}
-
 export function msUntilNextUtcDay(now = new Date()) {
   const next = Date.UTC(
     now.getUTCFullYear(),
