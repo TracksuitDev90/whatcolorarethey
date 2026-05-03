@@ -296,14 +296,6 @@
     "verified": false
   },
   {
-    "id": "inspector-gadget",
-    "name": "Inspector Gadget",
-    "era": "80s",
-    "color": { "hex": "#7F8C8D", "name": "Gadget Coat Gray" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Inspector_Gadget_(character)",
-    "verified": false
-  },
-  {
     "id": "pink-panther",
     "name": "Pink Panther",
     "era": "80s",
@@ -317,14 +309,6 @@
     "era": "80s",
     "color": { "hex": "#C8102E", "name": "Optimus Red" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Optimus_Prime",
-    "verified": false
-  },
-  {
-    "id": "arthur-read",
-    "name": "Arthur Read",
-    "era": "90s",
-    "color": { "hex": "#F0C419", "name": "Arthur Sweater Yellow" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Arthur_Read",
     "verified": false
   },
   {
@@ -384,43 +368,11 @@
     "verified": false
   },
   {
-    "id": "phineas",
-    "name": "Phineas Flynn",
-    "era": "00s",
-    "color": { "hex": "#E94E1B", "name": "Phineas Orange" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Phineas_Flynn",
-    "verified": false
-  },
-  {
-    "id": "ferb",
-    "name": "Ferb Fletcher",
-    "era": "00s",
-    "color": { "hex": "#5C9F5C", "name": "Ferb Hair Green" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Ferb_Fletcher",
-    "verified": false
-  },
-  {
-    "id": "kim-possible",
-    "name": "Kim Possible",
-    "era": "00s",
-    "color": { "hex": "#D6402F", "name": "Kim Possible Red" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Kim_Possible_(character)",
-    "verified": false
-  },
-  {
     "id": "jenny-xj9",
     "name": "Jenny Wakeman",
     "era": "00s",
     "color": { "hex": "#6FAEDB", "name": "XJ-9 Blue" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/My_Life_as_a_Teenage_Robot",
-    "verified": false
-  },
-  {
-    "id": "numbuh-1",
-    "name": "Numbuh 1",
-    "era": "00s",
-    "color": { "hex": "#D6322F", "name": "Numbuh 1 Red" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Codename:_Kids_Next_Door",
     "verified": false
   },
   {
