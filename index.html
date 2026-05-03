@@ -31,7 +31,12 @@
 
     <h2 class="character-title" id="character-name">&nbsp;</h2>
 
-    <section class="board" id="board" aria-label="Color choices">
+    <!-- Each round shows exactly one of these boards. The grid (5x5 shade
+         picker, character round) and quad (4 swatches, item round) are
+         mutually exclusive — JS toggles `hidden` based on the round type
+         so the player never sees both at once. Both start hidden so the
+         first paint doesn't flash an empty board before JS runs. -->
+    <section class="board" id="board" hidden aria-label="Color choices">
       <div class="board-corner" aria-hidden="true"></div>
       <div class="col-headers" id="col-headers" aria-hidden="true"></div>
       <div class="row-headers" id="row-headers" aria-hidden="true"></div>
