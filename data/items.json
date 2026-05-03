@@ -31,7 +31,7 @@
     "type": "item",
     "name": "Magilla Gorilla's bowtie",
     "show": "The Magilla Gorilla Show",
-    "color": { "hex": "#D33B3B", "name": "Magilla Bowtie Red" },
+    "color": { "hex": "#6C4298", "name": "Magilla Bowtie Purple" },
     "image": "assets/photos/magilla-gorilla-bowtie.png",
     "verified": true
   },
@@ -147,7 +147,7 @@
     "type": "item",
     "name": "Dexter's gloves",
     "show": "Dexter's Laboratory",
-    "color": { "hex": "#A57BBE", "name": "Dexter Glove Purple" },
+    "color": { "hex": "#83509D", "name": "Dexter Glove Purple" },
     "image": "assets/photos/dexter-gloves.png",
     "verified": true
   },
@@ -156,7 +156,7 @@
     "type": "item",
     "name": "Dee Dee's tutu",
     "show": "Dexter's Laboratory",
-    "color": { "hex": "#FFB6C1", "name": "Dee Dee Pink" },
+    "color": { "hex": "#FC698A", "name": "Dee Dee Pink" },
     "image": "assets/photos/dee-dee-tutu.png",
     "verified": true
   },
