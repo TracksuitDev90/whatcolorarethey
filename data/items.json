@@ -403,5 +403,59 @@
     "color": { "hex": "#C03080", "name": "Mabel Shirt Magenta" },
     "image": "assets/photos/mabel-shirt.png",
     "verified": true
+  },
+  {
+    "id": "nigel-hair",
+    "type": "item",
+    "name": "Nigel Thornberry's hair",
+    "show": "The Wild Thornberrys",
+    "color": { "hex": "#D14528", "name": "Nigel Hair Red" },
+    "image": "assets/photos/nigel-hair.png",
+    "verified": true
+  },
+  {
+    "id": "darkwing-mask",
+    "type": "item",
+    "name": "Darkwing Duck's mask",
+    "show": "Darkwing Duck",
+    "color": { "hex": "#6E3FA7", "name": "Darkwing Mask Purple" },
+    "image": "assets/photos/darkwing-mask.png",
+    "verified": true
+  },
+  {
+    "id": "lois-shirt",
+    "type": "item",
+    "name": "Lois Griffin's shirt",
+    "show": "Family Guy",
+    "color": { "hex": "#46BBA5", "name": "Lois Shirt Teal" },
+    "image": "assets/photos/lois-shirt.png",
+    "verified": true
+  },
+  {
+    "id": "fred-flintstone-shirt",
+    "type": "item",
+    "name": "Fred Flintstone's shirt",
+    "show": "The Flintstones",
+    "color": { "hex": "#E97B36", "name": "Fred Shirt Orange" },
+    "image": "assets/photos/fred-flintstone-shirt.png",
+    "verified": true
+  },
+  {
+    "id": "johnny-quest-hair",
+    "type": "item",
+    "name": "Jonny Quest's hair",
+    "show": "Jonny Quest",
+    "color": { "hex": "#F0C84B", "name": "Jonny Quest Blonde" },
+    "image": "assets/photos/johnny-quest-hair.png",
+    "verified": true
+  },
+  {
+    "id": "captain-planet-hair",
+    "type": "item",
+    "name": "Captain Planet's hair",
+    "show": "Captain Planet and the Planeteers",
+    "color": { "hex": "#1F6E4F", "name": "Captain Planet Green" },
+    "image": "assets/photos/captain-planet-hair.png",
+    "verified": true
   }
 ]

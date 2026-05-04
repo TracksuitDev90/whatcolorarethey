@@ -391,5 +391,32 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Perry_the_Platypus",
     "image": "assets/photos/perry-the-platypus.png",
     "verified": true
+  },
+  {
+    "id": "him",
+    "name": "Him",
+    "era": "90s",
+    "color": { "hex": "#D52A2C", "name": "Him Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Him_(The_Powerpuff_Girls)",
+    "image": "assets/photos/him.png",
+    "verified": true
+  },
+  {
+    "id": "blue-ranger",
+    "name": "Blue Ranger",
+    "era": "90s",
+    "color": { "hex": "#1B5BD0", "name": "Blue Ranger Blue" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Billy_Cranston",
+    "image": "assets/photos/blue-ranger.png",
+    "verified": true
+  },
+  {
+    "id": "ice-king",
+    "name": "Ice King",
+    "era": "00s",
+    "color": { "hex": "#BCE3F1", "name": "Ice King Light Blue" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Ice_King",
+    "image": "assets/photos/ice-king.png",
+    "verified": true
   }
 ]
