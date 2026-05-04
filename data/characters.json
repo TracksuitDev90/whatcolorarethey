@@ -14,6 +14,7 @@
     "color": { "hex": "#FFD90F", "name": "Simpsons Yellow" },
     "colorSource": "https://www.colourlovers.com/color/FFD90F/the_simpsons_yellow",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Homer_Simpson",
+    "image": "assets/photos/homer-simpson.png",
     "verified": true
   },
   {
@@ -121,6 +122,7 @@
     "color": { "hex": "#8CC871", "name": "Beast Boy Green" },
     "colorSource": "https://www.color-hex.com/color-palette/72954",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Beast_Boy",
+    "image": "assets/photos/beast-boy.png",
     "verified": true
   },
   {
@@ -174,6 +176,7 @@
     "color": { "hex": "#62B1CF", "name": "Stitch Blue" },
     "colorSource": "https://www.color-hex.com/color-palette/19591",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Stitch_(Lilo_%26_Stitch)",
+    "image": "assets/photos/stitch.png",
     "verified": true
   },
   {
@@ -209,6 +212,7 @@
     "color": { "hex": "#FFAAFF", "name": "Jigglypuff Pink" },
     "colorSource": "https://colorswall.com/color/ffaaff",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Jigglypuff",
+    "image": "assets/photos/jigglypuff.png",
     "verified": true
   },
   {
@@ -252,6 +256,7 @@
     "color": { "hex": "#0F98DC", "name": "Cookie Monster Blue" },
     "colorSource": "https://brandpalettes.com/sesame-street-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Cookie_Monster",
+    "image": "assets/photos/cookie-monster.png",
     "verified": true
   },
   {
@@ -285,7 +290,8 @@
     "era": "80s",
     "color": { "hex": "#A4D65E", "name": "Slimer Ectoplasm Green" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Slimer",
-    "verified": false
+    "image": "assets/photos/slimer.png",
+    "verified": true
   },
   {
     "id": "strawberry-shortcake",
@@ -301,7 +307,8 @@
     "era": "80s",
     "color": { "hex": "#FF7CB6", "name": "Pink Panther Pink" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pink_Panther_(character)",
-    "verified": false
+    "image": "assets/photos/pink-panther.png",
+    "verified": true
   },
   {
     "id": "optimus-prime",
@@ -373,7 +380,8 @@
     "era": "00s",
     "color": { "hex": "#6FAEDB", "name": "XJ-9 Blue" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/My_Life_as_a_Teenage_Robot",
-    "verified": false
+    "image": "assets/photos/jenny-xj9.png",
+    "verified": true
   },
   {
     "id": "perry-the-platypus",
@@ -381,6 +389,7 @@
     "era": "00s",
     "color": { "hex": "#3F8DAD", "name": "Perry Teal" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Perry_the_Platypus",
-    "verified": false
+    "image": "assets/photos/perry-the-platypus.png",
+    "verified": true
   }
 ]

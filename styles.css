@@ -145,6 +145,10 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
 }
 
 .photo img {

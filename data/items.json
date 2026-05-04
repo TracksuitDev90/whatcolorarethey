@@ -76,7 +76,7 @@
     "type": "item",
     "name": "Daphne's dress",
     "show": "Scooby-Doo, Where Are You!",
-    "color": { "hex": "#B07FBA", "name": "Daphne Lilac" },
+    "color": { "hex": "#7C3FAF", "name": "Daphne Purple" },
     "image": "assets/photos/daphne-dress.png",
     "verified": true
   },
