@@ -367,5 +367,41 @@
     "color": { "hex": "#87D737", "name": "Danny Phantom Green" },
     "image": "assets/photos/danny-phantom-eyes.png",
     "verified": true
+  },
+  {
+    "id": "brock-vest",
+    "type": "item",
+    "name": "Brock's vest",
+    "show": "Pokémon",
+    "color": { "hex": "#88C038", "name": "Brock Vest Green" },
+    "image": "assets/photos/brock-vest.png",
+    "verified": true
+  },
+  {
+    "id": "catdog-nose",
+    "type": "item",
+    "name": "Dog's nose",
+    "show": "CatDog",
+    "color": { "hex": "#2D2080", "name": "Dog Nose Indigo" },
+    "image": "assets/photos/catdog-nose.png",
+    "verified": true
+  },
+  {
+    "id": "finn-hair",
+    "type": "item",
+    "name": "Finn's hair",
+    "show": "Adventure Time",
+    "color": { "hex": "#F8F868", "name": "Finn Hair Yellow" },
+    "image": "assets/photos/finn-hair.png",
+    "verified": true
+  },
+  {
+    "id": "mabel-shirt",
+    "type": "item",
+    "name": "Mabel's shirt",
+    "show": "Gravity Falls",
+    "color": { "hex": "#C03080", "name": "Mabel Shirt Magenta" },
+    "image": "assets/photos/mabel-shirt.png",
+    "verified": true
   }
 ]
