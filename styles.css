@@ -10,6 +10,10 @@
   --radius: 12px;
   --gap: clamp(6px, 1.2vw, 12px);
   --shadow-soft: 0 8px 24px rgba(0,0,0,0.35);
+  /* Cap the photo's rendered height so the colour board still fits in the
+     viewport on bigger screens. Phone defaults stay generous; the breakpoint
+     below tightens this for tablets and desktops. */
+  --photo-max-h: 480px;
 }
 
 * { box-sizing: border-box; }
@@ -133,12 +137,17 @@ body {
 /* ---------- Photo card ---------- */
 .card {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .photo {
   margin: 0;
   position: relative;
-  width: 100%;
+  /* Pick the smaller of the column width and the width that would make the
+     photo exactly --photo-max-h tall at 4:3. The aspect-ratio rule then
+     derives height = width × 3/4, which is guaranteed ≤ --photo-max-h. */
+  width: min(100%, calc(var(--photo-max-h) * 4 / 3));
   aspect-ratio: 4 / 3;
   background: #ffffff;
   border: 1px solid var(--border);
@@ -456,15 +465,40 @@ body {
 
 /* ---------- Breakpoints ---------- */
 @media (min-width: 700px) {
-  .stage { gap: 22px; }
   .board { grid-template-columns: 32px 1fr; grid-template-rows: 32px 1fr; }
 }
 
-@media (min-width: 1024px) {
-  .stage { max-width: 860px; }
-}
-
-/* iPad portrait: keep image + grid both visible */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-  .photo { aspect-ratio: 16 / 10; }
+/* Tablet + desktop: photo on the left, title + colour board on the right.
+   Two columns so all three pieces (4:3 image, subtitle, colour options)
+   stay visible together without scrolling. The columns collapse back to a
+   single stack on phones, where the linear flow already works. */
+@media (min-width: 760px) {
+  :root {
+    /* Bound to the smaller of "more than half the viewport" and 480px so
+       the photo never dominates a tall desktop monitor. */
+    --photo-max-h: min(56dvh, 480px);
+  }
+  .stage {
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-areas:
+      "photo     title"
+      "photo     board"
+      "status    status"
+      "share     share"
+      "countdown countdown"
+      "actions   actions";
+    column-gap: clamp(18px, 3vw, 36px);
+    row-gap: clamp(8px, 1.5vw, 16px);
+    align-items: start;
+  }
+  .card            { grid-area: photo; align-self: center; }
+  .character-title { grid-area: title; align-self: end; }
+  .board           { grid-area: board; align-self: start; max-width: 100%; }
+  .quad            { grid-area: board; align-self: start; max-width: 100%; }
+  .status          { grid-area: status; }
+  .share           { grid-area: share; }
+  .countdown       { grid-area: countdown; }
+  .actions         { grid-area: actions; }
 }

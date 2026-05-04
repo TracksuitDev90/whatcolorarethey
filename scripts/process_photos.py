@@ -92,6 +92,12 @@ ASSIGNMENTS = {
     "heffer-hair":            "IMG_0419.jpeg",
     "reggie-shirt":           "IMG_0420.jpeg",
     # ---- Items (quad mode), 2000s cartoons ----
+    "nigel-hair":             "IMG_0456.jpeg",
+    "darkwing-mask":          "IMG_0458.png",
+    "lois-shirt":             "IMG_0460.png",
+    "fred-flintstone-shirt":  "IMG_0464.png",
+    "johnny-quest-hair":      "IMG_0465.webp",
+    "captain-planet-hair":    "IMG_0466.jpeg",
     "muriel-apron":           "IMG_0422.jpeg",
     "mac-shirt":              "IMG_0424.jpeg",
     "dora-shirt":             "IMG_0425.jpeg",
@@ -125,6 +131,9 @@ ASSIGNMENTS = {
     "pink-panther":           "IMG_0452.png",
     "slimer":                 "IMG_0453.jpeg",
     "perry-the-platypus":     "IMG_0454.jpeg",
+    "him":                    "IMG_0459.png",
+    "ice-king":               "IMG_0461.jpeg",
+    "blue-ranger":            "IMG_0463.jpeg",
 }
 
 

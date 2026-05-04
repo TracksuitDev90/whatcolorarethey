@@ -182,7 +182,7 @@ function renderRound() {
   }
 
   if (s.revealed) {
-    revealRound(/*lost*/ round.lost === true, /*announce*/ false);
+    revealRound(/*announce*/ false);
   } else if (s.board.kind === 'grid' && s.wrongGuesses.length >= 2) {
     applyAxisHints();
   }
@@ -337,7 +337,7 @@ function submitGuess(pos, btn) {
   const result = game.guess(pos);
   if (result.kind === 'correct') {
     btn.classList.add('cell--correct');
-    revealRound(/*lost*/ false);
+    revealRound();
   } else if (result.kind === 'wrong') {
     btn.classList.add('cell--wrong');
     flash(els.photoFrame, 'shake');
@@ -346,11 +346,11 @@ function submitGuess(pos, btn) {
     updateChips();
   } else if (result.kind === 'exhausted') {
     btn.classList.add('cell--wrong');
-    revealRound(/*lost*/ true);
+    revealRound();
   }
 }
 
-function revealRound(lost, announce = true) {
+function revealRound(announce = true) {
   const s = game.snapshot();
   const c = s.character;
   els.photoFrame.classList.add('revealed');
@@ -374,18 +374,11 @@ function revealRound(lost, announce = true) {
     }
   }
 
-  const colorLabel = c.color.name || c.color.hex;
-  const baseLine = lost
-    ? `Out of guesses. ${revealText(c)} — ${colorLabel}.`
-    : `Correct! ${revealText(c)} — ${colorLabel}.`;
+  // Keep the status row quiet on reveal — the title shows the answer and
+  // the highlighted swatch shows the colour, so the next-round button is
+  // all we need below.
+  els.status.textContent = '';
   const hasNext = s.roundIndex < s.totalRounds - 1;
-  if (announce) {
-    els.status.textContent = hasNext
-      ? `${baseLine} Swipe or tap Next.`
-      : baseLine;
-  } else {
-    els.status.textContent = `${revealText(c)} — ${colorLabel}.`;
-  }
   if (!hasNext) {
     els.next.hidden = true;
     if (s.finished && announce) {
