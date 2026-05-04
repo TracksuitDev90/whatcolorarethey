@@ -34,6 +34,7 @@ PRECROP = {
     "IMG_0390.webp": {"bottom": 0.08},   # Winnie - GalleryPops watermark
     "IMG_0388.png":  {"left": 0.04, "right": 0.04},  # Sonic - jpeg edge artefacts
     "IMG_0399.jpeg": {"bottom": 0.07},   # Speed Racer - "SPEED RACER" watermark
+    "IMG_0446.jpeg": {"bottom": 0.10},   # Stitch - GalleryPops watermark
 }
 
 # Mapping of every character/item ID to its source file. Character entries
@@ -114,6 +115,16 @@ ASSIGNMENTS = {
     "catdog-nose":            "IMG_0443.webp",
     "finn-hair":              "IMG_0444.jpeg",
     "mabel-shirt":            "IMG_0455.webp",
+    # ---- Characters (grid mode), additional ----
+    "stitch":                 "IMG_0446.jpeg",
+    "cookie-monster":         "IMG_0447.jpeg",
+    "beast-boy":              "IMG_0448.jpeg",
+    "homer-simpson":          "IMG_0449.webp",
+    "jigglypuff":             "IMG_0450.webp",
+    "jenny-xj9":              "IMG_0451.webp",
+    "pink-panther":           "IMG_0452.png",
+    "slimer":                 "IMG_0453.jpeg",
+    "perry-the-platypus":     "IMG_0454.jpeg",
 }
 
 
