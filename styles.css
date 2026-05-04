@@ -77,6 +77,8 @@ body {
 }
 
 .chip--guesses { color: var(--accent); }
+.chip--skips { color: #f4d36a; }
+.chip--skips.chip--depleted { color: var(--muted); opacity: 0.7; }
 
 /* ---------- Tabs ---------- */
 .tabs {
@@ -437,6 +439,75 @@ body {
   outline-offset: 2px;
 }
 
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Three-up share row that appears when the daily run finishes. Stacks on
+   narrow phones, sits in a single row on tablets and up. */
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+.share-actions[hidden] { display: none; }
+.share-actions .btn { flex: 1 1 140px; min-width: 140px; max-width: 220px; }
+
+/* Subtle pill anchored to the bottom of the photo to telegraph the swipe
+   gesture. Fades in only while the round is interactive — once revealed
+   it switches to "Swipe →" prompting the player to advance. */
+.swipe-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(14, 17, 22, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  white-space: nowrap;
+}
+.swipe-hint__arrow {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.85;
+  animation: swipe-nudge 1800ms ease-in-out infinite;
+}
+.swipe-hint__arrow--right { animation-delay: 200ms; }
+.swipe-hint--visible { opacity: 1; }
+.swipe-hint--depleted { color: rgba(255, 255, 255, 0.6); }
+
+@keyframes swipe-nudge {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(3px); }
+}
+.swipe-hint__arrow--left {
+  animation-name: swipe-nudge-left;
+}
+@keyframes swipe-nudge-left {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swipe-hint__arrow { animation: none; }
+}
+
 /* ---------- Footer ---------- */
 .bottombar {
   text-align: center;
@@ -488,7 +559,8 @@ body {
       "status    status"
       "share     share"
       "countdown countdown"
-      "actions   actions";
+      "actions   actions"
+      "shareacts shareacts";
     column-gap: clamp(18px, 3vw, 36px);
     row-gap: clamp(8px, 1.5vw, 16px);
     align-items: start;
@@ -501,4 +573,5 @@ body {
   .share           { grid-area: share; }
   .countdown       { grid-area: countdown; }
   .actions         { grid-area: actions; }
+  .share-actions   { grid-area: shareacts; }
 }

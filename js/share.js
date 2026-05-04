@@ -1,6 +1,8 @@
-// Renders the end-of-day share card to a canvas: one row per round,
-// each row a portrait next to N guess boxes — X for wrong, ✓ for win,
-// dimmed for unused slots. N varies per row (3 for grid, 1 for quad).
+// Renders the end-of-day share card to a canvas: one row per round, each
+// row a portrait next to N decorative boxes that visually echo the emoji
+// share — solid colored squares, dark for unused/skipped, green for a
+// correct guess, red for a wrong guess. N varies per row (3 for grid,
+// 1 for quad, padded out to a consistent 3-slot width).
 
 import { maxGuessesFor } from './game.js';
 
@@ -11,8 +13,13 @@ const ROW_GAP = 36;
 
 const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
 
-// Render at 2x backing resolution so the share image stays crisp on
-// retina screens and after social-network re-encoding.
+const BOX_COLORS = {
+  empty: '#1a1d24',
+  emptyStroke: '#2c333f',
+  correct: '#3ccb7f',   // 🟩
+  wrong: '#e04a4a',     // 🟥
+};
+
 const PIXEL_RATIO = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
 
 export async function renderShareCard(snapshot) {
@@ -27,7 +34,7 @@ export async function renderShareCard(snapshot) {
   drawBackground(ctx);
   drawHeader(ctx, snapshot);
 
-  const rowsTop = 230;
+  const rowsTop = 240;
   const rowsBottom = H - PADDING - 70;
   const rowCount = snapshot.rounds.length;
   const rowH = (rowsBottom - rowsTop - ROW_GAP * (rowCount - 1)) / rowCount;
@@ -37,7 +44,7 @@ export async function renderShareCard(snapshot) {
     await drawRow(ctx, snapshot, i, PADDING, y, W - PADDING * 2, rowH);
   }
 
-  drawFooter(ctx, snapshot);
+  drawFooter(ctx);
   return canvas;
 }
 
@@ -53,16 +60,17 @@ function drawHeader(ctx, snapshot) {
   ctx.textBaseline = 'top';
   ctx.fillStyle = '#e6ebf2';
   ctx.font = '900 60px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('What Color Are They?', PADDING, 60);
+  ctx.fillText('Color Guesser', PADDING, 60);
 
   ctx.fillStyle = '#8b95a7';
   ctx.font = '600 28px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const wonCount = snapshot.rounds.filter(r => r.won).length;
-  const summary = `Daily ${snapshot.date} · ${wonCount} / ${snapshot.rounds.length}`;
-  ctx.fillText(summary, PADDING, 132);
+  const modeLabel = snapshot.mode === 'items' ? 'Items' : 'Characters';
+  const summary = `${snapshot.date} · ${modeLabel} · ${wonCount} / ${snapshot.rounds.length}`;
+  ctx.fillText(summary, PADDING, 138);
 }
 
-function drawFooter(ctx, snapshot) {
+function drawFooter(ctx) {
   ctx.fillStyle = '#8b95a7';
   ctx.textBaseline = 'bottom';
   ctx.font = '600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -124,9 +132,8 @@ async function drawPortrait(ctx, src, x, y, size) {
     ctx.save();
     roundRect(ctx, x, y, size, size, 18);
     ctx.clip();
-    // object-fit: cover behavior
     const ratio = img.width / img.height;
-    let dw = size, dh = size;
+    let dw, dh;
     if (ratio > 1) {
       dh = size;
       dw = size * ratio;
@@ -139,7 +146,7 @@ async function drawPortrait(ctx, src, x, y, size) {
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.restore();
   } catch {
-    // Fall back to initials rendered onto the frame.
+    // Frame stays empty on failure — the swatch pip + name still convey identity.
   }
 }
 
@@ -157,30 +164,38 @@ function drawSwatchPip(ctx, character, cx, cy) {
 
 function drawGuessBox(ctx, round, idx, x, y, size) {
   const guess = round.guesses[idx];
-  const radius = 14;
+  const radius = 16;
   ctx.save();
   if (!guess) {
-    ctx.fillStyle = '#1f2530';
-    ctx.strokeStyle = '#262d38';
+    // Empty slot (or a skipped round): solid dark square mirroring ⬛.
+    ctx.fillStyle = BOX_COLORS.empty;
+    ctx.strokeStyle = BOX_COLORS.emptyStroke;
     ctx.lineWidth = 2;
     roundRect(ctx, x, y, size, size, radius);
     ctx.fill();
     ctx.stroke();
   } else if (guess.correct) {
-    ctx.fillStyle = '#4dd9c0';
-    roundRect(ctx, x, y, size, size, radius);
-    ctx.fill();
-    drawGlyph(ctx, '✓', x + size / 2, y + size / 2, size, '#062420');
+    drawSolidBox(ctx, x, y, size, radius, BOX_COLORS.correct);
   } else {
-    ctx.fillStyle = '#2a313d';
-    ctx.strokeStyle = '#3a4456';
-    ctx.lineWidth = 2;
-    roundRect(ctx, x, y, size, size, radius);
-    ctx.fill();
-    ctx.stroke();
-    drawX(ctx, x, y, size);
+    drawSolidBox(ctx, x, y, size, radius, BOX_COLORS.wrong);
   }
   drawBoxLabel(ctx, guess, x, y, size);
+  ctx.restore();
+}
+
+function drawSolidBox(ctx, x, y, size, radius, fill) {
+  ctx.fillStyle = fill;
+  roundRect(ctx, x, y, size, size, radius);
+  ctx.fill();
+  // Subtle inner highlight so the boxes feel "filled" rather than flat.
+  ctx.save();
+  ctx.globalAlpha = 0.18;
+  const grd = ctx.createLinearGradient(x, y, x, y + size);
+  grd.addColorStop(0, '#ffffff');
+  grd.addColorStop(0.6, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grd;
+  roundRect(ctx, x, y, size, size, radius);
+  ctx.fill();
   ctx.restore();
 }
 
@@ -188,33 +203,11 @@ function drawBoxLabel(ctx, guess, x, y, size) {
   if (!guess) return;
   // Grid guesses get the cell coordinate (A1, B3); quad guesses don't.
   if (!Number.isInteger(guess.col) || !Number.isInteger(guess.row)) return;
-  ctx.fillStyle = guess.correct ? 'rgba(6,36,32,0.85)' : 'rgba(180,190,206,0.95)';
+  ctx.fillStyle = guess.correct ? 'rgba(6,36,32,0.85)' : 'rgba(255,240,240,0.92)';
   ctx.textBaseline = 'top';
   ctx.font = '800 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const tag = `${COL_LABELS[guess.col] ?? '?'}${guess.row + 1}`;
   ctx.fillText(tag, x + 10, y + 8);
-}
-
-function drawGlyph(ctx, ch, cx, cy, size, color) {
-  ctx.fillStyle = color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = `900 ${Math.round(size * 0.55)}px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-  ctx.fillText(ch, cx, cy + 2);
-  ctx.textAlign = 'start';
-}
-
-function drawX(ctx, x, y, size) {
-  const pad = size * 0.28;
-  ctx.strokeStyle = '#ff7a8a';
-  ctx.lineWidth = Math.max(4, size * 0.06);
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(x + pad, y + pad);
-  ctx.lineTo(x + size - pad, y + size - pad);
-  ctx.moveTo(x + size - pad, y + pad);
-  ctx.lineTo(x + pad, y + size - pad);
-  ctx.stroke();
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -264,6 +257,7 @@ function roundLabel(round, max) {
     const n = round.guesses.length;
     return `Solved in ${n} ${n === 1 ? 'guess' : 'guesses'}`;
   }
+  if (round.skipped) return 'Skipped';
   if (round.lost) return 'Out of guesses';
   if (round.guesses.length === 0) return 'Not played';
   const left = max - round.guesses.length;
@@ -273,7 +267,7 @@ function roundLabel(round, max) {
 export async function shareCanvas(canvas, snapshot) {
   const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
   if (!blob) throw new Error('Could not encode share image');
-  const filename = `whatcolorarethey-${snapshot.date}.png`;
+  const filename = `colorguesser-${snapshot.date}.png`;
 
   if (navigator.canShare) {
     try {
@@ -281,7 +275,7 @@ export async function shareCanvas(canvas, snapshot) {
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'What Color Are They?',
+          title: 'Color Guesser',
           text: shareText(snapshot),
         });
         return { kind: 'shared' };
@@ -303,20 +297,92 @@ export async function shareCanvas(canvas, snapshot) {
   return { kind: 'downloaded' };
 }
 
+// Emoji-only share — black box default, green for correct, red for wrong.
+// Matches the user-spec "Color Guesser" header and one line per character.
 export function shareText(snapshot) {
-  const wins = snapshot.rounds.filter(r => r.won).length;
-  const total = snapshot.rounds.length;
-  const line = snapshot.rounds
-    .map((r, i) => {
-      const max = maxGuessesFor(snapshot.characters[i]);
-      if (!r.guesses.length) return '⬜'.repeat(max);
-      const cells = Array.from({ length: max }, (_, k) => {
-        const g = r.guesses[k];
-        if (!g) return '⬜';
-        return g.correct ? '🟩' : '🟥';
-      });
-      return cells.join('');
-    })
-    .join('\n');
-  return `What Color Are They? ${snapshot.date}\n${wins}/${total}\n\n${line}`;
+  const lines = snapshot.rounds.map((r, i) => {
+    const c = snapshot.characters[i];
+    const max = maxGuessesFor(c);
+    const cells = Array.from({ length: max }, (_, k) => {
+      const g = r.guesses[k];
+      if (!g) return '⬛';
+      return g.correct ? '🟩' : '🟥';
+    }).join('');
+    return `${c.name}: ${cells}`;
+  });
+  return ['Color Guesser', '', ...lines].join('\n');
+}
+
+// Build a shareable URL that encodes today's results into a query param.
+// The receiving page detects ?s= and renders a read-only share view.
+export function shareLinkUrl(snapshot) {
+  const payload = {
+    d: snapshot.date,
+    m: snapshot.mode,
+    c: snapshot.characters.map(c => c.id),
+    r: snapshot.rounds.map(r => ({
+      g: r.guesses.map(g => ({
+        c: g.correct ? 1 : 0,
+        ...(Number.isInteger(g.row) ? { r: g.row, x: g.col } : {}),
+        ...(Number.isInteger(g.index) ? { i: g.index } : {}),
+      })),
+      w: r.won ? 1 : 0,
+      l: r.lost ? 1 : 0,
+      s: r.skipped ? 1 : 0,
+    })),
+  };
+  const json = JSON.stringify(payload);
+  const b64 = btoa(unescape(encodeURIComponent(json)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+  const url = new URL(window.location.href);
+  // Drop any existing query so we control the params; keep just `s`.
+  url.search = '';
+  url.searchParams.set('s', b64);
+  url.hash = '';
+  return url.toString();
+}
+
+export function decodeSharePayload(s) {
+  try {
+    const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+    const json = decodeURIComponent(escape(atob(b64 + pad)));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+// Build a synthetic snapshot from a decoded share payload + the loaded
+// character list. Used by the read-only share view.
+export function snapshotFromPayload(payload, allCharacters) {
+  const byId = new Map(allCharacters.map(c => [c.id, c]));
+  const characters = payload.c.map(id => byId.get(id)).filter(Boolean);
+  if (characters.length !== payload.c.length) return null;
+  const rounds = payload.r.map((r, i) => ({
+    charId: characters[i].id,
+    guesses: (r.g || []).map(g => ({
+      correct: !!g.c,
+      ...(Number.isInteger(g.r) ? { row: g.r, col: g.x } : {}),
+      ...(Number.isInteger(g.i) ? { index: g.i } : {}),
+    })),
+    won: !!r.w,
+    lost: !!r.l,
+    skipped: !!r.s,
+  }));
+  return {
+    date: payload.d,
+    mode: payload.m || 'grid',
+    characters,
+    character: characters[0],
+    rounds,
+    roundIndex: rounds.length - 1,
+    totalRounds: rounds.length,
+    streak: 0,
+    bestStreak: 0,
+    finished: true,
+    revealed: true,
+  };
 }

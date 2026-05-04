@@ -19,6 +19,7 @@
       <span class="chip" id="streak-chip">Streak 0</span>
       <span class="chip" id="best-chip">Best 0</span>
       <span class="chip chip--guesses" id="guesses-chip">Guesses 3</span>
+      <span class="chip chip--skips" id="skips-chip">Skips 2</span>
     </div>
   </header>
 
@@ -31,6 +32,11 @@
     <section class="card" id="character-card" aria-label="Character">
       <figure class="photo" id="photo-frame">
         <img id="character-img" alt="" decoding="async" fetchpriority="high" />
+        <span class="swipe-hint" id="swipe-hint" aria-hidden="true">
+          <span class="swipe-hint__arrow swipe-hint__arrow--left">‹</span>
+          <span class="swipe-hint__text" id="swipe-hint-text">Swipe to skip</span>
+          <span class="swipe-hint__arrow swipe-hint__arrow--right">›</span>
+        </span>
       </figure>
     </section>
 
@@ -57,14 +63,19 @@
     <p class="countdown" id="countdown" aria-live="polite"></p>
 
     <div class="actions">
+      <button id="skip-btn" class="btn btn--ghost" hidden>Skip · 2 left</button>
       <button id="next-btn" class="btn btn--primary" hidden>Next round &rarr;</button>
-      <button id="share-btn" class="btn btn--primary" hidden>Share result</button>
-      <button id="copy-btn" class="btn btn--ghost" hidden>Copy text</button>
     </div>
+
+    <section class="share-actions" id="share-actions" hidden aria-label="Share options">
+      <button id="share-btn" class="btn btn--primary" type="button">Save image</button>
+      <button id="link-btn" class="btn" type="button">Copy link</button>
+      <button id="copy-btn" class="btn btn--ghost" type="button">Copy emoji</button>
+    </section>
   </main>
 
   <footer class="bottombar">
-    <small>Three guesses each. Resets at UTC midnight.</small>
+    <small>Three rounds. Two skips. Resets at UTC midnight.</small>
   </footer>
 
   <script type="module" src="js/main.js"></script>
