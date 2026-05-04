@@ -109,6 +109,11 @@ ASSIGNMENTS = {
     "danny-phantom-eyes":     "IMG_0438.jpeg",
     # Scooby collar reuses the same source as the full-body Scooby photo.
     "scooby-doo-collar":      "IMG_0384.webp",
+    # ---- Items (quad mode), more cartoons ----
+    "brock-vest":             "IMG_0441.jpeg",
+    "catdog-nose":            "IMG_0443.webp",
+    "finn-hair":              "IMG_0444.jpeg",
+    "mabel-shirt":            "IMG_0455.webp",
 }
 
 
