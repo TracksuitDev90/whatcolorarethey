@@ -1,42 +1,81 @@
-// Daily-mode game state. Plays through every character locked to the UTC
-// date. State is in-memory only — refreshing starts a fresh game with the
-// correct color rerolled to a new spot. Once we cap players at 3 a day,
-// we'll layer per-day persistence back on top to remember solved rounds.
+// Daily-mode game state. Plays through three characters locked to the UTC
+// date. State persists per UTC day in localStorage so refreshing mid-puzzle
+// resumes where the player left off; rolling over to a new UTC day starts
+// fresh. Each mode (items / grid) gets its own independent slot.
 //
 // Two board kinds, mixed within the same daily run:
 //   grid — 5x5 shade picker, 3 guesses, axis hints after the 2nd miss
 //   quad — 4 distinct color swatches, 1 guess, no hints
+//
+// Skips: each mode allows up to 2 skips per UTC day. A skipped round is
+// neither won nor lost — neutral against streak — but still consumes the
+// slot (so the player can't skip-spam past the daily 3).
 
 import { buildGrid } from './grid.js';
 import { buildQuad } from './quad.js';
 
 const STORAGE_KEYS = {
   bestStreak: 'wcat:bestStreak',
+  daily: 'wcat:daily',
 };
 
 const GRID_MAX_GUESSES = 3;
 const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 5;
+export const MAX_SKIPS_PER_MODE = 2;
 
 export function maxGuessesFor(character) {
   return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;
 }
 
-export function createDailyGame(dailyCharacters, dateKey) {
+export function createDailyGame(dailyCharacters, dateKey, options = {}) {
   if (!dailyCharacters?.length) throw new Error('createDailyGame: no characters');
+  const mode = options.mode || (dailyCharacters[0].type === 'item' ? 'items' : 'grid');
+  const charIds = dailyCharacters.map(c => c.id);
 
-  const state = {
-    date: dateKey,
-    characters: dailyCharacters,
-    rounds: dailyCharacters.map(c => ({
+  const all = readDaily();
+  const sameDay = all && all.date === dateKey;
+  const stored = sameDay ? all[mode] : null;
+
+  let rounds, currentIndex, skipsUsed, streak;
+  if (stored && arrayEqual(stored.charIds, charIds)) {
+    rounds = dailyCharacters.map((c, i) => {
+      const sr = stored.rounds[i] || {};
+      return {
+        charId: c.id,
+        guesses: Array.isArray(sr.guesses) ? sr.guesses.slice() : [],
+        won: !!sr.won,
+        lost: !!sr.lost,
+        skipped: !!sr.skipped,
+        seed: Number.isFinite(sr.seed) ? sr.seed : null,
+      };
+    });
+    currentIndex = clampInt(stored.currentIndex, 0, rounds.length - 1);
+    skipsUsed = clampInt(stored.skipsUsed, 0, MAX_SKIPS_PER_MODE);
+    streak = clampInt(stored.streak, 0, 9999);
+  } else {
+    rounds = dailyCharacters.map(c => ({
       charId: c.id,
       guesses: [],
       won: false,
       lost: false,
-    })),
-    currentIndex: 0,
-    streak: 0,
-    bestStreak: clampInt(readStorage(STORAGE_KEYS.bestStreak, 0), 0, 9999),
+      skipped: false,
+      seed: null,
+    }));
+    currentIndex = 0;
+    skipsUsed = 0;
+    streak = 0;
+  }
+
+  const state = {
+    date: dateKey,
+    mode,
+    characters: dailyCharacters,
+    rounds,
+    currentIndex,
+    skipsUsed,
+    streak,
+    bestStreak: clampInt(readNumber(STORAGE_KEYS.bestStreak, 0), 0, 9999),
     board: null,
     revealed: false,
   };
@@ -45,18 +84,22 @@ export function createDailyGame(dailyCharacters, dateKey) {
 
   function loadCurrent() {
     const c = state.characters[state.currentIndex];
-    // Fresh seed every load so the correct cell rotates around the grid
-    // instead of being pinned to the same row/column for a character.
-    const seed = Math.floor(Math.random() * 0x100000000);
+    const round = state.rounds[state.currentIndex];
+    // Per-round seed gets generated once and persisted, so the correct
+    // cell stays in the same place across page refreshes within the day.
+    if (round.seed == null) {
+      round.seed = Math.floor(Math.random() * 0x100000000);
+      persist();
+    }
     if (c.type === 'item') {
-      state.board = buildQuad(c.color.hex, { seed });
+      state.board = buildQuad(c.color.hex, { seed: round.seed });
     } else {
       state.board = {
         kind: 'grid',
-        ...buildGrid(c.color.hex, { rows: GRID_SIZE, cols: GRID_SIZE, seed }),
+        ...buildGrid(c.color.hex, { rows: GRID_SIZE, cols: GRID_SIZE, seed: round.seed }),
       };
     }
-    state.revealed = false;
+    state.revealed = isRoundDone(round);
   }
 
   function currentMaxGuesses() {
@@ -66,6 +109,7 @@ export function createDailyGame(dailyCharacters, dateKey) {
   function guess(pos) {
     if (state.revealed || isComplete()) return { kind: 'noop' };
     const round = state.rounds[state.currentIndex];
+    if (isRoundDone(round)) return { kind: 'noop' };
     const cell = cellAt(pos);
     if (!cell) return { kind: 'noop' };
     round.guesses.push({ ...pos, correct: cell.isCorrect });
@@ -75,39 +119,59 @@ export function createDailyGame(dailyCharacters, dateKey) {
       state.streak += 1;
       if (state.streak > state.bestStreak) {
         state.bestStreak = state.streak;
-        writeStorage(STORAGE_KEYS.bestStreak, state.bestStreak);
+        writeNumber(STORAGE_KEYS.bestStreak, state.bestStreak);
       }
+      persist();
       return { kind: 'correct', cell };
     }
     if (round.guesses.length >= currentMaxGuesses()) {
       round.lost = true;
       state.revealed = true;
       state.streak = 0;
+      persist();
       return { kind: 'exhausted', correctCell: correctCell() };
     }
+    persist();
     return { kind: 'wrong', cell, guessesLeft: currentMaxGuesses() - round.guesses.length };
   }
 
+  function skip() {
+    if (isComplete()) return { kind: 'noop' };
+    if (state.skipsUsed >= MAX_SKIPS_PER_MODE) return { kind: 'no-skips' };
+    const round = state.rounds[state.currentIndex];
+    if (isRoundDone(round)) return { kind: 'noop' };
+    round.skipped = true;
+    state.skipsUsed += 1;
+    state.revealed = true;
+    persist();
+    return {
+      kind: 'skipped',
+      skipsLeft: MAX_SKIPS_PER_MODE - state.skipsUsed,
+      correctCell: correctCell(),
+    };
+  }
+
   function next() {
-    if (state.currentIndex >= state.characters.length - 1) {
+    let nextIndex = state.currentIndex + 1;
+    while (nextIndex < state.rounds.length && isRoundDone(state.rounds[nextIndex])) {
+      nextIndex++;
+    }
+    if (nextIndex >= state.characters.length) {
       return { kind: 'finished' };
     }
-    state.currentIndex += 1;
+    state.currentIndex = nextIndex;
     loadCurrent();
+    persist();
     return { kind: 'round', round: state.currentIndex };
   }
 
   function cellAt(pos) {
-    if (state.board.kind === 'quad') {
-      return state.board.boxes[pos.index];
-    }
+    if (state.board.kind === 'quad') return state.board.boxes[pos.index];
     return state.board.cells[pos.row]?.[pos.col];
   }
 
   function correctCell() {
-    if (state.board.kind === 'quad') {
-      return state.board.boxes[state.board.correctIndex];
-    }
+    if (state.board.kind === 'quad') return state.board.boxes[state.board.correctIndex];
     return state.board.cells[state.board.correctRow][state.board.correctCol];
   }
 
@@ -120,6 +184,7 @@ export function createDailyGame(dailyCharacters, dateKey) {
     const max = currentMaxGuesses();
     return {
       date: state.date,
+      mode: state.mode,
       characters: state.characters,
       character: state.characters[state.currentIndex],
       rounds: state.rounds,
@@ -133,27 +198,65 @@ export function createDailyGame(dailyCharacters, dateKey) {
       wrongGuesses: round.guesses.filter(g => !g.correct),
       board: state.board,
       maxGuesses: max,
+      skipsUsed: state.skipsUsed,
+      skipsLeft: MAX_SKIPS_PER_MODE - state.skipsUsed,
+      maxSkips: MAX_SKIPS_PER_MODE,
     };
   }
 
-  return { guess, next, snapshot };
+  function persist() {
+    const existing = readDaily();
+    const base = existing && existing.date === dateKey ? existing : { date: dateKey };
+    base[mode] = {
+      charIds,
+      rounds: state.rounds.map(r => ({
+        charId: r.charId,
+        guesses: r.guesses,
+        won: r.won,
+        lost: r.lost,
+        skipped: r.skipped,
+        seed: r.seed,
+      })),
+      currentIndex: state.currentIndex,
+      skipsUsed: state.skipsUsed,
+      streak: state.streak,
+    };
+    writeJson(STORAGE_KEYS.daily, base);
+  }
+
+  return { guess, next, skip, snapshot };
 }
 
-function isRoundDone(round) {
-  return !!(round && (round.won || round.lost));
+function isRoundDone(r) {
+  return !!(r && (r.won || r.lost || r.skipped));
 }
 
-function readStorage(key, fallback) {
+function arrayEqual(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+function readDaily() {
+  try {
+    const v = localStorage.getItem(STORAGE_KEYS.daily);
+    return v ? JSON.parse(v) : null;
+  } catch { return null; }
+}
+
+function readNumber(key, fallback) {
   try {
     const v = localStorage.getItem(key);
     return v == null ? fallback : Number(v);
-  } catch {
-    return fallback;
-  }
+  } catch { return fallback; }
 }
 
-function writeStorage(key, value) {
+function writeNumber(key, value) {
   try { localStorage.setItem(key, String(value)); } catch { /* private mode */ }
+}
+
+function writeJson(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ }
 }
 
 function clampInt(n, lo, hi) {

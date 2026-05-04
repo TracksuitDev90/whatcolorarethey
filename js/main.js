@@ -1,15 +1,23 @@
 import { loadCharacters } from './characters.js';
-import { createDailyGame } from './game.js';
+import { createDailyGame, MAX_SKIPS_PER_MODE } from './game.js';
 import {
   getUtcDateKey,
-  shuffleCharacters,
+  pickDailyCharacters,
   msUntilNextUtcDay,
   formatCountdown,
 } from './daily.js';
-import { renderShareCard, shareCanvas, shareText } from './share.js';
+import {
+  renderShareCard,
+  shareCanvas,
+  shareText,
+  shareLinkUrl,
+  decodeSharePayload,
+  snapshotFromPayload,
+} from './share.js';
 
 const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
 const GRID_SIZE = 5;
+const ROUNDS_PER_DAY = 3;
 
 const els = {
   img: document.getElementById('character-img'),
@@ -22,17 +30,23 @@ const els = {
   quad: document.getElementById('quad'),
   status: document.getElementById('status'),
   next: document.getElementById('next-btn'),
+  skip: document.getElementById('skip-btn'),
   share: document.getElementById('share-btn'),
+  link: document.getElementById('link-btn'),
   copyResult: document.getElementById('copy-btn'),
   shareSlot: document.getElementById('share-slot'),
+  shareActions: document.getElementById('share-actions'),
   countdown: document.getElementById('countdown'),
   characterCard: document.getElementById('character-card'),
   roundChip: document.getElementById('round-chip'),
   streakChip: document.getElementById('streak-chip'),
   bestChip: document.getElementById('best-chip'),
   guessesChip: document.getElementById('guesses-chip'),
+  skipsChip: document.getElementById('skips-chip'),
   tabItems: document.getElementById('tab-items'),
   tabGrid: document.getElementById('tab-grid'),
+  swipeHint: document.getElementById('swipe-hint'),
+  swipeHintText: document.getElementById('swipe-hint-text'),
 };
 
 // Each tab is a separate experience: items use the 4-swatch quad and
@@ -53,15 +67,26 @@ async function init() {
   try {
     const chars = await loadCharacters();
     dateKey = getUtcDateKey();
-    // Daily cap removed for now — play every character each day. Re-enable
-    // by passing a smaller count (e.g. 3) once we ship publicly.
+
+    // Read-only "view someone else's results" mode — kicked off when the
+    // page loads with ?s=<encoded share>. Skip the rest of game setup so
+    // we never overwrite the visitor's own progress with the shared one.
+    const params = new URLSearchParams(window.location.search);
+    const sharedParam = params.get('s');
+    if (sharedParam) {
+      const ok = await tryRenderSharedView(sharedParam, chars);
+      if (ok) return;
+    }
+
     const itemPool = chars.filter(c => c.type === 'item');
     const gridPool = chars.filter(c => c.type !== 'item');
-    games.items = itemPool.length
-      ? createDailyGame(shuffleCharacters(itemPool), dateKey)
+    const itemDaily = pickDailyCharacters(itemPool, dateKey, ROUNDS_PER_DAY);
+    const gridDaily = pickDailyCharacters(gridPool, dateKey, ROUNDS_PER_DAY);
+    games.items = itemDaily.length
+      ? createDailyGame(itemDaily, dateKey, { mode: 'items' })
       : null;
-    games.grid = gridPool.length
-      ? createDailyGame(shuffleCharacters(gridPool), dateKey)
+    games.grid = gridDaily.length
+      ? createDailyGame(gridDaily, dateKey, { mode: 'grid' })
       : null;
     renderHeaders();
     setMode(games.items ? 'items' : 'grid');
@@ -69,6 +94,48 @@ async function init() {
     console.error(err);
     els.status.textContent = `Failed to start: ${err.message}`;
   }
+}
+
+async function tryRenderSharedView(s, allCharacters) {
+  const payload = decodeSharePayload(s);
+  if (!payload) return false;
+  const snap = snapshotFromPayload(payload, allCharacters);
+  if (!snap) return false;
+  // Read-only view: rip out the live UI so the player's own progress is
+  // never touched, and so the share-action button listeners (which expect a
+  // running game) never fire.
+  document.querySelector('.tabs')?.setAttribute('hidden', '');
+  els.characterCard.hidden = true;
+  els.board.hidden = true;
+  els.quad.hidden = true;
+  els.skip.hidden = true;
+  els.next.hidden = true;
+  els.swipeHint?.classList.remove('swipe-hint--visible');
+  els.name.textContent = '';
+  const wins = snap.rounds.filter(r => r.won).length;
+  els.status.textContent = `Shared result · ${snap.date} · ${wins} of ${snap.rounds.length} solved`;
+  els.shareSlot.hidden = false;
+  els.shareSlot.innerHTML = '';
+  const canvas = await renderShareCard(snap);
+  canvas.classList.add('share-card');
+  els.shareSlot.appendChild(canvas);
+  // Drop the original share-action buttons entirely and replace with a
+  // single "Play today" CTA. Replacing the contents removes the stale
+  // listeners so we don't accidentally fire them.
+  els.shareActions.hidden = false;
+  els.shareActions.innerHTML = '';
+  const playBtn = document.createElement('button');
+  playBtn.type = 'button';
+  playBtn.className = 'btn btn--primary';
+  playBtn.textContent = 'Play today\'s puzzle';
+  playBtn.addEventListener('click', () => {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    window.location.href = url.toString();
+  });
+  els.shareActions.appendChild(playBtn);
+  return true;
 }
 
 function setMode(next) {
@@ -162,6 +229,7 @@ function renderRound() {
 
   els.next.hidden = true;
   els.share.hidden = true;
+  els.shareActions.hidden = true;
   if (els.copyResult) els.copyResult.hidden = true;
   els.status.textContent = isItemRound(s)
     ? 'Pick the correct color.'
@@ -182,12 +250,14 @@ function renderRound() {
   }
 
   if (s.revealed) {
-    revealRound(/*announce*/ false);
+    revealRound(/*announce*/ false, /*skipped*/ round.skipped);
   } else if (s.board.kind === 'grid' && s.wrongGuesses.length >= 2) {
     applyAxisHints();
   }
 
   updateChips();
+  updateSkipButton();
+  updateSwipeHint();
 }
 
 function promptText(c) {
@@ -280,6 +350,10 @@ function onGridKeyDown(e) {
     case 'N':
       if (!els.next.hidden) els.next.click();
       break;
+    case 's':
+    case 'S':
+      if (!els.skip.hidden && !els.skip.disabled) els.skip.click();
+      break;
     default: return;
   }
   e.preventDefault();
@@ -308,6 +382,10 @@ function onQuadKeyDown(e) {
     case 'n':
     case 'N':
       if (!els.next.hidden) els.next.click();
+      break;
+    case 's':
+    case 'S':
+      if (!els.skip.hidden && !els.skip.disabled) els.skip.click();
       break;
     default: return;
   }
@@ -350,7 +428,7 @@ function submitGuess(pos, btn) {
   }
 }
 
-function revealRound(announce = true) {
+function revealRound(announce = true, skipped = false) {
   const s = game.snapshot();
   const c = s.character;
   els.photoFrame.classList.add('revealed');
@@ -374,10 +452,8 @@ function revealRound(announce = true) {
     }
   }
 
-  // Keep the status row quiet on reveal — the title shows the answer and
-  // the highlighted swatch shows the colour, so the next-round button is
-  // all we need below.
-  els.status.textContent = '';
+  els.status.textContent = skipped ? 'Skipped — here\'s the answer.' : '';
+  els.skip.hidden = true;
   const hasNext = s.roundIndex < s.totalRounds - 1;
   if (!hasNext) {
     els.next.hidden = true;
@@ -389,6 +465,7 @@ function revealRound(announce = true) {
     els.next.focus();
   }
   updateChips();
+  updateSwipeHint();
 }
 
 function updateChips() {
@@ -397,6 +474,42 @@ function updateChips() {
   els.streakChip.textContent = `Streak ${s.streak}`;
   els.bestChip.textContent = `Best ${s.bestStreak}`;
   els.guessesChip.textContent = `Guesses ${s.guessesLeft}`;
+  els.skipsChip.textContent = `Skips ${s.skipsLeft}`;
+  els.skipsChip.classList.toggle('chip--depleted', s.skipsLeft === 0);
+}
+
+function updateSkipButton() {
+  const s = game.snapshot();
+  const canSkip = !s.revealed && !s.finished && s.skipsLeft > 0;
+  els.skip.hidden = !canSkip;
+  els.skip.disabled = !canSkip;
+  els.skip.textContent = `Skip · ${s.skipsLeft} left`;
+}
+
+function updateSwipeHint() {
+  if (!els.swipeHint) return;
+  const s = game.snapshot();
+  if (s.finished) {
+    els.swipeHint.classList.remove('swipe-hint--visible');
+    return;
+  }
+  const revealed = s.revealed;
+  const lastRound = s.roundIndex >= s.totalRounds - 1;
+  if (revealed && lastRound) {
+    els.swipeHint.classList.remove('swipe-hint--visible');
+    return;
+  }
+  els.swipeHint.classList.add('swipe-hint--visible');
+  if (revealed) {
+    els.swipeHintText.textContent = 'Swipe for next';
+    els.swipeHint.classList.remove('swipe-hint--depleted');
+  } else if (s.skipsLeft > 0) {
+    els.swipeHintText.textContent = `Swipe to skip · ${s.skipsLeft} left`;
+    els.swipeHint.classList.remove('swipe-hint--depleted');
+  } else {
+    els.swipeHintText.textContent = 'No skips left';
+    els.swipeHint.classList.add('swipe-hint--depleted');
+  }
 }
 
 els.tabItems.addEventListener('click', () => setMode('items'));
@@ -411,36 +524,60 @@ function advanceRound() {
   }
 }
 
-els.next.addEventListener('click', advanceRound);
+function performSkip(viaSwipe = false) {
+  const result = game.skip();
+  if (result.kind === 'no-skips' || result.kind === 'noop') return false;
+  if (viaSwipe) {
+    // Swipe is the "fast" path — just advance, no reveal pause.
+    advanceRound();
+  } else {
+    // Button is the "deliberate" path — reveal so the player learns the
+    // answer, then they tap or swipe to advance. If skipping was the
+    // final unfinished round, auto-roll into the share screen.
+    renderRound();
+    if (game.snapshot().finished) {
+      setTimeout(showFinished, 1100);
+    }
+  }
+  return true;
+}
 
-// Swipe-to-advance: once a round is revealed, dragging the photo
-// horizontally past the threshold advances to the next round. Mirrors
-// the next-round button so the player can play one-handed without
-// reaching back to the action bar.
+els.next.addEventListener('click', advanceRound);
+els.skip.addEventListener('click', () => performSkip(false));
+
+// Swipe-to-advance / swipe-to-skip. Once a round is revealed, a horizontal
+// swipe advances to the next round. While a round is still in progress, a
+// swipe consumes a skip and advances. If skips are exhausted we snap back.
 attachSwipeToAdvance(els.photoFrame);
 
 function attachSwipeToAdvance(target) {
   if (!target) return;
-  const SWIPE_THRESHOLD = 70;     // px of horizontal travel to commit
+  const SWIPE_THRESHOLD = 60;     // px of horizontal travel to commit
   const VERTICAL_LIMIT = 60;      // beyond this we treat it as a scroll
   let active = false;
   let startX = 0;
   let startY = 0;
   let pointerId = null;
 
-  const canSwipe = () => !els.next.hidden;
+  const swipeMode = () => {
+    const s = game?.snapshot();
+    if (!s || s.finished) return 'none';
+    if (s.revealed) return 'next';
+    if (s.skipsLeft > 0) return 'skip';
+    return 'none';
+  };
 
   const reset = (animate) => {
-    target.style.transition = animate ? 'transform 180ms ease' : '';
+    target.style.transition = animate ? 'transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease' : '';
     target.style.transform = '';
     target.style.opacity = '';
     if (animate) {
-      setTimeout(() => { target.style.transition = ''; }, 200);
+      setTimeout(() => { target.style.transition = ''; }, 240);
     }
   };
 
   target.addEventListener('pointerdown', (e) => {
-    if (!canSwipe()) return;
+    if (swipeMode() === 'none') return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     active = true;
     pointerId = e.pointerId;
@@ -459,14 +596,14 @@ function attachSwipeToAdvance(target) {
       reset(true);
       return;
     }
-    if (Math.abs(dx) > 8) {
-      // Capture so the gesture keeps tracking even if the finger leaves
-      // the photo frame.
+    if (Math.abs(dx) > 6) {
       try { target.setPointerCapture(pointerId); } catch { /* ignore */ }
       e.preventDefault();
-      target.style.transform = `translateX(${dx}px) rotate(${dx * 0.02}deg)`;
-      const fade = Math.min(1, Math.abs(dx) / (SWIPE_THRESHOLD * 2));
-      target.style.opacity = String(1 - fade * 0.35);
+      // Slight non-linear curve — feels softer near the start, firmer past the threshold.
+      const eased = dx * (1 - Math.min(0.25, Math.abs(dx) / 1200));
+      target.style.transform = `translateX(${eased}px) rotate(${eased * 0.018}deg)`;
+      const fade = Math.min(1, Math.abs(dx) / (SWIPE_THRESHOLD * 2.2));
+      target.style.opacity = String(1 - fade * 0.4);
     }
   });
 
@@ -475,16 +612,20 @@ function attachSwipeToAdvance(target) {
     active = false;
     const dx = e.clientX - startX;
     try { target.releasePointerCapture(pointerId); } catch { /* ignore */ }
-    if (canSwipe() && Math.abs(dx) >= SWIPE_THRESHOLD) {
-      // Throw the card off-screen, then advance.
+    const m = swipeMode();
+    if (m !== 'none' && Math.abs(dx) >= SWIPE_THRESHOLD) {
       const dir = dx > 0 ? 1 : -1;
-      target.style.transition = 'transform 180ms ease, opacity 180ms ease';
+      target.style.transition = 'transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease';
       target.style.transform = `translateX(${dir * window.innerWidth}px) rotate(${dir * 8}deg)`;
       target.style.opacity = '0';
       setTimeout(() => {
         reset(false);
-        advanceRound();
-      }, 180);
+        if (m === 'skip') {
+          performSkip(true);
+        } else {
+          advanceRound();
+        }
+      }, 220);
     } else {
       reset(true);
     }
@@ -509,17 +650,48 @@ if (els.share) {
   });
 }
 
+if (els.link) {
+  els.link.addEventListener('click', async () => {
+    const url = shareLinkUrl(game.snapshot());
+    // Prefer the native share sheet so users on phones can fling the URL
+    // straight into Messages / Mail. Falls back to clipboard otherwise.
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Color Guesser',
+          text: shareText(game.snapshot()),
+          url,
+        });
+        return;
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+        // fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      flashLabel(els.link, 'Link copied!', 'Copy link');
+    } catch {
+      flashLabel(els.link, 'Copy failed', 'Copy link');
+    }
+  });
+}
+
 if (els.copyResult) {
   els.copyResult.addEventListener('click', async () => {
     const text = shareText(game.snapshot());
     try {
       await navigator.clipboard.writeText(text);
-      els.copyResult.textContent = 'Copied!';
-      setTimeout(() => { els.copyResult.textContent = 'Copy text'; }, 1800);
+      flashLabel(els.copyResult, 'Copied!', 'Copy emoji');
     } catch {
-      els.copyResult.textContent = 'Copy failed';
+      flashLabel(els.copyResult, 'Copy failed', 'Copy emoji');
     }
   });
+}
+
+function flashLabel(btn, hot, cool) {
+  btn.textContent = hot;
+  setTimeout(() => { btn.textContent = cool; }, 1800);
 }
 
 async function showFinished() {
@@ -528,10 +700,14 @@ async function showFinished() {
   els.board.hidden = true;
   els.quad.hidden = true;
   els.next.hidden = true;
+  els.skip.hidden = true;
   els.status.textContent = '';
+  els.swipeHint?.classList.remove('swipe-hint--visible');
 
   const wins = s.rounds.filter(r => r.won).length;
-  const summary = `${wins} of ${s.totalRounds} solved today.`;
+  const skipped = s.rounds.filter(r => r.skipped).length;
+  let summary = `${wins} of ${s.totalRounds} solved today.`;
+  if (skipped > 0) summary += ` (${skipped} skipped)`;
   els.status.textContent = summary;
   updateChips();
 
@@ -541,9 +717,14 @@ async function showFinished() {
   cachedShareCanvas.classList.add('share-card');
   els.shareSlot.appendChild(cachedShareCanvas);
 
+  els.shareActions.hidden = false;
   els.share.hidden = false;
   els.share.disabled = false;
-  if (els.copyResult) els.copyResult.hidden = false;
+  els.share.textContent = 'Save image';
+  els.link.hidden = false;
+  els.link.textContent = 'Copy link';
+  els.copyResult.hidden = false;
+  els.copyResult.textContent = 'Copy emoji';
   startCountdown();
 }
 
@@ -552,6 +733,7 @@ function hideShareSlot() {
     els.shareSlot.hidden = true;
     els.shareSlot.innerHTML = '';
   }
+  if (els.shareActions) els.shareActions.hidden = true;
   cachedShareCanvas = null;
   if (countdownTimer) {
     clearInterval(countdownTimer);
@@ -581,3 +763,7 @@ function flash(el, cls) {
   el.classList.add(cls);
   setTimeout(() => el.classList.remove(cls), 500);
 }
+
+// Surface MAX_SKIPS_PER_MODE for ad-hoc debugging in the console without
+// touching internal modules.
+window.__wcat = { MAX_SKIPS_PER_MODE };
