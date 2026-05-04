@@ -42,6 +42,19 @@ export function pickDailyCharacters(allCharacters, dateKey, count = CHARACTERS_P
   return pool.slice(0, Math.min(count, pool.length));
 }
 
+// Non-deterministic Fisher-Yates. Used for the live game so every visit
+// reshuffles the round order rather than locking everyone to the same daily
+// sequence.
+export function shuffleCharacters(allCharacters) {
+  if (!allCharacters?.length) return [];
+  const pool = allCharacters.slice();
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+
 export function msUntilNextUtcDay(now = new Date()) {
   const next = Date.UTC(
     now.getUTCFullYear(),

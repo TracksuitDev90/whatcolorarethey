@@ -2,7 +2,7 @@ import { loadCharacters } from './characters.js';
 import { createDailyGame } from './game.js';
 import {
   getUtcDateKey,
-  pickDailyCharacters,
+  shuffleCharacters,
   msUntilNextUtcDay,
   formatCountdown,
 } from './daily.js';
@@ -58,10 +58,10 @@ async function init() {
     const itemPool = chars.filter(c => c.type === 'item');
     const gridPool = chars.filter(c => c.type !== 'item');
     games.items = itemPool.length
-      ? createDailyGame(pickDailyCharacters(itemPool, dateKey, itemPool.length), dateKey)
+      ? createDailyGame(shuffleCharacters(itemPool), dateKey)
       : null;
     games.grid = gridPool.length
-      ? createDailyGame(pickDailyCharacters(gridPool, dateKey, gridPool.length), dateKey)
+      ? createDailyGame(shuffleCharacters(gridPool), dateKey)
       : null;
     renderHeaders();
     setMode(games.items ? 'items' : 'grid');
@@ -142,6 +142,10 @@ function renderRound() {
   // Drop `revealed` before swapping src so the next paint always shows the
   // new image already grayscale — no momentary color flash between rounds.
   els.photoFrame.classList.remove('revealed');
+  // Clear any leftover transform/opacity from a swipe-advance.
+  els.photoFrame.style.transform = '';
+  els.photoFrame.style.opacity = '';
+  els.photoFrame.style.transition = '';
   els.img.decoding = 'async';
   els.img.fetchPriority = 'high';
   els.img.src = c.imageSrc;
@@ -371,14 +375,18 @@ function revealRound(lost, announce = true) {
   }
 
   const colorLabel = c.color.name || c.color.hex;
+  const baseLine = lost
+    ? `Out of guesses. ${revealText(c)} — ${colorLabel}.`
+    : `Correct! ${revealText(c)} — ${colorLabel}.`;
+  const hasNext = s.roundIndex < s.totalRounds - 1;
   if (announce) {
-    els.status.textContent = lost
-      ? `Out of guesses. ${revealText(c)} — ${colorLabel}.`
-      : `Correct! ${revealText(c)} — ${colorLabel}.`;
+    els.status.textContent = hasNext
+      ? `${baseLine} Swipe or tap Next.`
+      : baseLine;
   } else {
     els.status.textContent = `${revealText(c)} — ${colorLabel}.`;
   }
-  if (s.roundIndex >= s.totalRounds - 1) {
+  if (!hasNext) {
     els.next.hidden = true;
     if (s.finished && announce) {
       setTimeout(showFinished, 1100);
@@ -401,14 +409,97 @@ function updateChips() {
 els.tabItems.addEventListener('click', () => setMode('items'));
 els.tabGrid.addEventListener('click', () => setMode('grid'));
 
-els.next.addEventListener('click', () => {
+function advanceRound() {
   const r = game.next();
   if (r.kind === 'finished' || game.snapshot().finished) {
     showFinished();
   } else {
     renderRound();
   }
-});
+}
+
+els.next.addEventListener('click', advanceRound);
+
+// Swipe-to-advance: once a round is revealed, dragging the photo
+// horizontally past the threshold advances to the next round. Mirrors
+// the next-round button so the player can play one-handed without
+// reaching back to the action bar.
+attachSwipeToAdvance(els.photoFrame);
+
+function attachSwipeToAdvance(target) {
+  if (!target) return;
+  const SWIPE_THRESHOLD = 70;     // px of horizontal travel to commit
+  const VERTICAL_LIMIT = 60;      // beyond this we treat it as a scroll
+  let active = false;
+  let startX = 0;
+  let startY = 0;
+  let pointerId = null;
+
+  const canSwipe = () => !els.next.hidden;
+
+  const reset = (animate) => {
+    target.style.transition = animate ? 'transform 180ms ease' : '';
+    target.style.transform = '';
+    target.style.opacity = '';
+    if (animate) {
+      setTimeout(() => { target.style.transition = ''; }, 200);
+    }
+  };
+
+  target.addEventListener('pointerdown', (e) => {
+    if (!canSwipe()) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    active = true;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    target.style.transition = '';
+  });
+
+  target.addEventListener('pointermove', (e) => {
+    if (!active || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.abs(dy) > VERTICAL_LIMIT && Math.abs(dy) > Math.abs(dx)) {
+      // Vertical scroll — let the page have it.
+      active = false;
+      reset(true);
+      return;
+    }
+    if (Math.abs(dx) > 8) {
+      // Capture so the gesture keeps tracking even if the finger leaves
+      // the photo frame.
+      try { target.setPointerCapture(pointerId); } catch { /* ignore */ }
+      e.preventDefault();
+      target.style.transform = `translateX(${dx}px) rotate(${dx * 0.02}deg)`;
+      const fade = Math.min(1, Math.abs(dx) / (SWIPE_THRESHOLD * 2));
+      target.style.opacity = String(1 - fade * 0.35);
+    }
+  });
+
+  const finish = (e) => {
+    if (!active || e.pointerId !== pointerId) return;
+    active = false;
+    const dx = e.clientX - startX;
+    try { target.releasePointerCapture(pointerId); } catch { /* ignore */ }
+    if (canSwipe() && Math.abs(dx) >= SWIPE_THRESHOLD) {
+      // Throw the card off-screen, then advance.
+      const dir = dx > 0 ? 1 : -1;
+      target.style.transition = 'transform 180ms ease, opacity 180ms ease';
+      target.style.transform = `translateX(${dir * window.innerWidth}px) rotate(${dir * 8}deg)`;
+      target.style.opacity = '0';
+      setTimeout(() => {
+        reset(false);
+        advanceRound();
+      }, 180);
+    } else {
+      reset(true);
+    }
+  };
+
+  target.addEventListener('pointerup', finish);
+  target.addEventListener('pointercancel', finish);
+}
 
 if (els.share) {
   els.share.addEventListener('click', async () => {
