@@ -418,5 +418,26 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Ice_King",
     "image": "assets/photos/ice-king.png",
     "verified": true
+  },
+  {
+    "id": "genie",
+    "name": "Genie",
+    "color": { "hex": "#4DB1E8", "name": "Genie Blue" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Genie_(Aladdin)",
+    "verified": false
+  },
+  {
+    "id": "ursula",
+    "name": "Ursula",
+    "color": { "hex": "#B8A5CD", "name": "Ursula Lavender" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Ursula_(The_Little_Mermaid)",
+    "verified": false
+  },
+  {
+    "id": "flounder",
+    "name": "Flounder",
+    "color": { "hex": "#FBD848", "name": "Flounder Yellow" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Flounder_(The_Little_Mermaid)",
+    "verified": false
   }
 ]
