@@ -134,6 +134,15 @@ ASSIGNMENTS = {
     "him":                    "IMG_0459.png",
     "ice-king":               "IMG_0461.jpeg",
     "blue-ranger":            "IMG_0463.jpeg",
+    "genie":                  "IMG_0468.jpeg",
+    "rocko":                  "IMG_0469.webp",
+    "ursula":                 "IMG_0475.jpeg",
+    "flounder":               "IMG_0476.webp",
+    # ---- Items (quad mode), Disney additions ----
+    "vanellope-hoodie":         "IMG_0471.jpeg",
+    "snow-white-dress-lower":   "IMG_0472.webp",
+    "jessica-rabbit-hair":      "IMG_0473.jpeg",
+    "dr-facilier-vest":         "IMG_0474.webp",
 }
 
 

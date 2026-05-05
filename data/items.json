@@ -464,7 +464,8 @@
     "name": "Vanellope's hoodie",
     "show": "Wreck-It Ralph",
     "color": { "hex": "#B6E3DC", "name": "Vanellope Hoodie Mint" },
-    "verified": false
+    "image": "assets/photos/vanellope-hoodie.png",
+    "verified": true
   },
   {
     "id": "snow-white-dress-lower",
@@ -472,7 +473,8 @@
     "name": "Snow White's lower dress",
     "show": "Snow White and the Seven Dwarfs",
     "color": { "hex": "#FFE680", "name": "Snow White Dress Yellow" },
-    "verified": false
+    "image": "assets/photos/snow-white-dress-lower.png",
+    "verified": true
   },
   {
     "id": "jessica-rabbit-hair",
@@ -480,7 +482,8 @@
     "name": "Jessica Rabbit's hair",
     "show": "Who Framed Roger Rabbit",
     "color": { "hex": "#B91414", "name": "Jessica Rabbit Red" },
-    "verified": false
+    "image": "assets/photos/jessica-rabbit-hair.png",
+    "verified": true
   },
   {
     "id": "dr-facilier-vest",
@@ -488,6 +491,7 @@
     "name": "Dr Facilier's vest",
     "show": "The Princess and the Frog",
     "color": { "hex": "#5C3987", "name": "Facilier Vest Purple" },
-    "verified": false
+    "image": "assets/photos/dr-facilier-vest.png",
+    "verified": true
   }
 ]
