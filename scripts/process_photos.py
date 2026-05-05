@@ -143,6 +143,14 @@ ASSIGNMENTS = {
     "snow-white-dress-lower":   "IMG_0472.webp",
     "jessica-rabbit-hair":      "IMG_0473.jpeg",
     "dr-facilier-vest":         "IMG_0474.webp",
+    # ---- Newest additions ----
+    "mystery-machine-text":     "IMG_0477.jpeg",
+    "mojo-jojo":                "IMG_0479.webp",
+    "piccolo-cape":             "IMG_0480.webp",
+    "jake-the-dog":             "IMG_0481.png",
+    "mandy-flower":             "IMG_0482.jpeg",
+    "red-guy":                  "IMG_0485.webp",
+    "courage":                  "IMG_0486.webp",
 }
 
 

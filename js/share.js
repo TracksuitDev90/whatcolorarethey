@@ -11,7 +11,7 @@ const H = 1080;
 const PADDING = 60;
 const ROW_GAP = 36;
 
-const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
+const COL_LABELS = ['A', 'B', 'C', 'D'];
 
 const BOX_COLORS = {
   empty: '#1a1d24',

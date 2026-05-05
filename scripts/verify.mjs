@@ -15,7 +15,7 @@ for (let i = 0; i < chars.length; i++) {
     console.error('BAD HEX', c.id, c.color.hex);
     errors++; continue;
   }
-  const g = buildGrid(c.color.hex, { rows: 5, cols: 5, seed: i + 1 });
+  const g = buildGrid(c.color.hex, { rows: 4, cols: 4, seed: i + 1 });
   const cc = g.cells[g.correctRow][g.correctCol];
   const want = c.color.hex.toUpperCase();
   if (cc.hex !== want) {

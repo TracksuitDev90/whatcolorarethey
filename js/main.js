@@ -15,8 +15,8 @@ import {
   snapshotFromPayload,
 } from './share.js';
 
-const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
-const GRID_SIZE = 5;
+const COL_LABELS = ['A', 'B', 'C', 'D'];
+const GRID_SIZE = 4;
 // Daily round cap is paused for testing — pool size effectively becomes the
 // cap. Restore to 3 to re-enable the daily limit.
 const ROUNDS_PER_DAY = 9999;

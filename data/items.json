@@ -63,6 +63,15 @@
     "verified": true
   },
   {
+    "id": "mystery-machine-text",
+    "type": "item",
+    "name": "The Mystery Machine's logo text",
+    "show": "Scooby-Doo, Where Are You!",
+    "color": { "hex": "#D5331E", "name": "Mystery Machine Orange-Red" },
+    "image": "assets/photos/mystery-machine-text.png",
+    "verified": true
+  },
+  {
     "id": "shaggy-shirt",
     "type": "item",
     "name": "Shaggy's shirt",
@@ -493,5 +502,31 @@
     "color": { "hex": "#5C3987", "name": "Facilier Vest Purple" },
     "image": "assets/photos/dr-facilier-vest.png",
     "verified": true
+  },
+  {
+    "id": "piccolo-cape",
+    "type": "item",
+    "name": "Piccolo's cape",
+    "show": "Dragon Ball Z",
+    "color": { "hex": "#F2F2F2", "name": "Piccolo Cape White" },
+    "image": "assets/photos/piccolo-cape.png",
+    "verified": true
+  },
+  {
+    "id": "mandy-flower",
+    "type": "item",
+    "name": "Mandy's shirt flower",
+    "show": "The Grim Adventures of Billy & Mandy",
+    "color": { "hex": "#F4E03A", "name": "Mandy Flower Yellow" },
+    "image": "assets/photos/mandy-flower.png",
+    "verified": true
+  },
+  {
+    "id": "strawberry-shortcake-hat",
+    "type": "item",
+    "name": "Strawberry Shortcake's hat",
+    "show": "Strawberry Shortcake",
+    "color": { "hex": "#E03A4D", "name": "Strawberry Hat Red" },
+    "verified": false
   }
 ]
