@@ -457,5 +457,37 @@
     "color": { "hex": "#1F6E4F", "name": "Captain Planet Green" },
     "image": "assets/photos/captain-planet-hair.png",
     "verified": true
+  },
+  {
+    "id": "vanellope-hoodie",
+    "type": "item",
+    "name": "Vanellope's hoodie",
+    "show": "Wreck-It Ralph",
+    "color": { "hex": "#B6E3DC", "name": "Vanellope Hoodie Mint" },
+    "verified": false
+  },
+  {
+    "id": "snow-white-dress-lower",
+    "type": "item",
+    "name": "Snow White's lower dress",
+    "show": "Snow White and the Seven Dwarfs",
+    "color": { "hex": "#FFE680", "name": "Snow White Dress Yellow" },
+    "verified": false
+  },
+  {
+    "id": "jessica-rabbit-hair",
+    "type": "item",
+    "name": "Jessica Rabbit's hair",
+    "show": "Who Framed Roger Rabbit",
+    "color": { "hex": "#B91414", "name": "Jessica Rabbit Red" },
+    "verified": false
+  },
+  {
+    "id": "dr-facilier-vest",
+    "type": "item",
+    "name": "Dr Facilier's vest",
+    "show": "The Princess and the Frog",
+    "color": { "hex": "#5C3987", "name": "Facilier Vest Purple" },
+    "verified": false
   }
 ]

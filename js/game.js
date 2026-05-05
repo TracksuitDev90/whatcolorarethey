@@ -22,7 +22,8 @@ const STORAGE_KEYS = {
 const GRID_MAX_GUESSES = 3;
 const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 5;
-export const MAX_SKIPS_PER_MODE = 2;
+// Skip limit is paused for testing. Restore to 2 to re-enable.
+export const MAX_SKIPS_PER_MODE = 9999;
 
 export function maxGuessesFor(character) {
   return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;

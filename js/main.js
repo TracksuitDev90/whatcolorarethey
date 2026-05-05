@@ -17,7 +17,9 @@ import {
 
 const COL_LABELS = ['A', 'B', 'C', 'D', 'E'];
 const GRID_SIZE = 5;
-const ROUNDS_PER_DAY = 3;
+// Daily round cap is paused for testing — pool size effectively becomes the
+// cap. Restore to 3 to re-enable the daily limit.
+const ROUNDS_PER_DAY = 9999;
 
 const els = {
   img: document.getElementById('character-img'),
@@ -215,7 +217,13 @@ function renderRound() {
   els.photoFrame.style.transition = '';
   els.img.decoding = 'async';
   els.img.fetchPriority = 'high';
-  els.img.src = c.imageSrc;
+  // Force a fresh load. Without removing the attribute first, switching tabs
+  // mid-round can leave the previous mode's photo visible until the next
+  // image's bytes arrive — items and characters are separate experiences.
+  if (els.img.getAttribute('src') !== c.imageSrc) {
+    els.img.removeAttribute('src');
+    els.img.src = c.imageSrc;
+  }
   els.img.alt = isItemRound(s)
     ? `Scene from ${c.show || c.name} (grayscale until revealed)`
     : `Cartoon character (grayscale until revealed)`;

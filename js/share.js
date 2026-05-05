@@ -2,7 +2,7 @@
 // row a portrait next to N decorative boxes that visually echo the emoji
 // share — solid colored squares, dark for unused/skipped, green for a
 // correct guess, red for a wrong guess. N varies per row (3 for grid,
-// 1 for quad, padded out to a consistent 3-slot width).
+// 1 for quad). No name, subtitle, or color swatch — photo + guesses only.
 
 import { maxGuessesFor } from './game.js';
 
@@ -89,28 +89,19 @@ async function drawRow(ctx, snapshot, i, x, y, w, h) {
 
   drawPortraitFrame(ctx, portraitX, portraitY, portraitSize);
   await drawPortrait(ctx, character.imageSrc, portraitX, portraitY, portraitSize);
-  drawSwatchPip(ctx, character, portraitX + portraitSize - 36, portraitY + portraitSize - 36);
 
   const rightX = portraitX + portraitSize + 32;
   const rightW = w - portraitSize - 32;
 
-  ctx.fillStyle = '#e6ebf2';
-  ctx.font = '900 34px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.textBaseline = 'top';
-  ctx.fillText(truncate(ctx, displayName(character), rightW), rightX, y + 6);
-
-  const subtitle = roundLabel(round, max);
-  ctx.fillStyle = '#8b95a7';
-  ctx.font = '600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(subtitle, rightX, y + 52);
-
+  // Boxes only — no name, subtitle, or swatch pip. Quad rows render a single
+  // large box (one guess, win/lose); grid rows render the per-guess sequence.
   const boxGap = 18;
-  // Always reserve the same slot width as a 3-guess row so quad rows don't
-  // produce a single huge box that dwarfs the portrait next to it.
-  const slotSize = Math.min(120, (rightW - boxGap * 2) / 3);
-  const boxesY = y + h - slotSize;
+  const slotSize = Math.min(h, (rightW - boxGap * (max - 1)) / max);
+  const totalBoxesW = slotSize * max + boxGap * Math.max(0, max - 1);
+  const boxesX = rightX + (rightW - totalBoxesW) / 2;
+  const boxesY = y + (h - slotSize) / 2;
   for (let b = 0; b < max; b++) {
-    const bx = rightX + b * (slotSize + boxGap);
+    const bx = boxesX + b * (slotSize + boxGap);
     drawGuessBox(ctx, round, b, bx, boxesY, slotSize);
   }
 }
@@ -146,20 +137,8 @@ async function drawPortrait(ctx, src, x, y, size) {
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.restore();
   } catch {
-    // Frame stays empty on failure — the swatch pip + name still convey identity.
+    // Frame stays empty on failure.
   }
-}
-
-function drawSwatchPip(ctx, character, cx, cy) {
-  ctx.save();
-  ctx.fillStyle = character.color.hex;
-  ctx.strokeStyle = '#0e1116';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 22, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-  ctx.restore();
 }
 
 function drawGuessBox(ctx, round, idx, x, y, size) {
@@ -233,35 +212,6 @@ function loadImage(src) {
     img.onerror = reject;
     img.src = src;
   });
-}
-
-function truncate(ctx, text, maxWidth) {
-  if (ctx.measureText(text).width <= maxWidth) return text;
-  const ell = '…';
-  let lo = 0, hi = text.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (ctx.measureText(text.slice(0, mid) + ell).width <= maxWidth) lo = mid + 1;
-    else hi = mid;
-  }
-  return text.slice(0, Math.max(0, lo - 1)) + ell;
-}
-
-function displayName(c) {
-  if (c.type === 'item' && c.show) return `${c.name} — ${c.show}`;
-  return c.name;
-}
-
-function roundLabel(round, max) {
-  if (round.won) {
-    const n = round.guesses.length;
-    return `Solved in ${n} ${n === 1 ? 'guess' : 'guesses'}`;
-  }
-  if (round.skipped) return 'Skipped';
-  if (round.lost) return 'Out of guesses';
-  if (round.guesses.length === 0) return 'Not played';
-  const left = max - round.guesses.length;
-  return `${left} guess${left === 1 ? '' : 'es'} left`;
 }
 
 export async function shareCanvas(canvas, snapshot) {
