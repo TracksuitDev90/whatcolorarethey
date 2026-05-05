@@ -4,7 +4,7 @@
 // fresh. Each mode (items / grid) gets its own independent slot.
 //
 // Two board kinds, mixed within the same daily run:
-//   grid — 5x5 shade picker, 3 guesses, axis hints after the 2nd miss
+//   grid — 4x4 shade picker, 3 guesses, axis hints after the 2nd miss
 //   quad — 4 distinct color swatches, 1 guess, no hints
 //
 // Skips: each mode allows up to 2 skips per UTC day. A skipped round is
@@ -21,7 +21,7 @@ const STORAGE_KEYS = {
 
 const GRID_MAX_GUESSES = 3;
 const QUAD_MAX_GUESSES = 1;
-const GRID_SIZE = 5;
+const GRID_SIZE = 4;
 // Skip limit is paused for testing. Restore to 2 to re-enable.
 export const MAX_SKIPS_PER_MODE = 9999;
 

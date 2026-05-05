@@ -1,4 +1,4 @@
-// Shade-grid generator. Builds a 5x5 (or arbitrary) board of shades around
+// Shade-grid generator. Builds a 4x4 (or arbitrary) board of shades around
 // a correct hex color, with the correct cell at a seeded random position.
 // Lightness sweeps top-to-bottom; saturation/hue sweep left-to-right —
 // matching the reference photo's gradient feel.
@@ -64,14 +64,16 @@ function mulberry32(seed) {
 
 // Per-step delta ranges. The exact step within each range is rolled per
 // round (seeded), so consecutive rounds don't reuse the same gradient.
-const LIGHT_STEP_MIN = 8;
-const LIGHT_STEP_MAX = 12;
-const SAT_STEP_MIN = 3;
-const SAT_STEP_MAX = 5;
-const HUE_STEP_MIN = 3;
-const HUE_STEP_MAX = 5;
+// Bumped wider than the original 5x5 so that on a 4x4 board the corners
+// still land far enough from the correct cell to feel meaningfully wrong.
+const LIGHT_STEP_MIN = 11;
+const LIGHT_STEP_MAX = 15;
+const SAT_STEP_MIN = 5;
+const SAT_STEP_MAX = 8;
+const HUE_STEP_MIN = 5;
+const HUE_STEP_MAX = 8;
 
-export function buildGrid(correctHex, { rows = 5, cols = 5, seed = 0 } = {}) {
+export function buildGrid(correctHex, { rows = 4, cols = 4, seed = 0 } = {}) {
   const base = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 17);
   const correctRow = Math.floor(rng() * rows);

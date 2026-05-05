@@ -200,7 +200,7 @@
   {
     "id": "squirtle",
     "name": "Squirtle",
-    "color": { "hex": "#55A3AB", "name": "Squirtle Blue-Green" },
+    "color": { "hex": "#6FBED5", "name": "Squirtle Sky Blue" },
     "colorSource": "https://www.schemecolor.com/squirtle-pokemon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Squirtle",
     "image": "assets/photos/squirtle.png",
@@ -222,14 +222,6 @@
     "colorSource": "https://www.colourlovers.com/color/6E2073/Grimace_purple",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Grimace_(character)",
     "image": "assets/photos/grimace.png",
-    "verified": true
-  },
-  {
-    "id": "hulk",
-    "name": "The Hulk",
-    "color": { "hex": "#54B951", "name": "Hulk Green" },
-    "colorSource": "https://brandpalettes.com/hulk-color-codes/",
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Hulk",
     "verified": true
   },
   {
@@ -269,14 +261,6 @@
     "verified": true
   },
   {
-    "id": "he-man",
-    "name": "He-Man",
-    "era": "80s",
-    "color": { "hex": "#E0A87E", "name": "He-Man Tan" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/He-Man",
-    "verified": false
-  },
-  {
     "id": "heathcliff",
     "name": "Heathcliff",
     "era": "80s",
@@ -294,14 +278,6 @@
     "verified": true
   },
   {
-    "id": "strawberry-shortcake",
-    "name": "Strawberry Shortcake",
-    "era": "80s",
-    "color": { "hex": "#E03A3E", "name": "Strawberry Red" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Strawberry_Shortcake",
-    "verified": false
-  },
-  {
     "id": "pink-panther",
     "name": "Pink Panther",
     "era": "80s",
@@ -309,14 +285,6 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pink_Panther_(character)",
     "image": "assets/photos/pink-panther.png",
     "verified": true
-  },
-  {
-    "id": "optimus-prime",
-    "name": "Optimus Prime",
-    "era": "80s",
-    "color": { "hex": "#C8102E", "name": "Optimus Red" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Optimus_Prime",
-    "verified": false
   },
   {
     "id": "rocko",
@@ -331,25 +299,10 @@
     "id": "courage",
     "name": "Courage the Cowardly Dog",
     "era": "90s",
-    "color": { "hex": "#F4B7B7", "name": "Courage Pink" },
+    "color": { "hex": "#F0AAB5", "name": "Courage Pink" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Courage_the_Cowardly_Dog",
-    "verified": false
-  },
-  {
-    "id": "catdog",
-    "name": "CatDog",
-    "era": "90s",
-    "color": { "hex": "#F4A12B", "name": "CatDog Orange-Yellow" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/CatDog",
-    "verified": false
-  },
-  {
-    "id": "darkwing-duck",
-    "name": "Darkwing Duck",
-    "era": "90s",
-    "color": { "hex": "#7341A6", "name": "Darkwing Purple" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Darkwing_Duck",
-    "verified": false
+    "image": "assets/photos/courage.png",
+    "verified": true
   },
   {
     "id": "the-brain",
@@ -442,6 +395,33 @@
     "color": { "hex": "#FBD848", "name": "Flounder Yellow" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Flounder_(The_Little_Mermaid)",
     "image": "assets/photos/flounder.png",
+    "verified": true
+  },
+  {
+    "id": "mojo-jojo",
+    "name": "Mojo Jojo",
+    "era": "90s",
+    "color": { "hex": "#9DBE3D", "name": "Mojo Jojo Green" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Mojo_Jojo",
+    "image": "assets/photos/mojo-jojo.png",
+    "verified": true
+  },
+  {
+    "id": "jake-the-dog",
+    "name": "Jake the Dog",
+    "era": "00s",
+    "color": { "hex": "#F5A623", "name": "Jake Yellow-Orange" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Jake_the_Dog",
+    "image": "assets/photos/jake-the-dog.png",
+    "verified": true
+  },
+  {
+    "id": "red-guy",
+    "name": "Red Guy",
+    "era": "90s",
+    "color": { "hex": "#E62022", "name": "Red Guy Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Cow_and_Chicken",
+    "image": "assets/photos/red-guy.png",
     "verified": true
   }
 ]

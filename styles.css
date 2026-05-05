@@ -170,6 +170,14 @@ body {
   object-fit: cover;
   filter: grayscale(1) contrast(1.05);
   image-rendering: auto;
+  /* Block the iOS Safari long-press callout / drag preview that would
+     otherwise reveal the source image in full color, defeating the
+     grayscale-until-revealed mechanic. */
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
 
 /* Transition only on the reveal direction. Without this scoping, removing
@@ -219,13 +227,13 @@ body {
 .col-headers {
   grid-row: 1; grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--gap);
 }
 .row-headers {
   grid-row: 2; grid-column: 1;
   display: grid;
-  grid-template-rows: repeat(5, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: var(--gap);
 }
 
@@ -273,8 +281,8 @@ body {
 .grid {
   grid-row: 2; grid-column: 2;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: var(--gap);
   padding: var(--gap);
   background: #1c2230;
