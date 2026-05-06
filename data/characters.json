@@ -266,7 +266,8 @@
     "era": "80s",
     "color": { "hex": "#F39C5C", "name": "Heathcliff Orange" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Heathcliff_(comics)",
-    "verified": false
+    "image": "assets/photos/heathcliff.png",
+    "verified": true
   },
   {
     "id": "slimer",
@@ -310,7 +311,8 @@
     "era": "90s",
     "color": { "hex": "#A8A29A", "name": "Brain Mouse Gray" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pinky_and_the_Brain",
-    "verified": false
+    "image": "assets/photos/the-brain.png",
+    "verified": true
   },
   {
     "id": "the-mask",
@@ -318,7 +320,8 @@
     "era": "90s",
     "color": { "hex": "#7FB539", "name": "Mask Green" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Mask_(character)",
-    "verified": false
+    "image": "assets/photos/the-mask.png",
+    "verified": true
   },
   {
     "id": "bloo",
@@ -326,7 +329,8 @@
     "era": "00s",
     "color": { "hex": "#7FAFD6", "name": "Bloo Blue" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Foster%27s_Home_for_Imaginary_Friends",
-    "verified": false
+    "image": "assets/photos/bloo.png",
+    "verified": true
   },
   {
     "id": "jenny-xj9",
@@ -422,6 +426,40 @@
     "color": { "hex": "#E62022", "name": "Red Guy Red" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Cow_and_Chicken",
     "image": "assets/photos/red-guy.png",
+    "verified": true
+  },
+  {
+    "id": "jerry",
+    "name": "Jerry",
+    "color": { "hex": "#C2754F", "name": "Jerry Brown" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Jerry_Mouse",
+    "image": "assets/photos/jerry.png",
+    "verified": true
+  },
+  {
+    "id": "muscle-man",
+    "name": "Muscle Man",
+    "era": "10s",
+    "color": { "hex": "#A2B477", "name": "Muscle Man Olive" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Regular_Show",
+    "image": "assets/photos/muscle-man.png",
+    "verified": true
+  },
+  {
+    "id": "amethyst",
+    "name": "Amethyst",
+    "era": "10s",
+    "color": { "hex": "#B89BC9", "name": "Amethyst Lavender" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Amethyst_(Steven_Universe)",
+    "image": "assets/photos/amethyst.png",
+    "verified": true
+  },
+  {
+    "id": "pluto",
+    "name": "Pluto",
+    "color": { "hex": "#F2A33A", "name": "Pluto Yellow-Orange" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Pluto_(Disney)",
+    "image": "assets/photos/pluto.png",
     "verified": true
   }
 ]
