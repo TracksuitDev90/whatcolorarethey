@@ -35,6 +35,28 @@ PRECROP = {
     "IMG_0388.png":  {"left": 0.04, "right": 0.04},  # Sonic - jpeg edge artefacts
     "IMG_0399.jpeg": {"bottom": 0.07},   # Speed Racer - "SPEED RACER" watermark
     "IMG_0446.jpeg": {"bottom": 0.10},   # Stitch - GalleryPops watermark
+    # New additions
+    "IMG_0489.webp": {"bottom": 0.26, "left": 0.14},  # The Brain - WB watermark
+    "IMG_0492.jpeg": {"right": 0.55},                  # The Mask - drop other characters
+    "IMG_0493.jpeg": {"left": 0.34, "right": 0.08},    # Jerry - drop Tom
+    "IMG_0496.jpeg": {"bottom": 0.05},                 # Charlie Brown - "Alamy" watermark
+    "IMG_0447.jpeg": {"bottom": 0.32},                 # Cookie Monster - drop cookies/plate so head fits
+}
+
+# After precrop + cover_crop strategy is selected, shift the centred crop
+# window. 0.5 keeps the existing centred behaviour; values <0.5 keep more of
+# the top/left, >0.5 keep more of the bottom/right. Used to nudge framing
+# when the subject sits off-centre in the source.
+COVER_OFFSET = {
+    "IMG_0438.jpeg": {"y": 0.30},   # Danny Phantom - keep more headroom
+}
+
+# Pad the source with the sampled background colour before any other
+# processing. Each value is a fraction of the source dimension to add to
+# that side. Useful for "zooming out" on a subject that sits too tight in
+# its source crop.
+EXPAND = {
+    "IMG_0438.jpeg": {"top": 0.18, "bottom": 0.12, "left": 0.12, "right": 0.12},
 }
 
 # Mapping of every character/item ID to its source file. Character entries
@@ -151,6 +173,16 @@ ASSIGNMENTS = {
     "mandy-flower":             "IMG_0482.jpeg",
     "red-guy":                  "IMG_0485.webp",
     "courage":                  "IMG_0486.webp",
+    "heathcliff":               "IMG_0487.png",
+    "the-brain":                "IMG_0489.webp",
+    "bloo":                     "IMG_0491.jpeg",
+    "the-mask":                 "IMG_0492.jpeg",
+    "jerry":                    "IMG_0493.jpeg",
+    "charlie-brown-shirt":      "IMG_0496.jpeg",
+    "pluto":                    "IMG_0498.webp",
+    "strawberry-shortcake-hat": "IMG_0499.jpeg",
+    "muscle-man":               "IMG_0500.webp",
+    "amethyst":                 "IMG_0501.webp",
 }
 
 
@@ -315,20 +347,52 @@ def is_solid_background(img):
     return spread <= 25
 
 
-def cover_crop(img, ratio):
-    """Crop the source to the target aspect ratio, keeping the image
-    centred. Used for full-bleed photographs."""
+def cover_crop(img, ratio, x_shift=0.5, y_shift=0.5):
+    """Crop the source to the target aspect ratio.
+
+    `x_shift` / `y_shift` move the crop window: 0.5 keeps it centred,
+    smaller values keep more of the top / left, larger values keep more of
+    the bottom / right. Used for full-bleed photographs where the subject
+    sits off-centre."""
     w, h = img.size
     cur = w / h
     if abs(cur - ratio) < 1e-3:
         return img.convert("RGB")
     if cur > ratio:
         new_w = round(h * ratio)
-        x0 = (w - new_w) // 2
+        x0 = int(round((w - new_w) * x_shift))
         return img.crop((x0, 0, x0 + new_w, h)).convert("RGB")
     new_h = round(w / ratio)
-    y0 = (h - new_h) // 2
+    y0 = int(round((h - new_h) * y_shift))
     return img.crop((0, y0, w, y0 + new_h)).convert("RGB")
+
+
+def expand_with_bg(img, name):
+    """Add a coloured border to each side of the source so the eventual
+    crop has more breathing room around the subject. The border colour is
+    sampled from the existing image corners so it blends in."""
+    if name not in EXPAND:
+        return img
+    spec = EXPAND[name]
+    w, h = img.size
+    left = int(w * spec.get("left", 0))
+    right = int(w * spec.get("right", 0))
+    top = int(h * spec.get("top", 0))
+    bottom = int(h * spec.get("bottom", 0))
+    if not (left or right or top or bottom):
+        return img
+    bg = sample_bg(img if img.mode != "P" else img.convert("RGB"))
+    new_w = w + left + right
+    new_h = h + top + bottom
+    if img.mode == "RGBA":
+        canvas = Image.new("RGB", (new_w, new_h), bg)
+        bg_layer = Image.new("RGB", img.size, bg)
+        bg_layer.paste(img, mask=img.split()[-1])
+        canvas.paste(bg_layer, (left, top))
+        return canvas
+    canvas = Image.new("RGB", (new_w, new_h), bg)
+    canvas.paste(img.convert("RGB"), (left, top))
+    return canvas
 
 
 def process(src_path, dst_path):
@@ -336,16 +400,24 @@ def process(src_path, dst_path):
     if img.mode not in ("RGB", "RGBA"):
         img = img.convert("RGBA" if "A" in img.getbands() else "RGB")
 
+    img = expand_with_bg(img, src_path.name)
     img = precrop(img, src_path.name)
 
     if not is_solid_background(img):
-        cropped = cover_crop(img, TARGET_RATIO)
+        offset = COVER_OFFSET.get(src_path.name, {})
+        cropped = cover_crop(
+            img,
+            TARGET_RATIO,
+            x_shift=offset.get("x", 0.5),
+            y_shift=offset.get("y", 0.5),
+        )
     else:
         cropped = isolated_subject_to_4_3(img)
 
     # Cap at a sensible maximum so retina screens stay sharp without
-    # shipping 5MB PNGs to phones.
-    MAX_W = 1600
+    # shipping huge PNGs to phones. 2400 keeps source detail on hi-DPI
+    # displays without bloating bytes for typical sources.
+    MAX_W = 2400
     if cropped.width > MAX_W:
         new_h = round(cropped.height * MAX_W / cropped.width)
         cropped = cropped.resize((MAX_W, new_h), Image.LANCZOS)

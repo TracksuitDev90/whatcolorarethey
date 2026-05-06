@@ -527,6 +527,16 @@
     "name": "Strawberry Shortcake's hat",
     "show": "Strawberry Shortcake",
     "color": { "hex": "#E03A4D", "name": "Strawberry Hat Red" },
-    "verified": false
+    "image": "assets/photos/strawberry-shortcake-hat.png",
+    "verified": true
+  },
+  {
+    "id": "charlie-brown-shirt",
+    "type": "item",
+    "name": "Charlie Brown's shirt",
+    "show": "Peanuts",
+    "color": { "hex": "#F2D74E", "name": "Charlie Brown Yellow" },
+    "image": "assets/photos/charlie-brown-shirt.png",
+    "verified": true
   }
 ]
