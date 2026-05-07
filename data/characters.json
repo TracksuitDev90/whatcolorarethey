@@ -2,7 +2,7 @@
   {
     "id": "winnie-the-pooh",
     "name": "Winnie the Pooh",
-    "color": { "hex": "#FCD667", "name": "Pooh Yellow" },
+    "color": { "hex": "#F2BC53", "name": "Pooh Yellow" },
     "colorSource": "https://colorfrompic.com/what-color-is-winnie-the-pooh/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Winnie-the-Pooh_(Disney_character)",
     "image": "assets/photos/winnie-the-pooh.png",
@@ -20,7 +20,7 @@
   {
     "id": "spongebob-squarepants",
     "name": "SpongeBob SquarePants",
-    "color": { "hex": "#F7E948", "name": "SpongeBob Yellow (Pantone)" },
+    "color": { "hex": "#FFF66C", "name": "SpongeBob Yellow" },
     "colorSource": "https://www.pantone.com/articles/press-releases/nickelodeon-and-the-pantone-color-institute-launch-spongebob-yellow-and-patrick-star-pink",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/SpongeBob_SquarePants_(character)",
     "image": "assets/photos/spongebob-squarepants.png",
@@ -38,7 +38,7 @@
   {
     "id": "garfield",
     "name": "Garfield",
-    "color": { "hex": "#FF8604", "name": "Garfield Orange" },
+    "color": { "hex": "#FFA918", "name": "Garfield Orange" },
     "colorSource": "https://www.colourlovers.com/color/FF8604/garfield_orange",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Garfield",
     "image": "assets/photos/garfield.png",
@@ -128,7 +128,7 @@
   {
     "id": "squidward",
     "name": "Squidward Tentacles",
-    "color": { "hex": "#54DBC2", "name": "Squidward Cyan (PMS 333)" },
+    "color": { "hex": "#a0ccbc", "name": "Squidward Sage" },
     "colorSource": "https://brandpalettes.com/spongebob-squarepants-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Squidward_Tentacles",
     "image": "assets/photos/squidward.png",
@@ -137,7 +137,7 @@
   {
     "id": "scooby-doo",
     "name": "Scooby-Doo",
-    "color": { "hex": "#974D12", "name": "Scooby-Doo Brown" },
+    "color": { "hex": "#B67321", "name": "Scooby-Doo Brown" },
     "colorSource": "https://www.colourlovers.com/color/974D12/Scooby-Doo_Brown",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Scooby-Doo_(character)",
     "image": "assets/photos/scooby-doo.png",
@@ -146,7 +146,7 @@
   {
     "id": "bugs-bunny",
     "name": "Bugs Bunny",
-    "color": { "hex": "#99A2A4", "name": "Bugs Sea Gray" },
+    "color": { "hex": "#B2B7BB", "name": "Bugs Gray" },
     "colorSource": "https://www.schemecolor.com/bugs-bunny-looney-tunes-cartoon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Bugs_Bunny",
     "image": "assets/photos/bugs-bunny.png",
@@ -164,7 +164,7 @@
   {
     "id": "yoshi",
     "name": "Yoshi",
-    "color": { "hex": "#6FD251", "name": "Yoshi Green" },
+    "color": { "hex": "#74be45", "name": "Yoshi Green" },
     "colorSource": "https://htmlcolors.com/palette/71/yoshi",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Yoshi",
     "image": "assets/photos/yoshi.png",
@@ -173,7 +173,7 @@
   {
     "id": "stitch",
     "name": "Stitch",
-    "color": { "hex": "#62B1CF", "name": "Stitch Blue" },
+    "color": { "hex": "#43779E", "name": "Stitch Blue" },
     "colorSource": "https://www.color-hex.com/color-palette/19591",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Stitch_(Lilo_%26_Stitch)",
     "image": "assets/photos/stitch.png",
@@ -182,7 +182,7 @@
   {
     "id": "crash-bandicoot",
     "name": "Crash Bandicoot",
-    "color": { "hex": "#FF6522", "name": "Crash Orange" },
+    "color": { "hex": "#FC5E2A", "name": "Crash Orange" },
     "colorSource": "https://colorshexa.com/palette/crash-bandicoot-logo",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Crash_Bandicoot_(character)",
     "image": "assets/photos/crash-bandicoot.png",
@@ -200,7 +200,7 @@
   {
     "id": "squirtle",
     "name": "Squirtle",
-    "color": { "hex": "#6FBED5", "name": "Squirtle Sky Blue" },
+    "color": { "hex": "#7CC5DF", "name": "Squirtle Sky Blue" },
     "colorSource": "https://www.schemecolor.com/squirtle-pokemon-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Squirtle",
     "image": "assets/photos/squirtle.png",
@@ -236,7 +236,7 @@
   {
     "id": "mr-krabs",
     "name": "Mr. Krabs",
-    "color": { "hex": "#FF3B3B", "name": "Mr. Krabs Red" },
+    "color": { "hex": "#D11C27", "name": "Mr. Krabs Red" },
     "colorSource": "https://colorswall.com/color/ff3b3b",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Mr._Krabs",
     "image": "assets/photos/mr-krabs.png",
@@ -254,7 +254,7 @@
   {
     "id": "tweety",
     "name": "Tweety",
-    "color": { "hex": "#FFF700", "name": "Tweety Bird Yellow" },
+    "color": { "hex": "#ffe512", "name": "Tweety Bird Yellow" },
     "colorSource": "https://rgb.to/color/18018/tweety-bird-yellow",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Tweety",
     "image": "assets/photos/tweety.png",
@@ -291,7 +291,7 @@
     "id": "rocko",
     "name": "Rocko",
     "era": "90s",
-    "color": { "hex": "#E8AD3E", "name": "Rocko Wallaby Yellow" },
+    "color": { "hex": "#F7CBAF", "name": "Rocko Peach" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Rocko%27s_Modern_Life",
     "image": "assets/photos/rocko.png",
     "verified": true
@@ -300,7 +300,7 @@
     "id": "courage",
     "name": "Courage the Cowardly Dog",
     "era": "90s",
-    "color": { "hex": "#F0AAB5", "name": "Courage Pink" },
+    "color": { "hex": "#E6A2AE", "name": "Courage Pink" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Courage_the_Cowardly_Dog",
     "image": "assets/photos/courage.png",
     "verified": true
@@ -309,7 +309,7 @@
     "id": "the-brain",
     "name": "The Brain",
     "era": "90s",
-    "color": { "hex": "#A8A29A", "name": "Brain Mouse Gray" },
+    "color": { "hex": "#FFFFFF", "name": "Brain White" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pinky_and_the_Brain",
     "image": "assets/photos/the-brain.png",
     "verified": true
@@ -318,7 +318,7 @@
     "id": "the-mask",
     "name": "The Mask",
     "era": "90s",
-    "color": { "hex": "#7FB539", "name": "Mask Green" },
+    "color": { "hex": "#78DE30", "name": "Mask Green" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Mask_(character)",
     "image": "assets/photos/the-mask.png",
     "verified": true
@@ -327,7 +327,7 @@
     "id": "bloo",
     "name": "Bloo",
     "era": "00s",
-    "color": { "hex": "#7FAFD6", "name": "Bloo Blue" },
+    "color": { "hex": "#6490FA", "name": "Bloo Blue" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Foster%27s_Home_for_Imaginary_Friends",
     "image": "assets/photos/bloo.png",
     "verified": true
@@ -345,7 +345,7 @@
     "id": "perry-the-platypus",
     "name": "Perry the Platypus",
     "era": "00s",
-    "color": { "hex": "#3F8DAD", "name": "Perry Teal" },
+    "color": { "hex": "#1B99A2", "name": "Perry Teal" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Perry_the_Platypus",
     "image": "assets/photos/perry-the-platypus.png",
     "verified": true
@@ -372,7 +372,7 @@
     "id": "ice-king",
     "name": "Ice King",
     "era": "00s",
-    "color": { "hex": "#BCE3F1", "name": "Ice King Light Blue" },
+    "color": { "hex": "#ACDEFF", "name": "Ice King Light Blue" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Ice_King",
     "image": "assets/photos/ice-king.png",
     "verified": true
@@ -388,7 +388,7 @@
   {
     "id": "ursula",
     "name": "Ursula",
-    "color": { "hex": "#B8A5CD", "name": "Ursula Lavender" },
+    "color": { "hex": "#8e8eb2", "name": "Ursula Mauve" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Ursula_(The_Little_Mermaid)",
     "image": "assets/photos/ursula.png",
     "verified": true
@@ -414,7 +414,7 @@
     "id": "jake-the-dog",
     "name": "Jake the Dog",
     "era": "00s",
-    "color": { "hex": "#F5A623", "name": "Jake Yellow-Orange" },
+    "color": { "hex": "#FFBB1C", "name": "Jake Yellow" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Jake_the_Dog",
     "image": "assets/photos/jake-the-dog.png",
     "verified": true
@@ -431,7 +431,7 @@
   {
     "id": "jerry",
     "name": "Jerry",
-    "color": { "hex": "#C2754F", "name": "Jerry Brown" },
+    "color": { "hex": "#C48338", "name": "Jerry Brown" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Jerry_Mouse",
     "image": "assets/photos/jerry.png",
     "verified": true
@@ -440,7 +440,7 @@
     "id": "muscle-man",
     "name": "Muscle Man",
     "era": "10s",
-    "color": { "hex": "#A2B477", "name": "Muscle Man Olive" },
+    "color": { "hex": "#AABA90", "name": "Muscle Man Olive" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Regular_Show",
     "image": "assets/photos/muscle-man.png",
     "verified": true
@@ -449,7 +449,7 @@
     "id": "amethyst",
     "name": "Amethyst",
     "era": "10s",
-    "color": { "hex": "#B89BC9", "name": "Amethyst Lavender" },
+    "color": { "hex": "#B899CA", "name": "Amethyst Lavender" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Amethyst_(Steven_Universe)",
     "image": "assets/photos/amethyst.png",
     "verified": true
@@ -457,7 +457,7 @@
   {
     "id": "pluto",
     "name": "Pluto",
-    "color": { "hex": "#F2A33A", "name": "Pluto Yellow-Orange" },
+    "color": { "hex": "#F2A652", "name": "Pluto Yellow-Orange" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pluto_(Disney)",
     "image": "assets/photos/pluto.png",
     "verified": true
