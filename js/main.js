@@ -560,12 +560,25 @@ attachSwipeToAdvance(els.photoFrame);
 
 function attachSwipeToAdvance(target) {
   if (!target) return;
-  const SWIPE_THRESHOLD = 60;     // px of horizontal travel to commit
-  const VERTICAL_LIMIT = 60;      // beyond this we treat it as a scroll
+  // Touch needs a much higher commit threshold than mouse — a phone-edge
+  // thumb-flick crosses 60px easily while reading, and the swipe should feel
+  // intentional, not incidental.
+  const COMMIT_TOUCH = 110;
+  const COMMIT_MOUSE = 60;
+  // Don't lock direction (or hijack the gesture) until the pointer has moved
+  // this far. Below this we can't reliably tell scroll from swipe.
+  const DIRECTION_LOCK_DISTANCE = 16;
+  // Once we have enough motion to decide, dx must exceed dy by this ratio to
+  // count as a horizontal swipe. Anything flatter is treated as a scroll and
+  // the gesture is released for the rest of this touch.
+  const HORIZONTAL_RATIO = 1.5;
+
   let active = false;
+  let locked = null; // null | 'horizontal' | 'vertical'
   let startX = 0;
   let startY = 0;
   let pointerId = null;
+  let pointerType = 'mouse';
 
   const swipeMode = () => {
     const s = game?.snapshot();
@@ -588,7 +601,9 @@ function attachSwipeToAdvance(target) {
     if (swipeMode() === 'none') return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     active = true;
+    locked = null;
     pointerId = e.pointerId;
+    pointerType = e.pointerType || 'mouse';
     startX = e.clientX;
     startY = e.clientY;
     target.style.transition = '';
@@ -598,30 +613,45 @@ function attachSwipeToAdvance(target) {
     if (!active || e.pointerId !== pointerId) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    if (Math.abs(dy) > VERTICAL_LIMIT && Math.abs(dy) > Math.abs(dx)) {
-      // Vertical scroll — let the page have it.
-      active = false;
-      reset(true);
-      return;
+    const adx = Math.abs(dx);
+    const ady = Math.abs(dy);
+
+    if (locked === null) {
+      // Wait for enough motion to make a confident decision. Below the lock
+      // distance, do nothing — no transform, no pointer capture, so vertical
+      // scrolling stays smooth.
+      if (Math.hypot(dx, dy) < DIRECTION_LOCK_DISTANCE) return;
+      if (adx > ady * HORIZONTAL_RATIO) {
+        locked = 'horizontal';
+        try { target.setPointerCapture(pointerId); } catch { /* ignore */ }
+      } else {
+        // Page scroll wins — bail out for the rest of this touch.
+        locked = 'vertical';
+        active = false;
+        return;
+      }
     }
-    if (Math.abs(dx) > 6) {
-      try { target.setPointerCapture(pointerId); } catch { /* ignore */ }
-      e.preventDefault();
-      // Slight non-linear curve — feels softer near the start, firmer past the threshold.
-      const eased = dx * (1 - Math.min(0.25, Math.abs(dx) / 1200));
-      target.style.transform = `translateX(${eased}px) rotate(${eased * 0.018}deg)`;
-      const fade = Math.min(1, Math.abs(dx) / (SWIPE_THRESHOLD * 2.2));
-      target.style.opacity = String(1 - fade * 0.4);
-    }
+
+    if (locked !== 'horizontal') return;
+    e.preventDefault();
+    // Slight non-linear curve — feels softer near the start, firmer past the threshold.
+    const eased = dx * (1 - Math.min(0.25, adx / 1200));
+    target.style.transform = `translateX(${eased}px) rotate(${eased * 0.018}deg)`;
+    const commit = pointerType === 'mouse' ? COMMIT_MOUSE : COMMIT_TOUCH;
+    const fade = Math.min(1, adx / (commit * 2.2));
+    target.style.opacity = String(1 - fade * 0.4);
   });
 
   const finish = (e) => {
     if (!active || e.pointerId !== pointerId) return;
     active = false;
+    const wasHorizontal = locked === 'horizontal';
+    locked = null;
     const dx = e.clientX - startX;
     try { target.releasePointerCapture(pointerId); } catch { /* ignore */ }
     const m = swipeMode();
-    if (m !== 'none' && Math.abs(dx) >= SWIPE_THRESHOLD) {
+    const commit = pointerType === 'mouse' ? COMMIT_MOUSE : COMMIT_TOUCH;
+    if (wasHorizontal && m !== 'none' && Math.abs(dx) >= commit) {
       const dir = dx > 0 ? 1 : -1;
       target.style.transition = 'transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease';
       target.style.transform = `translateX(${dir * window.innerWidth}px) rotate(${dir * 8}deg)`;
