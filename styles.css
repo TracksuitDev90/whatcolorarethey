@@ -151,7 +151,11 @@ body {
      derives height = width × 3/4, which is guaranteed ≤ --photo-max-h. */
   width: min(100%, calc(var(--photo-max-h) * 4 / 3));
   aspect-ratio: 4 / 3;
-  background: #ffffff;
+  /* Dark background instead of white. The rounded-corner clip on the
+     <img> antialiases against this colour, and PNG/WebP source images
+     with transparent corners reveal it directly — a white fill produced
+     a visible bright sliver in each inner corner. */
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
