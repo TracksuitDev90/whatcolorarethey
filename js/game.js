@@ -95,9 +95,26 @@ export function createDailyGame(dailyCharacters, dateKey, options = {}) {
     if (c.type === 'item') {
       state.board = buildQuad(c.color.hex, { seed: round.seed });
     } else {
+      // Look up the previous grid round's correct cell so we can avoid
+      // landing on the same (row, col) two rounds in a row. buildGrid is
+      // pure, so we can recompute the previous round's board cheaply
+      // instead of caching the position alongside state.
+      let avoidRow = null, avoidCol = null;
+      const prevChar = state.characters[state.currentIndex - 1];
+      const prevRound = state.rounds[state.currentIndex - 1];
+      if (prevChar && prevChar.type !== 'item' && prevRound?.seed != null) {
+        const prev = buildGrid(prevChar.color.hex, {
+          rows: GRID_SIZE, cols: GRID_SIZE, seed: prevRound.seed,
+        });
+        avoidRow = prev.correctRow;
+        avoidCol = prev.correctCol;
+      }
       state.board = {
         kind: 'grid',
-        ...buildGrid(c.color.hex, { rows: GRID_SIZE, cols: GRID_SIZE, seed: round.seed }),
+        ...buildGrid(c.color.hex, {
+          rows: GRID_SIZE, cols: GRID_SIZE, seed: round.seed,
+          avoidRow, avoidCol,
+        }),
       };
     }
     state.revealed = isRoundDone(round);

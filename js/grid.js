@@ -64,20 +64,34 @@ function mulberry32(seed) {
 
 // Per-step delta ranges. The exact step within each range is rolled per
 // round (seeded), so consecutive rounds don't reuse the same gradient.
-// Bumped wider than the original 5x5 so that on a 4x4 board the corners
-// still land far enough from the correct cell to feel meaningfully wrong.
-const LIGHT_STEP_MIN = 11;
-const LIGHT_STEP_MAX = 15;
-const SAT_STEP_MIN = 5;
-const SAT_STEP_MAX = 8;
-const HUE_STEP_MIN = 5;
-const HUE_STEP_MAX = 8;
+// Tightened from the previous 11-15 / 5-8 ranges so the surrounding
+// shades sit a bit closer to the correct cell — the photo-vs-grid
+// comparison should make the player squint, not pick by elimination.
+const LIGHT_STEP_MIN = 9;
+const LIGHT_STEP_MAX = 12;
+const SAT_STEP_MIN = 4;
+const SAT_STEP_MAX = 6;
+const HUE_STEP_MIN = 4;
+const HUE_STEP_MAX = 6;
 
-export function buildGrid(correctHex, { rows = 4, cols = 4, seed = 0 } = {}) {
+export function buildGrid(
+  correctHex,
+  { rows = 4, cols = 4, seed = 0, avoidRow = null, avoidCol = null } = {},
+) {
   const base = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 17);
-  const correctRow = Math.floor(rng() * rows);
-  const correctCol = Math.floor(rng() * cols);
+  let correctRow = Math.floor(rng() * rows);
+  let correctCol = Math.floor(rng() * cols);
+  // Force consecutive rounds to use a different cell. If the seed happens
+  // to land on the same (row, col) as the previous round, shift it by a
+  // seeded offset so the player isn't tapping the same spot twice in a row.
+  if (
+    avoidRow != null && avoidCol != null
+    && correctRow === avoidRow && correctCol === avoidCol
+  ) {
+    correctRow = (correctRow + 1 + Math.floor(rng() * (rows - 1))) % rows;
+    correctCol = (correctCol + 1 + Math.floor(rng() * (cols - 1))) % cols;
+  }
 
   // Randomize gradient orientation + magnitude so the surrounding shades
   // shift each round — sometimes lighter on top, sometimes on the bottom;
