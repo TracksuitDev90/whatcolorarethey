@@ -538,5 +538,14 @@
     "color": { "hex": "#F2D74E", "name": "Charlie Brown Yellow" },
     "image": "assets/photos/charlie-brown-shirt.png",
     "verified": true
+  },
+  {
+    "id": "blue-ranger",
+    "type": "item",
+    "name": "Blue Ranger's suit",
+    "show": "Mighty Morphin Power Rangers",
+    "color": { "hex": "#3969BE", "name": "Blue Ranger Blue" },
+    "image": "assets/photos/blue-ranger.png",
+    "verified": true
   }
 ]

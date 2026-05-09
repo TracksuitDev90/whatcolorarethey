@@ -1,7 +1,9 @@
 // Quad-mode board: four visually distinct color swatches, one of which is
-// the correct color. Distractors are picked from a curated cartoon palette,
-// scored by HSL distance from the correct color so the wrong options are
-// far in hue or lightness — never a near-shade like the grid version.
+// the correct color. Distractors come from a curated cartoon palette. To
+// keep the round from being too easy, one distractor is a "plausible near
+// miss" (e.g. red for a pink correct) and the other two are pulled from
+// further around the hue wheel — but every swatch must still read as a
+// different tone family, so the player never sees two pinks or two blues.
 
 import { hexToHsl } from './grid.js';
 
@@ -42,62 +44,108 @@ function hueDistance(a, b) {
   return Math.min(d, 360 - d);
 }
 
-// Hue dominates the score, with lightness as a tiebreaker so neutrals
-// (black/white/gray) compete with chromatic colors fairly.
+// Distance score used to rank candidates. Hue still dominates, but
+// saturation mismatch matters too — without that weight, white and gray
+// (s = 0, h = 0) read as "close" to a saturated pink at h ≈ 330 simply
+// because of the hue wraparound, and could leak into the plausible slot.
 function colorDistance(a, b) {
   const hd = hueDistance(a.h, b.h) / 180;        // 0..1
   const ld = Math.abs(a.l - b.l) / 100;          // 0..1
   const sd = Math.abs(a.s - b.s) / 100;          // 0..1
-  return hd * 0.7 + ld * 0.25 + sd * 0.05;
+  return hd * 0.5 + ld * 0.2 + sd * 0.4;
+}
+
+// Two colors register as the same tone family when their hue is too close
+// (think two pinks or two blues sitting next to each other). Neutrals
+// (white/gray/black) collapse to the same hue at h=0, so for those we use
+// lightness to tell them apart. A neutral paired with a chromatic color
+// always reads as different tones.
+const HUE_GAP_MIN = 25;
+const NEUTRAL_SAT = 15;
+const NEUTRAL_LIGHT_GAP = 18;
+function distinctTone(a, b) {
+  const aNeutral = a.s < NEUTRAL_SAT;
+  const bNeutral = b.s < NEUTRAL_SAT;
+  if (aNeutral && bNeutral) {
+    return Math.abs(a.l - b.l) > NEUTRAL_LIGHT_GAP;
+  }
+  if (aNeutral !== bNeutral) return true;
+  return hueDistance(a.h, b.h) >= HUE_GAP_MIN;
+}
+
+function shuffle(arr, rng) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
 }
 
 export function buildQuad(correctHex, { seed = 0 } = {}) {
   const correct = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 31);
 
-  // Score every palette color, sort most-different first.
   const scored = QUAD_PALETTE
     .filter(hex => hex.toUpperCase() !== correctHex.toUpperCase())
-    .map(hex => ({ hex, hsl: hexToHsl(hex) }))
-    .map(p => ({ ...p, dist: colorDistance(correct, p.hsl) }))
-    .sort((a, b) => b.dist - a.dist);
+    .map(hex => ({ hex: hex.toUpperCase(), hsl: hexToHsl(hex) }))
+    .map(p => ({ ...p, dist: colorDistance(correct, p.hsl) }));
 
-  // Take the top half of the candidates and shuffle — that way the picks
-  // are always far from correct, but vary day-to-day rather than always
-  // being the same three "most opposite" colors.
-  const pool = scored.slice(0, Math.max(6, Math.ceil(scored.length / 2)));
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+  const chosen = [{ hex: correctHex.toUpperCase(), hsl: correct }];
+  const distinctFromChosen = (cand) =>
+    chosen.every(c => distinctTone(cand.hsl, c.hsl));
+  const alreadyPicked = (cand) =>
+    chosen.some(c => c.hex === cand.hex);
+
+  // Sort all candidates closest-first, dropping anything that reads as the
+  // same tone family as the correct color (so we never offer a near-shade
+  // that's effectively "the same color").
+  const ranked = [...scored]
+    .sort((a, b) => a.dist - b.dist)
+    .filter(c => distinctTone(c.hsl, correct));
+
+  // Plausible "near miss": closest distinct candidate. Sample from the top
+  // three so the pick varies day to day rather than being identical every
+  // round, while staying anchored on genuinely close colors.
+  const closeBucket = ranked.slice(0, 3);
+  shuffle(closeBucket, rng);
+  if (closeBucket.length) chosen.push(closeBucket[0]);
+
+  // Two further-away distractors. Pull from the next slice of the ranked
+  // list — colors that are clearly different from correct, but still
+  // recognizable cartoon hues a player might consider. Skipping the very
+  // tail keeps neutrals like white/gray/black from dominating chromatic
+  // rounds (they should appear sometimes, not every time).
+  const midBucket = ranked.slice(3, 8);
+  shuffle(midBucket, rng);
+  for (const cand of midBucket) {
+    if (chosen.length >= BOX_COUNT) break;
+    if (alreadyPicked(cand)) continue;
+    if (distinctFromChosen(cand)) chosen.push(cand);
   }
 
-  // Greedy pick: each distractor must also be visually distinct from the
-  // distractors already chosen, so the four boxes never look like a pair.
-  const distractors = [];
-  const MIN_SIBLING_DIST = 0.22;
-  for (const cand of pool) {
-    if (distractors.length >= BOX_COUNT - 1) break;
-    const tooClose = distractors.some(d =>
-      colorDistance(cand.hsl, hexToHsl(d)) < MIN_SIBLING_DIST
-    );
-    if (!tooClose) distractors.push(cand.hex);
+  // Backstop: if the mid pool was thin (e.g. small palette after filtering),
+  // fall back to the rest of the ranked list to fill any remaining slots so
+  // the board always has four entries.
+  for (const cand of ranked) {
+    if (chosen.length >= BOX_COUNT) break;
+    if (alreadyPicked(cand)) continue;
+    if (distinctFromChosen(cand)) chosen.push(cand);
   }
-  // Backstop: if the diversity filter starved us, fill from the remaining
-  // pool in order. Means occasionally two distractors land closer together,
-  // but the game never crashes on an oddly-positioned correct color.
-  for (const cand of pool) {
-    if (distractors.length >= BOX_COUNT - 1) break;
-    if (!distractors.includes(cand.hex)) distractors.push(cand.hex);
+  for (const cand of ranked) {
+    if (chosen.length >= BOX_COUNT) break;
+    if (alreadyPicked(cand)) continue;
+    chosen.push(cand);
   }
 
   const correctIndex = Math.floor(rng() * BOX_COUNT);
+  const distractors = chosen.slice(1);
+  shuffle(distractors, rng);
   const boxes = [];
   let di = 0;
   for (let i = 0; i < BOX_COUNT; i++) {
     if (i === correctIndex) {
       boxes.push({ index: i, hex: correctHex.toUpperCase(), isCorrect: true });
     } else {
-      boxes.push({ index: i, hex: distractors[di++].toUpperCase(), isCorrect: false });
+      boxes.push({ index: i, hex: distractors[di++].hex, isCorrect: false });
     }
   }
 
