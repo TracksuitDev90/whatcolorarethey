@@ -547,5 +547,23 @@
     "color": { "hex": "#3969BE", "name": "Blue Ranger Blue" },
     "image": "assets/photos/blue-ranger.png",
     "verified": true
+  },
+  {
+    "id": "green-ranger",
+    "type": "item",
+    "name": "Green Ranger's suit",
+    "show": "Mighty Morphin Power Rangers",
+    "color": { "hex": "#327853", "name": "Green Ranger Green" },
+    "image": "assets/photos/green-ranger.png",
+    "verified": true
+  },
+  {
+    "id": "george-jetsons-belt",
+    "type": "item",
+    "name": "George Jetson's belt",
+    "show": "The Jetsons",
+    "color": { "hex": "#17621C", "name": "George Jetson Belt Green" },
+    "image": "assets/photos/george-jetsons-belt.png",
+    "verified": true
   }
 ]

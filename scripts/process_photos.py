@@ -171,7 +171,7 @@ ASSIGNMENTS = {
     "mandy-flower":             "IMG_0482.jpeg",
     "red-guy":                  "IMG_0485.webp",
     "courage":                  "IMG_0486.webp",
-    "heathcliff":               "IMG_0487.png",
+    "heathcliff":               "IMG_0530.webp",
     "the-brain":                "IMG_0489.webp",
     "bloo":                     "IMG_0508.webp",
     "the-mask":                 "IMG_0507.jpeg",
@@ -181,6 +181,9 @@ ASSIGNMENTS = {
     "strawberry-shortcake-hat": "IMG_0499.jpeg",
     "muscle-man":               "IMG_0500.webp",
     "amethyst":                 "IMG_0501.webp",
+    "green-ranger":             "IMG_0525.webp",
+    "george-jetsons-belt":      "IMG_0527.webp",
+    "astro":                    "IMG_0529.webp",
 }
 
 
