@@ -17,9 +17,7 @@ import {
 
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
-// Daily round cap is paused for testing — pool size effectively becomes the
-// cap. Restore to 3 to re-enable the daily limit.
-const ROUNDS_PER_DAY = 9999;
+const ROUNDS_PER_DAY = 3;
 
 const els = {
   img: document.getElementById('character-img'),
@@ -486,7 +484,7 @@ function updateSkipButton() {
   const canSkip = !s.revealed && !s.finished && s.skipsLeft > 0;
   els.skip.hidden = !canSkip;
   els.skip.disabled = !canSkip;
-  els.skip.textContent = `Skip · ${s.skipsLeft} left`;
+  els.skip.textContent = `Skip (${s.skipsLeft} of ${s.maxSkips} left)`;
 }
 
 els.tabItems.addEventListener('click', () => setMode('items'));
@@ -768,23 +766,6 @@ function flash(el, cls) {
   void el.offsetWidth;
   el.classList.add(cls);
   setTimeout(() => el.classList.remove(cls), 500);
-}
-
-// Temporary restart-for-testing button. Clears the per-day game state and
-// best-streak record so a fresh run starts on reload. Remove once the
-// daily limit / streak persistence work is finished.
-const restartBtn = document.getElementById('restart-btn');
-if (restartBtn) {
-  restartBtn.addEventListener('click', () => {
-    try {
-      localStorage.removeItem('wcat:daily');
-      localStorage.removeItem('wcat:bestStreak');
-    } catch { /* private mode — nothing to clear */ }
-    const url = new URL(window.location.href);
-    url.search = '';
-    url.hash = '';
-    window.location.replace(url.toString());
-  });
 }
 
 // Surface MAX_SKIPS_PER_MODE for ad-hoc debugging in the console without

@@ -4,6 +4,12 @@
 
 const CHARACTERS_PER_DAY = 3;
 
+// Day 0 of the rotation. Day index 0 picks the first slice of the pool;
+// each subsequent day advances by CHARACTERS_PER_DAY so every entry surfaces
+// once before any repeat. New characters appended later don't disturb the
+// already-played schedule — they only show up on later days.
+const ROTATION_EPOCH = '2026-05-09';
+
 export function getUtcDateKey(now = new Date()) {
   const y = now.getUTCFullYear();
   const m = String(now.getUTCMonth() + 1).padStart(2, '0');
@@ -31,15 +37,49 @@ function mulberry32(seed) {
   };
 }
 
+function parseUtcDateKey(key) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(key);
+  if (!m) return Date.UTC(2026, 4, 9);
+  return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+
+function daysBetween(fromKey, toKey) {
+  const ms = parseUtcDateKey(toKey) - parseUtcDateKey(fromKey);
+  return Math.floor(ms / 86400000);
+}
+
+function shuffleSeeded(items, seed) {
+  const out = items.slice();
+  const rng = mulberry32(seed);
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+// Walks deterministically through the pool, `count` per day starting from
+// ROTATION_EPOCH. Within a single cycle every entry appears exactly once
+// before any repeat. Each subsequent cycle uses a different seeded shuffle
+// so re-runs of the deck don't feel identical.
 export function pickDailyCharacters(allCharacters, dateKey, count = CHARACTERS_PER_DAY) {
   if (!allCharacters?.length) return [];
-  const rng = mulberry32(hashString(`daily:${dateKey}`));
-  const pool = allCharacters.slice();
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+  const len = allCharacters.length;
+  const dayIndex = Math.max(0, daysBetween(ROTATION_EPOCH, dateKey));
+  let offset = dayIndex * count;
+  const baseOrder = allCharacters.slice();
+
+  const result = [];
+  while (result.length < Math.min(count, len)) {
+    const cycle = Math.floor(offset / len);
+    const within = offset % len;
+    const ordered = cycle === 0
+      ? baseOrder
+      : shuffleSeeded(baseOrder, hashString(`rotation:cycle:${cycle}`));
+    result.push(ordered[within]);
+    offset += 1;
   }
-  return pool.slice(0, Math.min(count, pool.length));
+  return result;
 }
 
 // Non-deterministic Fisher-Yates. Used for the live game so every visit

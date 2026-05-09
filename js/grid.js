@@ -74,6 +74,20 @@ const SAT_STEP_MAX = 6;
 const HUE_STEP_MIN = 4;
 const HUE_STEP_MAX = 6;
 
+// Neutral-mode steps. When the correct color is gray/white/black, the
+// chromatic sweep barely moves — base.s ≈ 0 leaves nothing to subtract from,
+// so distractors come out almost identical to the correct cell. For those
+// rounds we widen the lightness sweep and tint distractors instead of
+// de-tinting them, so neighbors are clearly distinguishable from the neutral
+// correct color.
+const NEUTRAL_SAT_THRESHOLD = 14;
+const NEUTRAL_LIGHT_STEP_MIN = 14;
+const NEUTRAL_LIGHT_STEP_MAX = 18;
+const NEUTRAL_TINT_STEP_MIN = 18;
+const NEUTRAL_TINT_STEP_MAX = 26;
+const NEUTRAL_HUE_STEP_MIN = 35;
+const NEUTRAL_HUE_STEP_MAX = 55;
+
 export function buildGrid(
   correctHex,
   { rows = 4, cols = 4, seed = 0, avoidRow = null, avoidCol = null } = {},
@@ -98,9 +112,39 @@ export function buildGrid(
   // sometimes a wider hue sweep, sometimes a tight one.
   const lightDir = rng() < 0.5 ? -1 : 1;
   const hueDir = rng() < 0.5 ? -1 : 1;
-  const lightStep = LIGHT_STEP_MIN + rng() * (LIGHT_STEP_MAX - LIGHT_STEP_MIN);
-  const satStep = SAT_STEP_MIN + rng() * (SAT_STEP_MAX - SAT_STEP_MIN);
-  const hueStep = HUE_STEP_MIN + rng() * (HUE_STEP_MAX - HUE_STEP_MIN);
+
+  const isNeutral = base.s < NEUTRAL_SAT_THRESHOLD;
+  const lightStep = isNeutral
+    ? NEUTRAL_LIGHT_STEP_MIN + rng() * (NEUTRAL_LIGHT_STEP_MAX - NEUTRAL_LIGHT_STEP_MIN)
+    : LIGHT_STEP_MIN + rng() * (LIGHT_STEP_MAX - LIGHT_STEP_MIN);
+  const satStep = isNeutral
+    ? NEUTRAL_TINT_STEP_MIN + rng() * (NEUTRAL_TINT_STEP_MAX - NEUTRAL_TINT_STEP_MIN)
+    : SAT_STEP_MIN + rng() * (SAT_STEP_MAX - SAT_STEP_MIN);
+  const hueStep = isNeutral
+    ? NEUTRAL_HUE_STEP_MIN + rng() * (NEUTRAL_HUE_STEP_MAX - NEUTRAL_HUE_STEP_MIN)
+    : HUE_STEP_MIN + rng() * (HUE_STEP_MAX - HUE_STEP_MIN);
+
+  // For chromatic colors the neighbor sweep anchors on the correct hue so
+  // the gradient flows through it. For neutrals the correct cell has no
+  // meaningful hue, so we roll a random anchor hue per round (otherwise
+  // every neutral round defaults to red-tinted distractors).
+  const neighborHueAnchor = isNeutral ? rng() * 360 : base.h;
+
+  // White/black are at the extremes of lightness — same-row neighbors can't
+  // sweep above 100 or below 0, which would paint them identical to the
+  // correct cell. Pull the neighbor base toward the middle so the gradient
+  // can step in either direction.
+  let neighborLightAnchor = base.l;
+  if (isNeutral) {
+    if (neighborLightAnchor > 90) neighborLightAnchor = 90;
+    else if (neighborLightAnchor < 10) neighborLightAnchor = 10;
+  }
+  // For neutrals, force the lightness sweep AWAY from the extreme so the
+  // grid uses the full available range no matter where the correct cell
+  // sits. Bright neutrals (white, light gray) step darker; dark neutrals
+  // (black, dark gray) step lighter. Magnitude depends on distance from
+  // correctRow so cells above and below are equally differentiated.
+  const neutralLightSign = base.l > 50 ? 1 : -1;
 
   const cells = [];
   for (let r = 0; r < rows; r++) {
@@ -112,9 +156,17 @@ export function buildGrid(
       }
       const dRow = r - correctRow;
       const dCol = c - correctCol;
-      const l = clamp(base.l - lightDir * dRow * lightStep, 8, 96);
-      const s = clamp(base.s - Math.abs(dCol) * satStep, 5, 100);
-      const h = base.h + hueDir * dCol * hueStep;
+      const l = isNeutral
+        ? clamp(neighborLightAnchor - neutralLightSign * Math.abs(dRow) * lightStep, 8, 96)
+        : clamp(neighborLightAnchor - lightDir * dRow * lightStep, 8, 96);
+      // Chromatic rounds: distractors lose saturation as you move from
+      // correct (matching the existing photo-vs-grid feel). Neutral rounds:
+      // distractors gain saturation as you move from correct, so the
+      // surrounding cells visibly tint away from the gray/white anchor.
+      const s = isNeutral
+        ? clamp(Math.abs(dCol) * satStep + 8, 5, 90)
+        : clamp(base.s - Math.abs(dCol) * satStep, 5, 100);
+      const h = neighborHueAnchor + hueDir * dCol * hueStep;
       row.push({
         row: r,
         col: c,
