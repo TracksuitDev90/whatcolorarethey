@@ -360,15 +360,6 @@
     "verified": true
   },
   {
-    "id": "blue-ranger",
-    "name": "Blue Ranger",
-    "era": "90s",
-    "color": { "hex": "#1B5BD0", "name": "Blue Ranger Blue" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Billy_Cranston",
-    "image": "assets/photos/blue-ranger.png",
-    "verified": true
-  },
-  {
     "id": "ice-king",
     "name": "Ice King",
     "era": "00s",

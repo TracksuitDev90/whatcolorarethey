@@ -37,8 +37,6 @@ PRECROP = {
     "IMG_0446.jpeg": {"bottom": 0.10},   # Stitch - GalleryPops watermark
     # New additions
     "IMG_0489.webp": {"bottom": 0.26, "left": 0.14},  # The Brain - WB watermark
-    "IMG_0492.jpeg": {"right": 0.55},                  # The Mask - drop other characters
-    "IMG_0493.jpeg": {"left": 0.34, "right": 0.08},    # Jerry - drop Tom
     "IMG_0496.jpeg": {"bottom": 0.05},                 # Charlie Brown - "Alamy" watermark
     "IMG_0447.jpeg": {"bottom": 0.32},                 # Cookie Monster - drop cookies/plate so head fits
 }
@@ -70,7 +68,7 @@ ASSIGNMENTS = {
     "grimace":               "IMG_0366.webp",
     "tweety":                "IMG_0368.png",
     "mr-krabs":              "IMG_0371.png",
-    "crash-bandicoot":       "IMG_0372.png",
+    "crash-bandicoot":       "IMG_0502.webp",
     "bugs-bunny":            "IMG_0373.png",
     "squirtle":              "IMG_0374.webp",
     "smurfs":                "IMG_0375.png",
@@ -150,11 +148,11 @@ ASSIGNMENTS = {
     "homer-simpson":          "IMG_0449.webp",
     "jigglypuff":             "IMG_0450.webp",
     "jenny-xj9":              "IMG_0451.webp",
-    "pink-panther":           "IMG_0452.png",
+    "pink-panther":           "IMG_0523.webp",
     "slimer":                 "IMG_0453.jpeg",
     "perry-the-platypus":     "IMG_0454.jpeg",
-    "him":                    "IMG_0459.png",
-    "ice-king":               "IMG_0461.jpeg",
+    "him":                    "IMG_0520.webp",
+    "ice-king":               "IMG_0510.jpeg",
     "blue-ranger":            "IMG_0463.jpeg",
     "genie":                  "IMG_0468.jpeg",
     "rocko":                  "IMG_0469.webp",
@@ -163,7 +161,7 @@ ASSIGNMENTS = {
     # ---- Items (quad mode), Disney additions ----
     "vanellope-hoodie":         "IMG_0471.jpeg",
     "snow-white-dress-lower":   "IMG_0472.webp",
-    "jessica-rabbit-hair":      "IMG_0473.jpeg",
+    "jessica-rabbit-hair":      "IMG_0521.webp",
     "dr-facilier-vest":         "IMG_0474.webp",
     # ---- Newest additions ----
     "mystery-machine-text":     "IMG_0477.jpeg",
@@ -175,9 +173,9 @@ ASSIGNMENTS = {
     "courage":                  "IMG_0486.webp",
     "heathcliff":               "IMG_0487.png",
     "the-brain":                "IMG_0489.webp",
-    "bloo":                     "IMG_0491.jpeg",
-    "the-mask":                 "IMG_0492.jpeg",
-    "jerry":                    "IMG_0493.jpeg",
+    "bloo":                     "IMG_0508.webp",
+    "the-mask":                 "IMG_0507.jpeg",
+    "jerry":                    "IMG_0505.png",
     "charlie-brown-shirt":      "IMG_0496.jpeg",
     "pluto":                    "IMG_0498.webp",
     "strawberry-shortcake-hat": "IMG_0499.jpeg",

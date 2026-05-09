@@ -47,8 +47,6 @@ const els = {
   skipsChip: document.getElementById('skips-chip'),
   tabItems: document.getElementById('tab-items'),
   tabGrid: document.getElementById('tab-grid'),
-  swipeHint: document.getElementById('swipe-hint'),
-  swipeHintText: document.getElementById('swipe-hint-text'),
 };
 
 // Each tab is a separate experience: items use the 4-swatch quad and
@@ -112,7 +110,6 @@ async function tryRenderSharedView(s, allCharacters) {
   els.quad.hidden = true;
   els.skip.hidden = true;
   els.next.hidden = true;
-  els.swipeHint?.classList.remove('swipe-hint--visible');
   els.name.textContent = '';
   const wins = snap.rounds.filter(r => r.won).length;
   els.status.textContent = `Shared result · ${snap.date} · ${wins} of ${snap.rounds.length} solved`;
@@ -265,7 +262,6 @@ function renderRound() {
 
   updateChips();
   updateSkipButton();
-  updateSwipeHint();
 }
 
 function promptText(c) {
@@ -473,7 +469,6 @@ function revealRound(announce = true, skipped = false) {
     els.next.focus();
   }
   updateChips();
-  updateSwipeHint();
 }
 
 function updateChips() {
@@ -492,32 +487,6 @@ function updateSkipButton() {
   els.skip.hidden = !canSkip;
   els.skip.disabled = !canSkip;
   els.skip.textContent = `Skip · ${s.skipsLeft} left`;
-}
-
-function updateSwipeHint() {
-  if (!els.swipeHint) return;
-  const s = game.snapshot();
-  if (s.finished) {
-    els.swipeHint.classList.remove('swipe-hint--visible');
-    return;
-  }
-  const revealed = s.revealed;
-  const lastRound = s.roundIndex >= s.totalRounds - 1;
-  if (revealed && lastRound) {
-    els.swipeHint.classList.remove('swipe-hint--visible');
-    return;
-  }
-  els.swipeHint.classList.add('swipe-hint--visible');
-  if (revealed) {
-    els.swipeHintText.textContent = 'Swipe for next';
-    els.swipeHint.classList.remove('swipe-hint--depleted');
-  } else if (s.skipsLeft > 0) {
-    els.swipeHintText.textContent = `Swipe to skip · ${s.skipsLeft} left`;
-    els.swipeHint.classList.remove('swipe-hint--depleted');
-  } else {
-    els.swipeHintText.textContent = 'No skips left';
-    els.swipeHint.classList.add('swipe-hint--depleted');
-  }
 }
 
 els.tabItems.addEventListener('click', () => setMode('items'));
@@ -740,7 +709,6 @@ async function showFinished() {
   els.next.hidden = true;
   els.skip.hidden = true;
   els.status.textContent = '';
-  els.swipeHint?.classList.remove('swipe-hint--visible');
 
   const wins = s.rounds.filter(r => r.won).length;
   const skipped = s.rounds.filter(r => r.skipped).length;
