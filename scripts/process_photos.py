@@ -39,6 +39,9 @@ PRECROP = {
     "IMG_0489.webp": {"bottom": 0.26, "left": 0.14},  # The Brain - WB watermark
     "IMG_0496.jpeg": {"bottom": 0.05},                 # Charlie Brown - "Alamy" watermark
     "IMG_0447.jpeg": {"bottom": 0.32},                 # Cookie Monster - drop cookies/plate so head fits
+    # Him sits small on a wide couch — peel back the empty couch back/sides
+    # so he actually fills the 4:3 frame.
+    "IMG_0520.webp": {"top": 0.13, "bottom": 0.03, "left": 0.08, "right": 0.08},
 }
 
 # After precrop + cover_crop strategy is selected, shift the centred crop
@@ -55,6 +58,24 @@ COVER_OFFSET = {
 # its source crop.
 EXPAND = {
     "IMG_0438.jpeg": {"top": 0.18, "bottom": 0.12, "left": 0.12, "right": 0.12},
+}
+
+# Bypass the is_solid_background heuristic and always cover-crop the source.
+# Use for full-bleed scene shots whose corners happen to be uniformly
+# coloured (eg. Him on a pink couch, or Tito on a dim porch with dark edges)
+# — without this they get treated as isolated subjects and end up with a
+# coloured pad band around them.
+FORCE_COVER = {
+    "IMG_0520.webp",  # Him - all four corners pink
+    "IMG_0547.png",   # Tito Makani - corners near-black, RGBA fully opaque
+}
+
+# Per-image override of the bbox padding fraction used by isolated_subject.
+# Default is PADDING_FRAC; lowering it lets a tall, headshot-style subject
+# fill more of the eventual 4:3 frame instead of getting a sash of bg colour
+# above and below.
+PADDING_OVERRIDE = {
+    "IMG_0385.jpeg": 0.01,  # Kermit - tighten so he fills the frame vertically
 }
 
 # Mapping of every character/item ID to its source file. Character entries
@@ -184,6 +205,16 @@ ASSIGNMENTS = {
     "green-ranger":             "IMG_0525.webp",
     "george-jetsons-belt":      "IMG_0527.webp",
     "astro":                    "IMG_0529.webp",
+    # ---- Latest additions ----
+    "bobby-hill-shirt":         "IMG_0531.jpeg",
+    "kyle-hair":                "IMG_0532.webp",
+    "sharingan":                "IMG_0534.webp",
+    "leela-hair":               "IMG_0537.jpeg",
+    "family-guy-stationwagon":  "IMG_0539.png",
+    "chopper":                  "IMG_0541.png",
+    "zoro-hair":                "IMG_0544.png",
+    "ed-bighead":               "IMG_0545.png",
+    "tito-makani":              "IMG_0547.png",
 }
 
 
@@ -281,7 +312,7 @@ def expand_to_aspect(bbox, ratio):
     return (round(x0), round(y0), round(x1), round(y1))
 
 
-def isolated_subject_to_4_3(img):
+def isolated_subject_to_4_3(img, padding_frac=PADDING_FRAC):
     """Tightly crop a flat-background subject to its bbox + a small
     breathing margin, then pad with the bg colour out to 4:3."""
     w, h = img.size
@@ -289,8 +320,8 @@ def isolated_subject_to_4_3(img):
     bx0, by0, bx1, by1 = bbox
     bw, bh = bx1 - bx0, by1 - by0
 
-    pad_x = bw * PADDING_FRAC
-    pad_y = bh * PADDING_FRAC
+    pad_x = bw * padding_frac
+    pad_y = bh * padding_frac
     bbox = (bx0 - pad_x, by0 - pad_y, bx1 + pad_x, by1 + pad_y)
 
     target = expand_to_aspect(bbox, TARGET_RATIO)
@@ -404,7 +435,8 @@ def process(src_path, dst_path):
     img = expand_with_bg(img, src_path.name)
     img = precrop(img, src_path.name)
 
-    if not is_solid_background(img):
+    use_cover = src_path.name in FORCE_COVER or not is_solid_background(img)
+    if use_cover:
         offset = COVER_OFFSET.get(src_path.name, {})
         cropped = cover_crop(
             img,
@@ -413,7 +445,10 @@ def process(src_path, dst_path):
             y_shift=offset.get("y", 0.5),
         )
     else:
-        cropped = isolated_subject_to_4_3(img)
+        cropped = isolated_subject_to_4_3(
+            img,
+            padding_frac=PADDING_OVERRIDE.get(src_path.name, PADDING_FRAC),
+        )
 
     # Cap at a sensible maximum so retina screens stay sharp without
     # shipping huge PNGs to phones. 2400 keeps source detail on hi-DPI

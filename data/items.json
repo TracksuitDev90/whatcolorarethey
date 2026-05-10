@@ -565,5 +565,59 @@
     "color": { "hex": "#17621C", "name": "George Jetson Belt Green" },
     "image": "assets/photos/george-jetsons-belt.png",
     "verified": true
+  },
+  {
+    "id": "sharingan",
+    "type": "item",
+    "name": "The Sharingan",
+    "show": "Naruto",
+    "color": { "hex": "#B63331", "name": "Sharingan Red" },
+    "image": "assets/photos/sharingan.png",
+    "verified": true
+  },
+  {
+    "id": "bobby-hill-shirt",
+    "type": "item",
+    "name": "Bobby Hill's shirt",
+    "show": "King of the Hill",
+    "color": { "hex": "#567277", "name": "Bobby Shirt Slate" },
+    "image": "assets/photos/bobby-hill-shirt.png",
+    "verified": true
+  },
+  {
+    "id": "kyle-hair",
+    "type": "item",
+    "name": "Kyle's hair",
+    "show": "South Park",
+    "color": { "hex": "#C13524", "name": "Kyle Hair Red" },
+    "image": "assets/photos/kyle-hair.png",
+    "verified": true
+  },
+  {
+    "id": "family-guy-stationwagon",
+    "type": "item",
+    "name": "The Griffins' station wagon",
+    "show": "Family Guy",
+    "color": { "hex": "#D63540", "name": "Griffin Wagon Red" },
+    "image": "assets/photos/family-guy-stationwagon.png",
+    "verified": true
+  },
+  {
+    "id": "leela-hair",
+    "type": "item",
+    "name": "Leela's hair",
+    "show": "Futurama",
+    "color": { "hex": "#590A65", "name": "Leela Hair Purple" },
+    "image": "assets/photos/leela-hair.png",
+    "verified": true
+  },
+  {
+    "id": "zoro-hair",
+    "type": "item",
+    "name": "Zoro's hair",
+    "show": "One Piece",
+    "color": { "hex": "#9FE35F", "name": "Zoro Hair Green" },
+    "image": "assets/photos/zoro-hair.png",
+    "verified": true
   }
 ]

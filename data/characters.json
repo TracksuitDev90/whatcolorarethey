@@ -460,5 +460,32 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Astro_(The_Jetsons)",
     "image": "assets/photos/astro.png",
     "verified": true
+  },
+  {
+    "id": "chopper",
+    "name": "Tony Tony Chopper",
+    "era": "00s",
+    "color": { "hex": "#CDA77B", "name": "Chopper Tan" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Tony_Tony_Chopper",
+    "image": "assets/photos/chopper.png",
+    "verified": true
+  },
+  {
+    "id": "ed-bighead",
+    "name": "Ed Bighead",
+    "era": "90s",
+    "color": { "hex": "#97C23B", "name": "Bighead Green" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Rocko%27s_Modern_Life",
+    "image": "assets/photos/ed-bighead.png",
+    "verified": true
+  },
+  {
+    "id": "tito-makani",
+    "name": "Tito Makani",
+    "era": "00s",
+    "color": { "hex": "#E05D30", "name": "Tito Orange" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Rocket_Power",
+    "image": "assets/photos/tito-makani.png",
+    "verified": true
   }
 ]
