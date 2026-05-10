@@ -42,6 +42,9 @@ PRECROP = {
     # Him sits small on a wide couch — peel back the empty couch back/sides
     # so he actually fills the 4:3 frame.
     "IMG_0520.webp": {"top": 0.13, "bottom": 0.03, "left": 0.08, "right": 0.08},
+    # Boo Boo source has a 1px black border baked into the PNG — strip a
+    # thin sliver from each side so the cover-crop doesn't preserve it.
+    "IMG_0395.png": {"top": 0.01, "bottom": 0.01, "left": 0.01, "right": 0.01},
 }
 
 # After precrop + cover_crop strategy is selected, shift the centred crop
@@ -49,8 +52,6 @@ PRECROP = {
 # the top/left, >0.5 keep more of the bottom/right. Used to nudge framing
 # when the subject sits off-centre in the source.
 COVER_OFFSET = {
-    "IMG_0438.jpeg": {"y": 0.30},   # Danny Phantom - keep more headroom
-    "IMG_0525.webp": {"y": 0.05},   # Green Ranger - top half (head + torso)
 }
 
 # Pad the source with the sampled background colour before any other
@@ -58,7 +59,6 @@ COVER_OFFSET = {
 # that side. Useful for "zooming out" on a subject that sits too tight in
 # its source crop.
 EXPAND = {
-    "IMG_0438.jpeg": {"top": 0.18, "bottom": 0.12, "left": 0.12, "right": 0.12},
 }
 
 # Bypass the is_solid_background heuristic and always cover-crop the source.
@@ -69,6 +69,14 @@ EXPAND = {
 FORCE_COVER = {
     "IMG_0520.webp",  # Him - all four corners pink
     "IMG_0547.png",   # Tito Makani - corners near-black, RGBA fully opaque
+    # Cartoon scene crops where the subject sits centred against a flat-ish
+    # bg. Without FORCE_COVER they'd be detected as isolated subjects, get a
+    # tight bbox, then get padded back out to 4:3 with the bg colour — so the
+    # subject ends up small inside a wide coloured band. cover_crop instead
+    # keeps the source full-bleed and just trims to 4:3.
+    "IMG_0395.png",   # Boo Boo - light gray scene
+    "IMG_0464.png",   # Fred Flintstone - khaki scene
+    "IMG_0438.jpeg",  # Danny Phantom - teal locker scene
 }
 
 # Per-image override of the bbox padding fraction used by isolated_subject.
@@ -159,7 +167,7 @@ ASSIGNMENTS = {
     # Scooby collar reuses the same source as the full-body Scooby photo.
     "scooby-doo-collar":      "IMG_0384.webp",
     # ---- Items (quad mode), more cartoons ----
-    "brock-vest":             "IMG_0441.jpeg",
+    "brock-vest":             "IMG_0550.webp",
     "catdog-nose":            "IMG_0443.webp",
     "finn-hair":              "IMG_0444.jpeg",
     "mabel-shirt":            "IMG_0455.webp",
@@ -175,7 +183,7 @@ ASSIGNMENTS = {
     "perry-the-platypus":     "IMG_0454.jpeg",
     "him":                    "IMG_0520.webp",
     "ice-king":               "IMG_0510.jpeg",
-    "blue-ranger":            "IMG_0463.jpeg",
+    "blue-ranger":            "IMG_0555.webp",
     "genie":                  "IMG_0468.jpeg",
     "rocko":                  "IMG_0469.webp",
     "ursula":                 "IMG_0475.jpeg",
@@ -203,7 +211,8 @@ ASSIGNMENTS = {
     "strawberry-shortcake-hat": "IMG_0499.jpeg",
     "muscle-man":               "IMG_0500.webp",
     "amethyst":                 "IMG_0501.webp",
-    "green-ranger":             "IMG_0525.webp",
+    "green-ranger":             "IMG_0557.webp",
+    "black-ranger":             "IMG_0558.webp",
     "george-jetsons-belt":      "IMG_0527.webp",
     "astro":                    "IMG_0529.webp",
     # ---- Latest additions ----
@@ -398,14 +407,25 @@ def cover_crop(img, ratio, x_shift=0.5, y_shift=0.5):
     w, h = img.size
     cur = w / h
     if abs(cur - ratio) < 1e-3:
-        return img.convert("RGB")
-    if cur > ratio:
+        cropped = img
+    elif cur > ratio:
         new_w = round(h * ratio)
         x0 = int(round((w - new_w) * x_shift))
-        return img.crop((x0, 0, x0 + new_w, h)).convert("RGB")
-    new_h = round(w / ratio)
-    y0 = int(round((h - new_h) * y_shift))
-    return img.crop((0, y0, w, y0 + new_h)).convert("RGB")
+        cropped = img.crop((x0, 0, x0 + new_w, h))
+    else:
+        new_h = round(w / ratio)
+        y0 = int(round((h - new_h) * y_shift))
+        cropped = img.crop((0, y0, w, y0 + new_h))
+    # Flatten transparency over the sampled bg colour. A direct .convert("RGB")
+    # would render alpha=0 pixels as black, which leaves a black halo around
+    # cut-out subjects (e.g. the Blue Ranger PNG where one opaque corner
+    # disqualifies it from the isolated-subject path).
+    if cropped.mode == "RGBA":
+        bg = sample_bg(cropped)
+        bg_layer = Image.new("RGB", cropped.size, bg)
+        bg_layer.paste(cropped, mask=cropped.split()[-1])
+        return bg_layer
+    return cropped.convert("RGB")
 
 
 def expand_with_bg(img, name):

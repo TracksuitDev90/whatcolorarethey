@@ -29,16 +29,29 @@ const QUAD_PALETTE = [
 // Themed palettes restrict distractors to colors that "make sense" in the
 // universe of the answer — e.g. for Power Rangers items, only the canonical
 // suit colors should appear so distractors never include a fuchsia or teal
-// that no ranger ever wore.
+// that no ranger ever wore. Same idea for Powerpuff Girls items: distractors
+// come from the trio's canonical color scheme so the player chooses between
+// "is this Blossom's red, Bubbles' blue, or Buttercup's green?" rather than
+// hunting through a generic rainbow.
 const PALETTES = {
+  // Mighty Morphin suit colors. Blue, green, and black are the exact hex
+  // values of the matching Ranger items in items.json so the correct swatch
+  // and the palette agree pixel-for-pixel; the rest are widely-cited fan refs
+  // for the other six suits.
   'power-rangers': [
-    '#D62828', // red
-    '#FFD90F', // yellow
-    '#1A1A1A', // black
-    '#3969BE', // blue
-    '#327853', // green
-    '#FFFFFF', // white
-    '#FF8FB3', // pink
+    '#C8102E', // red ranger
+    '#FFCD00', // yellow ranger
+    '#0B0C0D', // black ranger
+    '#0A71C1', // blue ranger
+    '#2C8335', // green ranger
+    '#FFFFFF', // white ranger
+    '#F46DB7', // pink ranger
+  ],
+  'powerpuff': [
+    '#E63946', // Blossom red bow
+    '#4A90D9', // Bubbles blue
+    '#2ECC71', // Buttercup green
+    '#F371AC', // Powerpuff dress pink
   ],
 };
 
