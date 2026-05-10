@@ -1,5 +1,5 @@
 import { loadCharacters } from './characters.js';
-import { createDailyGame, MAX_SKIPS_PER_MODE } from './game.js';
+import { createDailyGame, onceStorageWriteFailed } from './game.js';
 import {
   getUtcDateKey,
   pickDailyCharacters,
@@ -62,6 +62,7 @@ let cachedShareCanvas = null;
 init();
 
 async function init() {
+  showLoading();
   try {
     const chars = await loadCharacters();
     dateKey = getUtcDateKey();
@@ -74,6 +75,13 @@ async function init() {
     if (sharedParam) {
       const ok = await tryRenderSharedView(sharedParam, chars);
       if (ok) return;
+      // Decode failed (corrupt/expired link). Strip the param so it doesn't
+      // stick around on refresh, surface a one-time toast, then fall through
+      // to the normal daily game.
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('s');
+      window.history.replaceState({}, '', cleanUrl.toString());
+      toast("That share link couldn't be read — showing today's puzzle instead.");
     }
 
     const itemPool = chars.filter(c => c.type === 'item');
@@ -88,9 +96,40 @@ async function init() {
       : null;
     renderHeaders();
     setMode(games.items ? 'items' : 'grid');
+    onceStorageWriteFailed(() => {
+      toast("Your progress won't be saved in this browsing mode.");
+    });
   } catch (err) {
-    console.error(err);
-    els.status.textContent = `Failed to start: ${err.message}`;
+    showInitError(err);
+  }
+}
+
+function showLoading() {
+  els.characterCard.hidden = true;
+  els.board.hidden = true;
+  els.quad.hidden = true;
+  els.status.innerHTML = '<span class="spinner" aria-hidden="true"></span>Loading today\'s puzzle…';
+}
+
+function showInitError(err) {
+  els.characterCard.hidden = true;
+  els.board.hidden = true;
+  els.quad.hidden = true;
+  els.status.innerHTML = '';
+  const msg = document.createElement('span');
+  msg.textContent = "Couldn't load today's puzzle. ";
+  els.status.appendChild(msg);
+  const retry = document.createElement('button');
+  retry.type = 'button';
+  retry.className = 'btn btn--ghost btn--inline';
+  retry.textContent = 'Retry';
+  retry.addEventListener('click', () => { init(); });
+  els.status.appendChild(retry);
+  if (err?.message) {
+    const detail = document.createElement('div');
+    detail.className = 'status-detail';
+    detail.textContent = err.message;
+    els.status.appendChild(detail);
   }
 }
 
@@ -144,6 +183,10 @@ function setMode(next) {
   els.tabItems.setAttribute('aria-selected', mode === 'items' ? 'true' : 'false');
   els.tabGrid.classList.toggle('tab--active', mode === 'grid');
   els.tabGrid.setAttribute('aria-selected', mode === 'grid' ? 'true' : 'false');
+  const stage = document.getElementById('stage');
+  if (stage) {
+    stage.setAttribute('aria-labelledby', mode === 'items' ? 'tab-items' : 'tab-grid');
+  }
   hideShareSlot();
   if (game.snapshot().finished) {
     showFinished();
@@ -658,10 +701,14 @@ if (els.share) {
     if (!cachedShareCanvas) return;
     els.share.disabled = true;
     try {
-      await shareCanvas(cachedShareCanvas, game.snapshot());
+      const result = await shareCanvas(cachedShareCanvas, game.snapshot());
+      if (result?.kind === 'shared') {
+        toast('Shared!');
+      } else if (result?.kind === 'downloaded') {
+        toast('Image saved');
+      }
     } catch (err) {
-      console.error(err);
-      els.status.textContent = `Could not share: ${err.message}`;
+      toast(`Could not share: ${err.message}`);
     } finally {
       els.share.disabled = false;
     }
@@ -781,6 +828,22 @@ function flash(el, cls) {
   setTimeout(() => el.classList.remove(cls), 500);
 }
 
-// Surface MAX_SKIPS_PER_MODE for ad-hoc debugging in the console without
-// touching internal modules.
-window.__wcat = { MAX_SKIPS_PER_MODE };
+let toastTimer = null;
+function toast(message) {
+  let host = document.getElementById('toast');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'toast';
+    host.className = 'toast';
+    host.setAttribute('role', 'status');
+    host.setAttribute('aria-live', 'polite');
+    document.body.appendChild(host);
+  }
+  host.textContent = message;
+  host.classList.add('toast--visible');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    host.classList.remove('toast--visible');
+  }, 3200);
+}
+

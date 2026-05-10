@@ -5,7 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0e1116" />
   <title>What Color Are They?</title>
+  <meta name="description" content="A daily color guessing game. Pick the right shade for an iconic character or item — fresh puzzles every day at UTC midnight." />
+  <!-- TODO(release): replace TODO_PRODUCTION_URL with the canonical site URL. -->
+  <link rel="canonical" href="TODO_PRODUCTION_URL/" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="What Color Are They?" />
+  <meta property="og:title" content="What Color Are They?" />
+  <meta property="og:description" content="A daily color guessing game. Pick the right shade for an iconic character or item." />
+  <meta property="og:url" content="TODO_PRODUCTION_URL/" />
+  <meta property="og:image" content="TODO_PRODUCTION_URL/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="What Color Are They?" />
+  <meta name="twitter:description" content="A daily color guessing game. Pick the right shade for an iconic character or item." />
+  <meta name="twitter:image" content="TODO_PRODUCTION_URL/assets/og-image.png" />
+
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" />
@@ -24,11 +45,11 @@
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Game mode">
-    <button id="tab-items" class="tab tab--active" role="tab" aria-selected="true" type="button">Items</button>
-    <button id="tab-grid" class="tab" role="tab" aria-selected="false" type="button">Characters</button>
+    <button id="tab-items" class="tab tab--active" role="tab" aria-selected="true" aria-controls="stage" type="button">Items</button>
+    <button id="tab-grid" class="tab" role="tab" aria-selected="false" aria-controls="stage" type="button">Characters</button>
   </nav>
 
-  <main class="stage" id="stage">
+  <main class="stage" id="stage" role="tabpanel" aria-labelledby="tab-items">
     <section class="card" id="character-card" aria-label="Character">
       <figure class="photo" id="photo-frame">
         <img id="character-img" alt="" decoding="async" fetchpriority="high" />
