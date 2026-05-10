@@ -471,11 +471,20 @@ function revealRound(announce = true, skipped = false) {
 
 function updateChips() {
   const s = game.snapshot();
-  els.roundChip.textContent = `Round ${s.roundIndex + 1} / ${s.totalRounds}`;
+  // Hide the "/ N" suffix when N is effectively unlimited — it would just
+  // read as noise (e.g. "Round 1 / 999"). Same for skips.
+  // Drop the "/ N" suffix when the daily run is open-ended — surfacing "1 of
+  // 57" reads as a slog rather than an invitation, even though the pool
+  // technically has that many entries.
+  els.roundChip.textContent = s.totalRounds >= 10
+    ? `Round ${s.roundIndex + 1}`
+    : `Round ${s.roundIndex + 1} / ${s.totalRounds}`;
   els.streakChip.textContent = `Streak ${s.streak}`;
   els.bestChip.textContent = `Best ${s.bestStreak}`;
   els.guessesChip.textContent = `Guesses ${s.guessesLeft}`;
-  els.skipsChip.textContent = `Skips ${s.skipsLeft}`;
+  els.skipsChip.textContent = s.maxSkips >= 10
+    ? 'Skip available'
+    : `Skips ${s.skipsLeft}`;
   els.skipsChip.classList.toggle('chip--depleted', s.skipsLeft === 0);
 }
 
@@ -484,7 +493,11 @@ function updateSkipButton() {
   const canSkip = !s.revealed && !s.finished && s.skipsLeft > 0;
   els.skip.hidden = !canSkip;
   els.skip.disabled = !canSkip;
-  els.skip.textContent = `Skip (${s.skipsLeft} of ${s.maxSkips} left)`;
+  // Drop the "X of Y left" suffix when skips are effectively unlimited — the
+  // count would just read as noise (e.g. "Skip (998 of 999)").
+  els.skip.textContent = s.maxSkips >= 10
+    ? 'Skip'
+    : `Skip (${s.skipsLeft} of ${s.maxSkips} left)`;
 }
 
 els.tabItems.addEventListener('click', () => setMode('items'));

@@ -92,7 +92,10 @@ export function createDailyGame(dailyCharacters, dateKey, options = {}) {
       persist();
     }
     if (c.type === 'item') {
-      state.board = buildQuad(c.color.hex, { seed: round.seed });
+      state.board = buildQuad(c.color.hex, {
+        seed: round.seed,
+        palette: c.quadPalette,
+      });
     } else {
       // Look up the previous grid round's correct cell so we can avoid
       // landing on the same (row, col) two rounds in a row. buildGrid is

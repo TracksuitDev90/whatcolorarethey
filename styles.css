@@ -529,10 +529,14 @@ body {
     row-gap: clamp(8px, 1.5vw, 16px);
     align-items: start;
   }
-  .card            { grid-area: photo; align-self: center; }
+  /* Bottom-align the photo and the colour board so their lower edges meet
+     across the column gap — looks like one cohesive widget instead of two
+     stacked strips with mismatched baselines. The title floats up to the
+     start of its row above the board. */
+  .card            { grid-area: photo; align-self: end; }
   .character-title { grid-area: title; align-self: end; }
-  .board           { grid-area: board; align-self: start; max-width: 100%; }
-  .quad            { grid-area: board; align-self: start; max-width: 100%; }
+  .board           { grid-area: board; align-self: end; max-width: 100%; }
+  .quad            { grid-area: board; align-self: end; max-width: 100%; }
   .status          { grid-area: status; }
   .share           { grid-area: share; }
   .countdown       { grid-area: countdown; }

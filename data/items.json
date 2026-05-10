@@ -526,7 +526,7 @@
     "type": "item",
     "name": "Strawberry Shortcake's hat",
     "show": "Strawberry Shortcake",
-    "color": { "hex": "#E03A4D", "name": "Strawberry Hat Red" },
+    "color": { "hex": "#F58FA7", "name": "Strawberry Hat Pink" },
     "image": "assets/photos/strawberry-shortcake-hat.png",
     "verified": true
   },
@@ -546,6 +546,7 @@
     "show": "Mighty Morphin Power Rangers",
     "color": { "hex": "#3969BE", "name": "Blue Ranger Blue" },
     "image": "assets/photos/blue-ranger.png",
+    "quadPalette": "power-rangers",
     "verified": true
   },
   {
@@ -555,6 +556,7 @@
     "show": "Mighty Morphin Power Rangers",
     "color": { "hex": "#327853", "name": "Green Ranger Green" },
     "image": "assets/photos/green-ranger.png",
+    "quadPalette": "power-rangers",
     "verified": true
   },
   {
