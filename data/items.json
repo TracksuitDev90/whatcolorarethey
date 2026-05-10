@@ -195,6 +195,7 @@
     "show": "The Powerpuff Girls",
     "color": { "hex": "#E63946", "name": "Blossom Bow Red" },
     "image": "assets/photos/blossom-bow.png",
+    "quadPalette": "powerpuff",
     "verified": true
   },
   {
@@ -204,6 +205,7 @@
     "show": "The Powerpuff Girls",
     "color": { "hex": "#2ECC71", "name": "Buttercup Green" },
     "image": "assets/photos/buttercup-dress.png",
+    "quadPalette": "powerpuff",
     "verified": true
   },
   {
@@ -544,7 +546,7 @@
     "type": "item",
     "name": "Blue Ranger's suit",
     "show": "Mighty Morphin Power Rangers",
-    "color": { "hex": "#3969BE", "name": "Blue Ranger Blue" },
+    "color": { "hex": "#0A71C1", "name": "Blue Ranger Blue" },
     "image": "assets/photos/blue-ranger.png",
     "quadPalette": "power-rangers",
     "verified": true
@@ -554,8 +556,18 @@
     "type": "item",
     "name": "Green Ranger's suit",
     "show": "Mighty Morphin Power Rangers",
-    "color": { "hex": "#327853", "name": "Green Ranger Green" },
+    "color": { "hex": "#2C8335", "name": "Green Ranger Green" },
     "image": "assets/photos/green-ranger.png",
+    "quadPalette": "power-rangers",
+    "verified": true
+  },
+  {
+    "id": "black-ranger",
+    "type": "item",
+    "name": "Black Ranger's suit",
+    "show": "Mighty Morphin Power Rangers",
+    "color": { "hex": "#0B0C0D", "name": "Black Ranger Black" },
+    "image": "assets/photos/black-ranger.png",
     "quadPalette": "power-rangers",
     "verified": true
   },
