@@ -828,6 +828,24 @@ function flash(el, cls) {
   setTimeout(() => el.classList.remove(cls), 500);
 }
 
+// Temporary hard-reset button for testing. Clears the per-day game state
+// and best-streak record (covers streaks, characters, items, and skips —
+// everything game.js writes to localStorage) so a fresh run starts on
+// reload. Remove once testing is finished.
+const restartBtn = document.getElementById('restart-btn');
+if (restartBtn) {
+  restartBtn.addEventListener('click', () => {
+    try {
+      localStorage.removeItem('wcat:daily');
+      localStorage.removeItem('wcat:bestStreak');
+    } catch { /* private mode — nothing to clear */ }
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    window.location.replace(url.toString());
+  });
+}
+
 let toastTimer = null;
 function toast(message) {
   let host = document.getElementById('toast');
