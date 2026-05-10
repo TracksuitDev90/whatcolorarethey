@@ -272,11 +272,29 @@ function readNumber(key, fallback) {
 }
 
 function writeNumber(key, value) {
-  try { localStorage.setItem(key, String(value)); } catch { /* private mode */ }
+  try { localStorage.setItem(key, String(value)); } catch { reportStorageWriteFailure(); }
 }
 
 function writeJson(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ }
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { reportStorageWriteFailure(); }
+}
+
+// Surface storage write failures to the UI exactly once per session so private-
+// browsing visitors learn their progress won't persist, without a recurring
+// nag every time persist() runs.
+let storageWriteFailed = false;
+let storageFailureListener = null;
+function reportStorageWriteFailure() {
+  if (storageWriteFailed) return;
+  storageWriteFailed = true;
+  if (storageFailureListener) {
+    try { storageFailureListener(); } catch { /* ignore */ }
+  }
+}
+export function onceStorageWriteFailed(listener) {
+  if (typeof listener !== 'function') return;
+  storageFailureListener = listener;
+  if (storageWriteFailed) listener();
 }
 
 function clampInt(n, lo, hi) {

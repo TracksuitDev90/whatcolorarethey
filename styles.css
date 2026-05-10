@@ -160,7 +160,11 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
-  touch-action: pan-y;
+  /* `none` would block vertical page scrolling that starts on the photo;
+     `pan-y` previously left iOS double-tap-to-zoom enabled, which could
+     defeat the grayscale-until-revealed mechanic. `pan-y pinch-zoom` keeps
+     scroll working but suppresses the implicit double-tap-zoom gesture. */
+  touch-action: pan-y pinch-zoom;
   user-select: none;
   -webkit-user-select: none;
   will-change: transform;
@@ -497,6 +501,67 @@ body {
 }
 
 .shake { animation: shake 360ms ease; }
+
+/* ---------- Spinner + inline retry ---------- */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn--inline {
+  padding: 4px 12px;
+  min-height: 0;
+  font-size: inherit;
+  vertical-align: baseline;
+}
+
+.status-detail {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 24px);
+  transform: translate(-50%, 12px);
+  max-width: min(90vw, 420px);
+  padding: 10px 16px;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 14px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+  z-index: 50;
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+  .toast { transition: opacity 200ms ease; transform: translate(-50%, 0); }
+}
 
 /* ---------- Breakpoints ---------- */
 @media (min-width: 700px) {
