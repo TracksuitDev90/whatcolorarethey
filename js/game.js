@@ -22,7 +22,7 @@ const STORAGE_KEYS = {
 const GRID_MAX_GUESSES = 3;
 const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 4;
-export const MAX_SKIPS_PER_MODE = 2;
+export const MAX_SKIPS_PER_MODE = 999;
 
 export function maxGuessesFor(character) {
   return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;
