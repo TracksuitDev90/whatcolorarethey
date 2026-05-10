@@ -492,6 +492,8 @@
     "id": "dr-zoidberg",
     "name": "Dr. Zoidberg",
     "color": { "hex": "#F56856", "name": "Zoidberg Red" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Dr._Zoidberg"
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Dr._Zoidberg",
+    "image": "assets/photos/dr-zoidberg.png",
+    "verified": true
   }
 ]

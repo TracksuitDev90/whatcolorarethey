@@ -22,6 +22,11 @@ const BOX_COLORS = {
 
 const PIXEL_RATIO = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
 
+// Above this count, the per-round portrait layout would crush rows below the
+// minimum readable size. We switch to a compact tile grid (one filled square
+// per round) so a 50-round marathon still produces a clean share image.
+const COMPACT_GRID_THRESHOLD = 12;
+
 export async function renderShareCard(snapshot) {
   const canvas = document.createElement('canvas');
   canvas.width = W * PIXEL_RATIO;
@@ -34,18 +39,77 @@ export async function renderShareCard(snapshot) {
   drawBackground(ctx);
   drawHeader(ctx, snapshot);
 
-  const rowsTop = 240;
-  const rowsBottom = H - PADDING - 70;
-  const rowCount = snapshot.rounds.length;
-  const rowH = (rowsBottom - rowsTop - ROW_GAP * (rowCount - 1)) / rowCount;
+  // Only count rounds the player actually played — unfinished rounds clutter
+  // the layout and aren't part of the result they'd want to share.
+  const playedRounds = snapshot.rounds
+    .map((r, i) => ({ r, i }))
+    .filter(({ r }) => r.won || r.lost || r.skipped);
 
-  for (let i = 0; i < rowCount; i++) {
-    const y = rowsTop + i * (rowH + ROW_GAP);
-    await drawRow(ctx, snapshot, i, PADDING, y, W - PADDING * 2, rowH);
+  if (playedRounds.length > COMPACT_GRID_THRESHOLD) {
+    drawCompactGrid(ctx, snapshot, playedRounds);
+  } else {
+    const rowsTop = 240;
+    const rowsBottom = H - PADDING - 70;
+    const rowCount = Math.max(1, playedRounds.length);
+    const rowH = (rowsBottom - rowsTop - ROW_GAP * (rowCount - 1)) / rowCount;
+
+    for (let k = 0; k < playedRounds.length; k++) {
+      const y = rowsTop + k * (rowH + ROW_GAP);
+      await drawRow(ctx, snapshot, playedRounds[k].i, PADDING, y, W - PADDING * 2, rowH);
+    }
   }
 
   drawFooter(ctx);
   return canvas;
+}
+
+function drawCompactGrid(ctx, snapshot, played) {
+  // One square per played round, coloured by outcome. Same emoji vocabulary
+  // as the text share (correct=green, wrong=red, skipped=dark) so the visual
+  // and text shares feel cohesive.
+  const top = 240;
+  const bottom = H - PADDING - 70;
+  const left = PADDING;
+  const right = W - PADDING;
+  const availW = right - left;
+  const availH = bottom - top;
+
+  const n = played.length;
+  // Choose a grid that roughly matches the available aspect ratio (1:1 here).
+  const cols = Math.max(1, Math.ceil(Math.sqrt(n * (availW / availH))));
+  const rows = Math.ceil(n / cols);
+  const gap = 12;
+  const tile = Math.floor(Math.min(
+    (availW - gap * (cols - 1)) / cols,
+    (availH - gap * (rows - 1)) / rows,
+  ));
+  const usedW = tile * cols + gap * (cols - 1);
+  const usedH = tile * rows + gap * (rows - 1);
+  const x0 = left + (availW - usedW) / 2;
+  const y0 = top + (availH - usedH) / 2;
+  const radius = Math.max(6, Math.floor(tile * 0.18));
+  for (let k = 0; k < n; k++) {
+    const r = Math.floor(k / cols);
+    const c = k % cols;
+    const x = x0 + c * (tile + gap);
+    const y = y0 + r * (tile + gap);
+    const round = played[k].r;
+    const fill = round.won
+      ? BOX_COLORS.correct
+      : round.lost
+        ? BOX_COLORS.wrong
+        : BOX_COLORS.empty;
+    if (round.skipped && !round.lost) {
+      ctx.fillStyle = BOX_COLORS.empty;
+      ctx.strokeStyle = BOX_COLORS.emptyStroke;
+      ctx.lineWidth = 2;
+      roundRect(ctx, x, y, tile, tile, radius);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      drawSolidBox(ctx, x, y, tile, radius, fill);
+    }
+  }
 }
 
 function drawBackground(ctx) {
@@ -249,8 +313,31 @@ export async function shareCanvas(canvas, snapshot) {
 
 // Emoji-only share — black box default, green for correct, red for wrong.
 // Matches the user-spec "Color Guesser" header and one line per character.
+// Only completed rounds are listed so a partial run doesn't dump empty rows.
+// Long runs collapse into a single emoji ribbon so the share text stays
+// scannable in a tweet or DM.
+const TEXT_COMPACT_THRESHOLD = 12;
 export function shareText(snapshot) {
-  const lines = snapshot.rounds.map((r, i) => {
+  const played = snapshot.rounds
+    .map((r, i) => ({ r, i }))
+    .filter(({ r }) => r.won || r.lost || r.skipped);
+
+  if (played.length > TEXT_COMPACT_THRESHOLD) {
+    const ribbon = played.map(({ r }) => {
+      if (r.won) return '🟩';
+      if (r.lost) return '🟥';
+      return '⬛';
+    }).join('');
+    const wins = played.filter(({ r }) => r.won).length;
+    return [
+      'Color Guesser',
+      `${wins} / ${played.length}`,
+      '',
+      ribbon,
+    ].join('\n');
+  }
+
+  const lines = played.map(({ r, i }) => {
     const c = snapshot.characters[i];
     const max = maxGuessesFor(c);
     const cells = Array.from({ length: max }, (_, k) => {
@@ -266,20 +353,30 @@ export function shareText(snapshot) {
 // Build a shareable URL that encodes today's results into a query param.
 // The receiving page detects ?s= and renders a read-only share view.
 export function shareLinkUrl(snapshot) {
+  // Only encode played rounds — including 900+ untouched slots would balloon
+  // the URL past browser/clipboard friendliness with no upside.
+  const playedIdx = [];
+  for (let i = 0; i < snapshot.rounds.length; i++) {
+    const r = snapshot.rounds[i];
+    if (r.won || r.lost || r.skipped) playedIdx.push(i);
+  }
   const payload = {
     d: snapshot.date,
     m: snapshot.mode,
-    c: snapshot.characters.map(c => c.id),
-    r: snapshot.rounds.map(r => ({
-      g: r.guesses.map(g => ({
-        c: g.correct ? 1 : 0,
-        ...(Number.isInteger(g.row) ? { r: g.row, x: g.col } : {}),
-        ...(Number.isInteger(g.index) ? { i: g.index } : {}),
-      })),
-      w: r.won ? 1 : 0,
-      l: r.lost ? 1 : 0,
-      s: r.skipped ? 1 : 0,
-    })),
+    c: playedIdx.map(i => snapshot.characters[i].id),
+    r: playedIdx.map(i => {
+      const r = snapshot.rounds[i];
+      return {
+        g: r.guesses.map(g => ({
+          c: g.correct ? 1 : 0,
+          ...(Number.isInteger(g.row) ? { r: g.row, x: g.col } : {}),
+          ...(Number.isInteger(g.index) ? { i: g.index } : {}),
+        })),
+        w: r.won ? 1 : 0,
+        l: r.lost ? 1 : 0,
+        s: r.skipped ? 1 : 0,
+      };
+    }),
   };
   const json = JSON.stringify(payload);
   const b64 = btoa(unescape(encodeURIComponent(json)))

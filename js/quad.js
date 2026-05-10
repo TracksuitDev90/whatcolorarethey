@@ -26,6 +26,22 @@ const QUAD_PALETTE = [
   '#9B9B9B', // gray
 ];
 
+// Themed palettes restrict distractors to colors that "make sense" in the
+// universe of the answer — e.g. for Power Rangers items, only the canonical
+// suit colors should appear so distractors never include a fuchsia or teal
+// that no ranger ever wore.
+const PALETTES = {
+  'power-rangers': [
+    '#D62828', // red
+    '#FFD90F', // yellow
+    '#1A1A1A', // black
+    '#3969BE', // blue
+    '#327853', // green
+    '#FFFFFF', // white
+    '#FF8FB3', // pink
+  ],
+};
+
 const BOX_COUNT = 4;
 
 function mulberry32(seed) {
@@ -80,27 +96,39 @@ function shuffle(arr, rng) {
   }
 }
 
-export function buildQuad(correctHex, { seed = 0 } = {}) {
+export function buildQuad(correctHex, { seed = 0, palette } = {}) {
   const correct = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 31);
 
-  const scored = QUAD_PALETTE
+  // Themed palettes (e.g. Power Rangers) constrain distractors to a small
+  // set of canonical colors. Fall back to the general cartoon palette if the
+  // named palette doesn't exist.
+  const source = (typeof palette === 'string' ? PALETTES[palette] : palette)
+    || QUAD_PALETTE;
+  // The general palette spans the hue wheel and includes near-shades the
+  // distinctTone filter is meant to weed out. Themed palettes are already
+  // hand-curated to be visually distinct (every Power Ranger color is canon),
+  // so skipping the filter ensures plausible options like Red + Pink can both
+  // appear on the board.
+  const isThemed = source !== QUAD_PALETTE;
+
+  const scored = source
     .filter(hex => hex.toUpperCase() !== correctHex.toUpperCase())
     .map(hex => ({ hex: hex.toUpperCase(), hsl: hexToHsl(hex) }))
     .map(p => ({ ...p, dist: colorDistance(correct, p.hsl) }));
 
   const chosen = [{ hex: correctHex.toUpperCase(), hsl: correct }];
   const distinctFromChosen = (cand) =>
-    chosen.every(c => distinctTone(cand.hsl, c.hsl));
+    isThemed || chosen.every(c => distinctTone(cand.hsl, c.hsl));
   const alreadyPicked = (cand) =>
     chosen.some(c => c.hex === cand.hex);
 
   // Sort all candidates closest-first, dropping anything that reads as the
   // same tone family as the correct color (so we never offer a near-shade
-  // that's effectively "the same color").
+  // that's effectively "the same color"). Themed palettes skip this filter.
   const ranked = [...scored]
     .sort((a, b) => a.dist - b.dist)
-    .filter(c => distinctTone(c.hsl, correct));
+    .filter(c => isThemed || distinctTone(c.hsl, correct));
 
   // Plausible "near miss": closest distinct candidate. Sample from the top
   // three so the pick varies day to day rather than being identical every

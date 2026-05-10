@@ -50,6 +50,7 @@ PRECROP = {
 # when the subject sits off-centre in the source.
 COVER_OFFSET = {
     "IMG_0438.jpeg": {"y": 0.30},   # Danny Phantom - keep more headroom
+    "IMG_0525.webp": {"y": 0.05},   # Green Ranger - top half (head + torso)
 }
 
 # Pad the source with the sampled background colour before any other
@@ -215,6 +216,7 @@ ASSIGNMENTS = {
     "zoro-hair":                "IMG_0544.png",
     "ed-bighead":               "IMG_0545.png",
     "tito-makani":              "IMG_0547.png",
+    "dr-zoidberg":              "IMG_0536.webp",
 }
 
 
@@ -246,13 +248,20 @@ def find_content_bbox(img):
     """Return the bounding box of the foreground content."""
     if img.mode == "RGBA":
         alpha = img.split()[-1]
-        # Ignore stray near-transparent pixels — they trip the bbox up
-        # on PNG exports that have anti-aliased edges fading to alpha 1.
-        mask = alpha.point(lambda v: 255 if v > 60 else 0)
-        bbox = mask.getbbox()
-        if bbox is not None:
-            return bbox
-        return alpha.getbbox() or (0, 0, *img.size)
+        # If the alpha is essentially all opaque, the alpha mask covers the
+        # whole frame and tells us nothing useful — fall through to the
+        # color-difference path so a flat-bg PNG with no real transparency
+        # gets the same tight bbox as a JPEG would.
+        if alpha.getextrema()[0] >= 250:
+            pass
+        else:
+            # Ignore stray near-transparent pixels — they trip the bbox up
+            # on PNG exports that have anti-aliased edges fading to alpha 1.
+            mask = alpha.point(lambda v: 255 if v > 60 else 0)
+            bbox = mask.getbbox()
+            if bbox is not None:
+                return bbox
+            return alpha.getbbox() or (0, 0, *img.size)
 
     rgb = img.convert("RGB")
     bg = sample_bg(rgb)
