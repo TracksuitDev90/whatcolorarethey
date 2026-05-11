@@ -262,7 +262,8 @@
     "id": "heathcliff",
     "name": "Heathcliff",
     "era": "80s",
-    "color": { "hex": "#c96b26", "name": "Heathcliff Orange" },
+    "color": { "hex": "#C07D3D", "name": "Heathcliff Orange" },
+    "colorSource": "colorthief",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Heathcliff_(comics)",
     "image": "assets/photos/heathcliff.png",
     "verified": true
@@ -343,7 +344,8 @@
     "id": "perry-the-platypus",
     "name": "Perry the Platypus",
     "era": "00s",
-    "color": { "hex": "#1B99A2", "name": "Perry Teal" },
+    "color": { "hex": "#1E8894", "name": "Perry Teal" },
+    "colorSource": "colorthief",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Perry_the_Platypus",
     "image": "assets/photos/perry-the-platypus.png",
     "verified": true
@@ -412,7 +414,8 @@
     "id": "red-guy",
     "name": "Red Guy",
     "era": "90s",
-    "color": { "hex": "#E62022", "name": "Red Guy Red" },
+    "color": { "hex": "#F70606", "name": "Red Guy Red" },
+    "colorSource": "colorthief",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Cow_and_Chicken",
     "image": "assets/photos/red-guy.png",
     "verified": true
@@ -463,7 +466,8 @@
     "id": "chopper",
     "name": "Tony Tony Chopper",
     "era": "00s",
-    "color": { "hex": "#CDA77B", "name": "Chopper Tan" },
+    "color": { "hex": "#CE8877", "name": "Chopper Tan" },
+    "colorSource": "colorthief",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Tony_Tony_Chopper",
     "image": "assets/photos/chopper.png",
     "verified": true

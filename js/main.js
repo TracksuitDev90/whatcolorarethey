@@ -359,7 +359,17 @@ function promptText(c) {
 }
 
 function revealText(c) {
-  if (c.type === 'item' && c.show) return `${c.name} — ${c.show}`;
+  if (c.type === 'item' && c.show) {
+    // For Power Rangers items the unrevealed name is the generic "Ranger's
+    // suit" so the player has to guess the color; once it's revealed, prepend
+    // the actual color ranger so the answer reads "Blue Ranger's suit" etc.
+    if (c.quadPalette === 'power-rangers') {
+      const colorWord = String(c.id).split('-')[0];
+      const cap = colorWord.charAt(0).toUpperCase() + colorWord.slice(1);
+      return `${cap} ${c.name} — ${c.show}`;
+    }
+    return `${c.name} — ${c.show}`;
+  }
   return c.name;
 }
 
