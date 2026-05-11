@@ -53,6 +53,15 @@ const PALETTES = {
     '#2ECC71', // Buttercup green
     '#F371AC', // Powerpuff dress pink
   ],
+  // Brock's vest is green — pair it with the other primary cartoon hues
+  // (blue, orange, red) so the player picks between four canonical colors
+  // and never sees gray as an option.
+  'brock-vest': [
+    '#88C038', // Brock vest green (correct)
+    '#4A90D9', // blue
+    '#F39C12', // orange
+    '#E63946', // red
+  ],
 };
 
 const BOX_COUNT = 4;
@@ -109,6 +118,12 @@ function shuffle(arr, rng) {
   }
 }
 
+// Default-palette gray is intentionally rare. It's still in the rotation so
+// the occasional gray-tinged distractor turns up, but most rounds drop it
+// before scoring so the typical board reads as four chromatic colors.
+const RARE_HEX = '#9B9B9B';
+const RARE_KEEP_CHANCE = 0.2;
+
 export function buildQuad(correctHex, { seed = 0, palette, correctIndex: forcedIndex = null } = {}) {
   const correct = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 31);
@@ -116,8 +131,15 @@ export function buildQuad(correctHex, { seed = 0, palette, correctIndex: forcedI
   // Themed palettes (e.g. Power Rangers) constrain distractors to a small
   // set of canonical colors. Fall back to the general cartoon palette if the
   // named palette doesn't exist.
-  const source = (typeof palette === 'string' ? PALETTES[palette] : palette)
+  let source = (typeof palette === 'string' ? PALETTES[palette] : palette)
     || QUAD_PALETTE;
+
+  // Gray rarely belongs alongside the saturated cartoon hues the game centres
+  // on. Strip it from the default palette most rounds — the dice roll lives
+  // off the seeded rng so the decision is stable per round.
+  if (source === QUAD_PALETTE && rng() > RARE_KEEP_CHANCE) {
+    source = source.filter(hex => hex.toUpperCase() !== RARE_HEX);
+  }
   // The general palette spans the hue wheel and includes near-shades the
   // distinctTone filter is meant to weed out. Themed palettes are already
   // hand-curated to be visually distinct (every Power Ranger color is canon),

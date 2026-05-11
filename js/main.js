@@ -2,7 +2,7 @@ import { loadCharacters } from './characters.js';
 import { createDailyGame, onceStorageWriteFailed } from './game.js';
 import {
   getUtcDateKey,
-  pickDailyCharacters,
+  pickFreshDailyCharacters,
   msUntilNextUtcDay,
   formatCountdown,
 } from './daily.js';
@@ -18,6 +18,52 @@ import {
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
 const ROUNDS_PER_DAY = 3;
+
+// Per-mode localStorage keys. Seen records the IDs the player has already
+// encountered (so each day surfaces fresh entries until the roster wraps).
+// Lock pins today's selection so refreshing the page returns the same trio
+// even after the IDs were already moved into the seen record.
+const STORAGE_SEEN = { items: 'wcat:seen:items', grid: 'wcat:seen:grid' };
+const STORAGE_LOCK = { items: 'wcat:daily-lock:items', grid: 'wcat:daily-lock:grid' };
+
+function selectDailyFresh(pool, key, mode) {
+  if (!pool.length) return [];
+  const byId = new Map(pool.map(c => [c.id, c]));
+
+  const lock = readJson(STORAGE_LOCK[mode]);
+  if (lock && lock.date === key && Array.isArray(lock.ids)) {
+    const restored = lock.ids.map(id => byId.get(id)).filter(Boolean);
+    if (restored.length === Math.min(ROUNDS_PER_DAY, pool.length)) {
+      return restored;
+    }
+  }
+
+  let seen = new Set(readJson(STORAGE_SEEN[mode]) || []);
+  // Drop stale IDs that no longer exist in the roster so a shrunk pool
+  // can't permanently lock the player out of a fresh cycle.
+  for (const id of [...seen]) if (!byId.has(id)) seen.delete(id);
+
+  let result = pickFreshDailyCharacters(pool, key, seen, mode, ROUNDS_PER_DAY);
+  if (result.exhausted) {
+    seen = new Set();
+    result = pickFreshDailyCharacters(pool, key, seen, mode, ROUNDS_PER_DAY);
+  }
+  for (const c of result.picks) seen.add(c.id);
+  writeJson(STORAGE_SEEN[mode], [...seen]);
+  writeJson(STORAGE_LOCK[mode], { date: key, ids: result.picks.map(c => c.id) });
+  return result.picks;
+}
+
+function readJson(key) {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : null;
+  } catch { return null; }
+}
+
+function writeJson(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ }
+}
 
 const els = {
   img: document.getElementById('character-img'),
@@ -86,8 +132,8 @@ async function init() {
 
     const itemPool = chars.filter(c => c.type === 'item');
     const gridPool = chars.filter(c => c.type !== 'item');
-    const itemDaily = pickDailyCharacters(itemPool, dateKey, ROUNDS_PER_DAY);
-    const gridDaily = pickDailyCharacters(gridPool, dateKey, ROUNDS_PER_DAY);
+    const itemDaily = selectDailyFresh(itemPool, dateKey, 'items');
+    const gridDaily = selectDailyFresh(gridPool, dateKey, 'grid');
     games.items = itemDaily.length
       ? createDailyGame(itemDaily, dateKey, { mode: 'items' })
       : null;
@@ -826,24 +872,6 @@ function flash(el, cls) {
   void el.offsetWidth;
   el.classList.add(cls);
   setTimeout(() => el.classList.remove(cls), 500);
-}
-
-// Temporary hard-reset button for testing. Clears the per-day game state
-// and best-streak record (covers streaks, characters, items, and skips —
-// everything game.js writes to localStorage) so a fresh run starts on
-// reload. Remove once testing is finished.
-const restartBtn = document.getElementById('restart-btn');
-if (restartBtn) {
-  restartBtn.addEventListener('click', () => {
-    try {
-      localStorage.removeItem('wcat:daily');
-      localStorage.removeItem('wcat:bestStreak');
-    } catch { /* private mode — nothing to clear */ }
-    const url = new URL(window.location.href);
-    url.search = '';
-    url.hash = '';
-    window.location.replace(url.toString());
-  });
 }
 
 let toastTimer = null;

@@ -386,6 +386,7 @@
     "show": "Pokémon",
     "color": { "hex": "#88C038", "name": "Brock Vest Green" },
     "image": "assets/photos/brock-vest.png",
+    "quadPalette": "brock-vest",
     "verified": true
   },
   {
