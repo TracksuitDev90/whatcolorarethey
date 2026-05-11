@@ -45,6 +45,17 @@ PRECROP = {
     # Boo Boo source has a 1px black border baked into the PNG — strip a
     # thin sliver from each side so the cover-crop doesn't preserve it.
     "IMG_0395.png": {"top": 0.01, "bottom": 0.01, "left": 0.01, "right": 0.01},
+    # New Pikachu source - GalleryPops watermark band along the bottom.
+    "IMG_0560.webp": {"bottom": 0.14},
+}
+
+# Vertical anchor for isolated-subject crops. 0.5 (default) centers the
+# subject in the 4:3 frame; 1.0 pins the bottom of the subject's bbox to the
+# bottom of the frame so all the slack ends up above the head. Used when a
+# character's shirt/feet should sit flush at the frame edge instead of
+# floating with bg padding below.
+Y_ANCHOR = {
+    "IMG_0379.png": 1.0,  # Squidward - anchor shirt bottom to frame bottom
 }
 
 # After precrop + cover_crop strategy is selected, shift the centred crop
@@ -93,7 +104,7 @@ PADDING_OVERRIDE = {
 ASSIGNMENTS = {
     # ---- Characters (grid mode) ----
     "spongebob-squarepants": "IMG_0359.webp",
-    "pikachu":               "IMG_0362.jpeg",
+    "pikachu":               "IMG_0560.webp",
     "garfield":              "IMG_0363.jpeg",
     "grimace":               "IMG_0366.webp",
     "tweety":                "IMG_0368.png",
@@ -176,7 +187,7 @@ ASSIGNMENTS = {
     "cookie-monster":         "IMG_0447.jpeg",
     "beast-boy":              "IMG_0448.jpeg",
     "homer-simpson":          "IMG_0449.webp",
-    "jigglypuff":             "IMG_0450.webp",
+    "jigglypuff":             "IMG_0562.png",
     "jenny-xj9":              "IMG_0451.webp",
     "pink-panther":           "IMG_0523.webp",
     "slimer":                 "IMG_0453.jpeg",
@@ -307,11 +318,16 @@ def precrop(img, name):
     return img.crop((left, top, right, bottom))
 
 
-def expand_to_aspect(bbox, ratio):
+def expand_to_aspect(bbox, ratio, y_anchor=0.5):
     """Pad the bbox out to the target aspect ratio. We always grow rather
     than crop into the subject so the character keeps its head and feet.
     Returns the padded bbox in a virtual coordinate space; callers pad with
-    the background colour for any part that falls outside the source."""
+    the background colour for any part that falls outside the source.
+
+    `y_anchor` controls where the original bbox sits within the expanded
+    height: 0.5 splits the new vertical space evenly above and below
+    (centered), 1.0 puts it all above (subject pinned to the bottom of the
+    expanded frame), 0.0 puts it all below."""
     x0, y0, x1, y1 = bbox
     bw, bh = x1 - x0, y1 - y0
     cur = bw / bh
@@ -324,25 +340,29 @@ def expand_to_aspect(bbox, ratio):
     else:
         target_h = bw / ratio
         extra = target_h - bh
-        y0 -= extra / 2
-        y1 += extra / 2
+        y0 -= extra * y_anchor
+        y1 += extra * (1 - y_anchor)
 
     return (round(x0), round(y0), round(x1), round(y1))
 
 
-def isolated_subject_to_4_3(img, padding_frac=PADDING_FRAC):
+def isolated_subject_to_4_3(img, padding_frac=PADDING_FRAC, y_anchor=0.5):
     """Tightly crop a flat-background subject to its bbox + a small
-    breathing margin, then pad with the bg colour out to 4:3."""
+    breathing margin, then pad with the bg colour out to 4:3. When
+    `y_anchor=1.0` the bbox is anchored to the bottom of the 4:3 frame
+    (no breathing room below the subject), so callers can pin a
+    shirt/feet edge to the frame edge."""
     w, h = img.size
     bbox = find_content_bbox(img)
     bx0, by0, bx1, by1 = bbox
     bw, bh = bx1 - bx0, by1 - by0
 
     pad_x = bw * padding_frac
-    pad_y = bh * padding_frac
-    bbox = (bx0 - pad_x, by0 - pad_y, bx1 + pad_x, by1 + pad_y)
+    pad_y_top = bh * padding_frac
+    pad_y_bottom = 0 if y_anchor >= 0.999 else bh * padding_frac
+    bbox = (bx0 - pad_x, by0 - pad_y_top, bx1 + pad_x, by1 + pad_y_bottom)
 
-    target = expand_to_aspect(bbox, TARGET_RATIO)
+    target = expand_to_aspect(bbox, TARGET_RATIO, y_anchor=y_anchor)
     tx0, ty0, tx1, ty1 = target
     target_w = tx1 - tx0
     target_h = ty1 - ty0
@@ -477,6 +497,7 @@ def process(src_path, dst_path):
         cropped = isolated_subject_to_4_3(
             img,
             padding_frac=PADDING_OVERRIDE.get(src_path.name, PADDING_FRAC),
+            y_anchor=Y_ANCHOR.get(src_path.name, 0.5),
         )
 
     # Cap at a sensible maximum so retina screens stay sharp without

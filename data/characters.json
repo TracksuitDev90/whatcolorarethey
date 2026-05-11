@@ -29,8 +29,7 @@
   {
     "id": "pikachu",
     "name": "Pikachu",
-    "color": { "hex": "#FFCB05", "name": "Pokémon Yellow" },
-    "colorSource": "https://brandpalettes.com/pokemon-color-codes/",
+    "color": { "hex": "#FED42E", "name": "Pikachu Yellow" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Pikachu",
     "image": "assets/photos/pikachu.png",
     "verified": true
@@ -209,8 +208,7 @@
   {
     "id": "jigglypuff",
     "name": "Jigglypuff",
-    "color": { "hex": "#FFAAFF", "name": "Jigglypuff Pink" },
-    "colorSource": "https://colorswall.com/color/ffaaff",
+    "color": { "hex": "#F5D1EA", "name": "Jigglypuff Pink" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Jigglypuff",
     "image": "assets/photos/jigglypuff.png",
     "verified": true

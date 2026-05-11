@@ -95,6 +95,22 @@ export function shuffleCharacters(allCharacters) {
   return pool;
 }
 
+// Deterministically walk the correct cell around a board of `totalCells`
+// positions so the answer truly rotates round-to-round, day-to-day. Within a
+// single day each of the `slotsPerDay` rounds gets a different position, and
+// across days the same slot cycles through every cell before any repeat — so
+// even the same character/item on a later day lands on a fresh spot.
+//
+// `step` must be coprime to `totalCells`; that gives a full cycle. The
+// defaults below cover the two boards in play (16-cell grid, 4-swatch quad).
+export function positionForRound(dateKey, slotIndex, totalCells, slotsPerDay = CHARACTERS_PER_DAY) {
+  if (!Number.isInteger(totalCells) || totalCells <= 0) return 0;
+  const dayIndex = Math.max(0, daysBetween(ROTATION_EPOCH, dateKey));
+  const linear = dayIndex * slotsPerDay + slotIndex;
+  const step = totalCells === 16 ? 7 : totalCells === 4 ? 3 : 1;
+  return ((linear * step) % totalCells + totalCells) % totalCells;
+}
+
 export function msUntilNextUtcDay(now = new Date()) {
   const next = Date.UTC(
     now.getUTCFullYear(),

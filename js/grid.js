@@ -64,15 +64,15 @@ function mulberry32(seed) {
 
 // Per-step delta ranges. The exact step within each range is rolled per
 // round (seeded), so consecutive rounds don't reuse the same gradient.
-// Tightened from the previous 11-15 / 5-8 ranges so the surrounding
-// shades sit a bit closer to the correct cell — the photo-vs-grid
-// comparison should make the player squint, not pick by elimination.
-const LIGHT_STEP_MIN = 9;
-const LIGHT_STEP_MAX = 12;
-const SAT_STEP_MIN = 4;
-const SAT_STEP_MAX = 6;
-const HUE_STEP_MIN = 4;
-const HUE_STEP_MAX = 6;
+// Tightened so the surrounding shades sit close to the correct cell — the
+// photo-vs-grid comparison should make the player squint, not pick the
+// obvious-looking neighbor by elimination.
+const LIGHT_STEP_MIN = 7;
+const LIGHT_STEP_MAX = 10;
+const SAT_STEP_MIN = 3;
+const SAT_STEP_MAX = 5;
+const HUE_STEP_MIN = 3;
+const HUE_STEP_MAX = 5;
 
 // Neutral-mode steps. When the correct color is gray/white/black, the
 // chromatic sweep barely moves — base.s ≈ 0 leaves nothing to subtract from,
@@ -88,22 +88,26 @@ const NEUTRAL_COL_LIGHT_STEP_MAX = 8;
 
 export function buildGrid(
   correctHex,
-  { rows = 4, cols = 4, seed = 0, avoidRow = null, avoidCol = null } = {},
+  {
+    rows = 4,
+    cols = 4,
+    seed = 0,
+    correctRow: forcedRow = null,
+    correctCol: forcedCol = null,
+  } = {},
 ) {
   const base = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 17);
-  let correctRow = Math.floor(rng() * rows);
-  let correctCol = Math.floor(rng() * cols);
-  // Force consecutive rounds to use a different cell. If the seed happens
-  // to land on the same (row, col) as the previous round, shift it by a
-  // seeded offset so the player isn't tapping the same spot twice in a row.
-  if (
-    avoidRow != null && avoidCol != null
-    && correctRow === avoidRow && correctCol === avoidCol
-  ) {
-    correctRow = (correctRow + 1 + Math.floor(rng() * (rows - 1))) % rows;
-    correctCol = (correctCol + 1 + Math.floor(rng() * (cols - 1))) % cols;
-  }
+  // Callers (the daily game) pass in a deterministic (row, col) that walks
+  // around the board each round so the same character on a later day lands
+  // on a fresh cell. Fall back to a seeded random pick when not provided —
+  // verify scripts and ad-hoc tests still work that way.
+  const correctRow = Number.isInteger(forcedRow) && forcedRow >= 0 && forcedRow < rows
+    ? forcedRow
+    : Math.floor(rng() * rows);
+  const correctCol = Number.isInteger(forcedCol) && forcedCol >= 0 && forcedCol < cols
+    ? forcedCol
+    : Math.floor(rng() * cols);
 
   // Randomize gradient orientation + magnitude so the surrounding shades
   // shift each round — sometimes lighter on top, sometimes on the bottom;

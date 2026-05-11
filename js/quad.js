@@ -109,7 +109,7 @@ function shuffle(arr, rng) {
   }
 }
 
-export function buildQuad(correctHex, { seed = 0, palette } = {}) {
+export function buildQuad(correctHex, { seed = 0, palette, correctIndex: forcedIndex = null } = {}) {
   const correct = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 31);
 
@@ -177,7 +177,12 @@ export function buildQuad(correctHex, { seed = 0, palette } = {}) {
     chosen.push(cand);
   }
 
-  const correctIndex = Math.floor(rng() * BOX_COUNT);
+  // Callers (the daily game) pass in a deterministic index that walks around
+  // the four positions each round so the same item on a later day lands on
+  // a different swatch. Fall back to a seeded pick when not provided.
+  const correctIndex = Number.isInteger(forcedIndex) && forcedIndex >= 0 && forcedIndex < BOX_COUNT
+    ? forcedIndex
+    : Math.floor(rng() * BOX_COUNT);
   const distractors = chosen.slice(1);
   shuffle(distractors, rng);
   const boxes = [];
