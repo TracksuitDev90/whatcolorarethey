@@ -2,6 +2,8 @@
 // seed are derived from the UTC date, so every player worldwide sees the
 // same puzzle until UTC midnight rolls over to the next day.
 
+import { hexToHsl } from './grid.js';
+
 const CHARACTERS_PER_DAY = 3;
 
 // Day 0 of the rotation. Day index 0 picks the first slice of the pool;
@@ -63,6 +65,10 @@ function shuffleSeeded(items, seed) {
 // unseen pool runs short of `count`, the caller is told the roster wrapped
 // so it can clear its seen-record before the next call.
 //
+// After the seeded shuffle the picks are re-interleaved by hue family so the
+// daily order never strings together a run of same-family colors (e.g. four
+// pinks in a row). The interleave is deterministic per date+mode.
+//
 // Returns { picks, exhausted } — `exhausted` is true when the unseen pool
 // could not satisfy the request and we fell back to the full pool.
 export function pickFreshDailyCharacters(allCharacters, dateKey, seenIds, mode = '', count = CHARACTERS_PER_DAY) {
@@ -72,7 +78,73 @@ export function pickFreshDailyCharacters(allCharacters, dateKey, seenIds, mode =
   const exhausted = unseen.length < count;
   const pool = exhausted ? allCharacters : unseen;
   const ordered = shuffleSeeded(pool, hashString(`fresh:${mode}:${dateKey}`));
-  return { picks: ordered.slice(0, Math.min(count, pool.length)), exhausted };
+  const sliced = ordered.slice(0, Math.min(count, pool.length));
+  const spread = spreadByHueFamily(sliced, hashString(`spread:${mode}:${dateKey}`));
+  return { picks: spread, exhausted };
+}
+
+// Round-robin draws one character at a time from each hue-family bucket so
+// the final order alternates families. Inside each bucket entries keep their
+// already-shuffled order, so the daily set stays the same — only the position
+// of each character moves to avoid runs of the same color. When the only
+// remaining queues match the just-emitted family the loop falls back to the
+// largest pool to keep progress; some clustering is unavoidable when a single
+// family dominates the pool.
+function spreadByHueFamily(list, seed) {
+  if (list.length <= 2) return list.slice();
+  const buckets = new Map();
+  for (const c of list) {
+    const fam = hueFamily(c.color?.hex);
+    if (!buckets.has(fam)) buckets.set(fam, []);
+    buckets.get(fam).push(c);
+  }
+  // Seeded shuffle of bucket order so family-presentation rotates day to day,
+  // then a stable size sort so the largest pool always leads each pass and
+  // tail clusters don't form.
+  const queues = [...buckets.values()].map(arr => arr.slice());
+  const rng = mulberry32(seed);
+  for (let i = queues.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [queues[i], queues[j]] = [queues[j], queues[i]];
+  }
+  queues.sort((a, b) => b.length - a.length);
+
+  const out = [];
+  let lastFam = null;
+  while (out.length < list.length) {
+    queues.sort((a, b) => b.length - a.length);
+    // Largest non-empty queue whose head isn't the same family we just emitted.
+    let pick = queues.find(q => q.length && hueFamily(q[0].color?.hex) !== lastFam);
+    if (!pick) pick = queues.find(q => q.length);
+    if (!pick) break;
+    const next = pick.shift();
+    out.push(next);
+    lastFam = hueFamily(next.color?.hex);
+  }
+  return out;
+}
+
+// Bucket a hex into a coarse perceived hue family. Saturation + lightness
+// gate the chromatic-vs-neutral split so very light/dark or grayish colors
+// don't get lumped in with vivid hues that happen to share their angle.
+function hueFamily(hex) {
+  if (!hex) return 'unknown';
+  const { h, s, l } = hexToHsl(hex);
+  if (s < 14 || l < 12 || l > 92) {
+    if (l < 25) return 'black';
+    if (l > 80) return 'white';
+    return 'gray';
+  }
+  if (h < 15 || h >= 345) return 'red';
+  if (h < 40) return 'orange';
+  if (h < 65) return 'yellow';
+  if (h < 95) return 'lime';
+  if (h < 160) return 'green';
+  if (h < 195) return 'teal';
+  if (h < 240) return 'blue';
+  if (h < 280) return 'indigo';
+  if (h < 320) return 'purple';
+  return 'pink';
 }
 
 // Non-deterministic Fisher-Yates. Used for the live game so every visit

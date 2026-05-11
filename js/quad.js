@@ -5,7 +5,7 @@
 // further around the hue wheel — but every swatch must still read as a
 // different tone family, so the player never sees two pinks or two blues.
 
-import { hexToHsl } from './grid.js';
+import { hexToHsl, hslToHex } from './grid.js';
 
 // Saturated, recognizable cartoon colors spread around the hue wheel,
 // plus neutrals. Three distractors are picked from this list per round.
@@ -124,20 +124,57 @@ function shuffle(arr, rng) {
 const RARE_HEX = '#9B9B9B';
 const RARE_KEEP_CHANCE = 0.2;
 
+// Same-family "near miss" tuning. The plausible distractor is synthesized
+// from the correct color by keeping its hue and shoving its lightness far
+// enough that it reads as "clearly a different shade of the same color"
+// rather than "almost the right shade". Lower bound prevents a flat tonal
+// duplicate; upper bound prevents the swatch from collapsing into pure
+// white/black for mid-saturation hues.
+const SHADE_SHIFT_MIN = 28;
+const SHADE_SHIFT_MAX = 42;
+// How close a candidate's hue must be to share a "family" with the correct
+// color for the synthesized-shade purposes. Wider than HUE_GAP_MIN so two
+// adjacent hues (e.g. red ↔ pink, yellow ↔ orange) are treated as
+// potentially-too-close and benefit from the shade-shift behaviour.
+const SAME_FAMILY_HUE = 35;
+
+// Build a same-family but clearly-different-shade distractor by keeping the
+// correct hue and shoving lightness toward whichever extreme has more room.
+// Saturation jitters slightly so the synthesized swatch doesn't feel like a
+// mathematical mirror of the correct cell. Neutral correct colors (white,
+// black, gray) skip this — there is no chromatic family to anchor to.
+function synthesizeShadeShifted(correctHsl, rng) {
+  if (correctHsl.s < 12) return null;
+  const upRoom = 92 - correctHsl.l;
+  const downRoom = correctHsl.l - 10;
+  let direction;
+  if (upRoom < 18) direction = -1;
+  else if (downRoom < 18) direction = 1;
+  else direction = rng() < 0.5 ? -1 : 1;
+  const shift = SHADE_SHIFT_MIN + rng() * (SHADE_SHIFT_MAX - SHADE_SHIFT_MIN);
+  const newL = Math.max(10, Math.min(92, correctHsl.l + direction * shift));
+  const newS = Math.max(20, Math.min(100, correctHsl.s - 8 + rng() * 16));
+  return { h: correctHsl.h, s: newS, l: newL };
+}
+
 export function buildQuad(correctHex, { seed = 0, palette, correctIndex: forcedIndex = null } = {}) {
   const correct = hexToHsl(correctHex);
   const rng = mulberry32(seed * 2654435761 + 31);
 
   // Themed palettes (e.g. Power Rangers) constrain distractors to a small
   // set of canonical colors. Fall back to the general cartoon palette if the
-  // named palette doesn't exist.
-  let source = (typeof palette === 'string' ? PALETTES[palette] : palette)
-    || QUAD_PALETTE;
+  // named palette doesn't exist. `isThemed` is captured BEFORE the gray-strip
+  // step because that step returns a new filtered array — comparing against
+  // QUAD_PALETTE by reference after the strip would mis-classify the default
+  // palette as a themed one and skip the distinctTone filter.
+  const requestedPalette = (typeof palette === 'string' ? PALETTES[palette] : palette);
+  const isThemed = !!requestedPalette;
+  let source = requestedPalette || QUAD_PALETTE;
 
   // Gray rarely belongs alongside the saturated cartoon hues the game centres
   // on. Strip it from the default palette most rounds — the dice roll lives
   // off the seeded rng so the decision is stable per round.
-  if (source === QUAD_PALETTE && rng() > RARE_KEEP_CHANCE) {
+  if (!isThemed && rng() > RARE_KEEP_CHANCE) {
     source = source.filter(hex => hex.toUpperCase() !== RARE_HEX);
   }
   // The general palette spans the hue wheel and includes near-shades the
@@ -145,7 +182,6 @@ export function buildQuad(correctHex, { seed = 0, palette, correctIndex: forcedI
   // hand-curated to be visually distinct (every Power Ranger color is canon),
   // so skipping the filter ensures plausible options like Red + Pink can both
   // appear on the board.
-  const isThemed = source !== QUAD_PALETTE;
 
   const scored = source
     .filter(hex => hex.toUpperCase() !== correctHex.toUpperCase())
@@ -165,12 +201,31 @@ export function buildQuad(correctHex, { seed = 0, palette, correctIndex: forcedI
     .sort((a, b) => a.dist - b.dist)
     .filter(c => isThemed || distinctTone(c.hsl, correct));
 
-  // Plausible "near miss": closest distinct candidate. Sample from the top
-  // three so the pick varies day to day rather than being identical every
-  // round, while staying anchored on genuinely close colors.
-  const closeBucket = ranked.slice(0, 3);
-  shuffle(closeBucket, rng);
-  if (closeBucket.length) chosen.push(closeBucket[0]);
+  // Plausible "near miss". For themed palettes we still pick the closest
+  // canonical color (Pink Ranger when the answer is Red Ranger, etc.). For
+  // the general palette we synthesize a same-hue but clearly different-
+  // lightness swatch instead — that produces a "light/dark version of the
+  // same color" distractor without ever being only a few shades off.
+  if (isThemed) {
+    const closeBucket = ranked.slice(0, 3);
+    shuffle(closeBucket, rng);
+    if (closeBucket.length) chosen.push(closeBucket[0]);
+  } else {
+    const shifted = synthesizeShadeShifted(correct, rng);
+    if (shifted) {
+      chosen.push({
+        hex: hslToHex(shifted.h, shifted.s, shifted.l).toUpperCase(),
+        hsl: shifted,
+      });
+    } else if (ranked.length) {
+      // Neutral correct: there is no chromatic family to shade-shift, so
+      // fall back to the closest distinct palette pick the way themed
+      // palettes do.
+      const closeBucket = ranked.slice(0, 3);
+      shuffle(closeBucket, rng);
+      chosen.push(closeBucket[0]);
+    }
+  }
 
   // Two further-away distractors. Pull from the next slice of the ranked
   // list — colors that are clearly different from correct, but still
