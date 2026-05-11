@@ -46,9 +46,6 @@ assets/
   favicon.svg          - source icon (PNG sizes derived from it)
   og-image.png         - social-share preview (1200×630)
 scripts/               - one-off Python/Node tooling for asset prep
-  colorthief_update.py - refresh canonical hexes via ColorThief for entries
-                         without an explicit colorSource (`pip install
-                         colorthief`; run with `--dry-run` to preview).
 ```
 
 ## Before deploying
