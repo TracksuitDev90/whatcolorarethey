@@ -1,17 +1,14 @@
-// Renders the end-of-day share card to a canvas: one row per round, each
-// row a portrait next to N decorative boxes that visually echo the emoji
-// share — solid colored squares, dark for unused/skipped, green for a
-// correct guess, red for a wrong guess. N varies per row (3 for grid,
-// 1 for quad). No name, subtitle, or color swatch — photo + guesses only.
+// Renders the end-of-day share card to a canvas. Layout per round:
+//   portrait · name + color swatch · N outcome boxes
+// Boxes mirror the emoji vocabulary in the text share — dark for
+// unused/skipped, green for a correct guess, red for a wrong guess.
+// N varies per row (3 for grid, 1 for quad).
 
 import { maxGuessesFor } from './game.js';
 
 const W = 1080;
 const H = 1080;
-const PADDING = 60;
-const ROW_GAP = 36;
-
-const COL_LABELS = ['A', 'B', 'C', 'D'];
+const PADDING = 64;
 
 const BOX_COLORS = {
   empty: '#1a1d24',
@@ -20,14 +17,25 @@ const BOX_COLORS = {
   wrong: '#e04a4a',     // 🟥
 };
 
+const CARD_BG = '#171c25';
+const CARD_STROKE = '#262d38';
+const TEXT_PRIMARY = '#e6ebf2';
+const TEXT_SECONDARY = '#a4afc1';
+const TEXT_MUTED = '#7b8597';
+const ACCENT = '#4dd9c0';
+
 const PIXEL_RATIO = Math.max(2, Math.min(3, window.devicePixelRatio || 2));
 
 // Above this count, the per-round portrait layout would crush rows below the
 // minimum readable size. We switch to a compact tile grid (one filled square
-// per round) so a 50-round marathon still produces a clean share image.
-const COMPACT_GRID_THRESHOLD = 12;
+// per round) so a long marathon still produces a clean share image.
+const COMPACT_GRID_THRESHOLD = 8;
 
 export async function renderShareCard(snapshot) {
+  // Preload all portraits up-front so the draw path can pull them
+  // synchronously from cache. The in-game prefetch usually has them already.
+  await preloadAllPortraits(snapshot.characters || []);
+
   const canvas = document.createElement('canvas');
   canvas.width = W * PIXEL_RATIO;
   canvas.height = H * PIXEL_RATIO;
@@ -45,32 +53,44 @@ export async function renderShareCard(snapshot) {
     .map((r, i) => ({ r, i }))
     .filter(({ r }) => r.won || r.lost || r.skipped);
 
-  if (playedRounds.length > COMPACT_GRID_THRESHOLD) {
-    drawCompactGrid(ctx, snapshot, playedRounds);
-  } else {
-    const rowsTop = 240;
-    const rowsBottom = H - PADDING - 70;
-    const rowCount = Math.max(1, playedRounds.length);
-    const rowH = (rowsBottom - rowsTop - ROW_GAP * (rowCount - 1)) / rowCount;
+  const bodyTop = 280;
+  const bodyBottom = H - 110;
+  const bodyLeft = PADDING;
+  const bodyRight = W - PADDING;
 
-    for (let k = 0; k < playedRounds.length; k++) {
-      const y = rowsTop + k * (rowH + ROW_GAP);
-      await drawRow(ctx, snapshot, playedRounds[k].i, PADDING, y, W - PADDING * 2, rowH);
-    }
+  if (playedRounds.length === 0) {
+    // Defensive: nothing to draw, just skip the body.
+  } else if (playedRounds.length > COMPACT_GRID_THRESHOLD) {
+    drawCompactGrid(ctx, snapshot, playedRounds, bodyLeft, bodyTop, bodyRight, bodyBottom);
+  } else {
+    drawPortraitRows(ctx, snapshot, playedRounds, bodyLeft, bodyTop, bodyRight, bodyBottom);
   }
 
   drawFooter(ctx);
   return canvas;
 }
 
-function drawCompactGrid(ctx, snapshot, played) {
+function drawPortraitRows(ctx, snapshot, played, left, top, right, bottom) {
+  const rowGap = 18;
+  const n = played.length;
+  const availH = bottom - top;
+  const rowH = Math.min(
+    160,
+    (availH - rowGap * Math.max(0, n - 1)) / n,
+  );
+  const totalH = rowH * n + rowGap * Math.max(0, n - 1);
+  const startY = top + (availH - totalH) / 2;
+  const width = right - left;
+  for (let k = 0; k < n; k++) {
+    const y = startY + k * (rowH + rowGap);
+    drawRow(ctx, snapshot, played[k].i, left, y, width, rowH);
+  }
+}
+
+function drawCompactGrid(ctx, snapshot, played, left, top, right, bottom) {
   // One square per played round, coloured by outcome. Same emoji vocabulary
   // as the text share (correct=green, wrong=red, skipped=dark) so the visual
   // and text shares feel cohesive.
-  const top = 240;
-  const bottom = H - PADDING - 70;
-  const left = PADDING;
-  const right = W - PADDING;
   const availW = right - left;
   const availH = bottom - top;
 
@@ -78,7 +98,7 @@ function drawCompactGrid(ctx, snapshot, played) {
   // Choose a grid that roughly matches the available aspect ratio (1:1 here).
   const cols = Math.max(1, Math.ceil(Math.sqrt(n * (availW / availH))));
   const rows = Math.ceil(n / cols);
-  const gap = 12;
+  const gap = 14;
   const tile = Math.floor(Math.min(
     (availW - gap * (cols - 1)) / cols,
     (availH - gap * (rows - 1)) / rows,
@@ -87,170 +107,342 @@ function drawCompactGrid(ctx, snapshot, played) {
   const usedH = tile * rows + gap * (rows - 1);
   const x0 = left + (availW - usedW) / 2;
   const y0 = top + (availH - usedH) / 2;
-  const radius = Math.max(6, Math.floor(tile * 0.18));
+  const radius = Math.max(8, Math.floor(tile * 0.18));
   for (let k = 0; k < n; k++) {
     const r = Math.floor(k / cols);
     const c = k % cols;
     const x = x0 + c * (tile + gap);
     const y = y0 + r * (tile + gap);
     const round = played[k].r;
-    const fill = round.won
-      ? BOX_COLORS.correct
-      : round.lost
-        ? BOX_COLORS.wrong
-        : BOX_COLORS.empty;
-    if (round.skipped && !round.lost) {
-      ctx.fillStyle = BOX_COLORS.empty;
-      ctx.strokeStyle = BOX_COLORS.emptyStroke;
-      ctx.lineWidth = 2;
-      roundRect(ctx, x, y, tile, tile, radius);
-      ctx.fill();
-      ctx.stroke();
+    if (round.won) {
+      drawSolidBox(ctx, x, y, tile, radius, BOX_COLORS.correct);
+    } else if (round.lost) {
+      drawSolidBox(ctx, x, y, tile, radius, BOX_COLORS.wrong);
     } else {
-      drawSolidBox(ctx, x, y, tile, radius, fill);
+      drawEmptyBox(ctx, x, y, tile, radius);
     }
   }
 }
 
 function drawBackground(ctx) {
+  // Vertical gradient base.
   const grd = ctx.createLinearGradient(0, 0, 0, H);
-  grd.addColorStop(0, '#1f2530');
-  grd.addColorStop(1, '#0e1116');
+  grd.addColorStop(0, '#1f2735');
+  grd.addColorStop(0.55, '#141821');
+  grd.addColorStop(1, '#0b0e13');
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, W, H);
+
+  // Soft radial glow top-left to give the card a focal point.
+  const glow = ctx.createRadialGradient(220, 160, 20, 220, 160, 700);
+  glow.addColorStop(0, 'rgba(77, 217, 192, 0.16)');
+  glow.addColorStop(1, 'rgba(77, 217, 192, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Thin accent rule under the header.
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(PADDING, 240, W - PADDING * 2, 1);
 }
 
 function drawHeader(ctx, snapshot) {
   ctx.textBaseline = 'top';
-  ctx.fillStyle = '#e6ebf2';
-  ctx.font = '900 60px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('Color Guesser', PADDING, 60);
 
-  ctx.fillStyle = '#8b95a7';
-  ctx.font = '600 28px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  // Brand kicker — small label above the title.
+  ctx.fillStyle = ACCENT;
+  ctx.font = '800 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('DAILY · ' + snapshot.date, PADDING, 64);
+
+  // Title.
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.font = '900 72px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('What Color Are They?', PADDING, 100);
+
+  // Subhead — mode + scoreline.
   const wonCount = snapshot.rounds.filter(r => r.won).length;
+  const total = snapshot.rounds.length;
   const modeLabel = snapshot.mode === 'items' ? 'Items' : 'Characters';
-  const summary = `${snapshot.date} · ${modeLabel} · ${wonCount} / ${snapshot.rounds.length}`;
-  ctx.fillText(summary, PADDING, 138);
+
+  ctx.fillStyle = TEXT_SECONDARY;
+  ctx.font = '600 28px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(modeLabel, PADDING, 188);
+
+  // Score pill on the right.
+  drawScorePill(ctx, `${wonCount} / ${total}`, W - PADDING, 178);
+}
+
+function drawScorePill(ctx, text, right, top) {
+  ctx.font = '900 36px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  const padX = 22;
+  const padY = 12;
+  const metrics = ctx.measureText(text);
+  const w = metrics.width + padX * 2;
+  const h = 36 + padY * 2;
+  const x = right - w;
+  const y = top - padY + 4;
+
+  ctx.save();
+  // Subtle gradient fill on the pill.
+  const grd = ctx.createLinearGradient(x, y, x, y + h);
+  grd.addColorStop(0, 'rgba(77,217,192,0.22)');
+  grd.addColorStop(1, 'rgba(77,217,192,0.10)');
+  ctx.fillStyle = grd;
+  ctx.strokeStyle = 'rgba(77,217,192,0.55)';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, x, y, w, h, h / 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.textBaseline = 'top';
+  ctx.font = '900 36px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(text, x + padX, y + padY);
 }
 
 function drawFooter(ctx) {
-  ctx.fillStyle = '#8b95a7';
-  ctx.textBaseline = 'bottom';
-  ctx.font = '600 24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('whatcolorarethey · play today\'s puzzle', PADDING, H - 50);
+  // Thin top rule.
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(PADDING, H - 96, W - PADDING * 2, 1);
+
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.font = '800 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('whatcolorarethey', PADDING, H - 74);
+
+  ctx.fillStyle = TEXT_MUTED;
+  ctx.font = '600 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('Play today’s puzzle', PADDING, H - 44);
+
+  // Legend on the right — three small boxes with labels.
+  drawLegend(ctx, W - PADDING, H - 70);
+}
+
+function drawLegend(ctx, right, top) {
+  const items = [
+    { color: BOX_COLORS.correct, label: 'Correct' },
+    { color: BOX_COLORS.wrong, label: 'Wrong' },
+    { color: BOX_COLORS.empty, label: 'Skipped', stroke: BOX_COLORS.emptyStroke },
+  ];
+  ctx.textBaseline = 'middle';
+  ctx.font = '600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  const gap = 16;
+  // Measure totals so we can right-align the row.
+  let totalW = 0;
+  const sizes = items.map(({ label }) => {
+    const tw = ctx.measureText(label).width;
+    return { tw, w: 18 + 8 + tw };
+  });
+  totalW = sizes.reduce((acc, s, i) => acc + s.w + (i > 0 ? gap : 0), 0);
+  let x = right - totalW;
+  const y = top + 14;
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    if (it.stroke) {
+      ctx.fillStyle = it.color;
+      ctx.strokeStyle = it.stroke;
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, x, y - 9, 18, 18, 5);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      drawSolidBox(ctx, x, y - 9, 18, 5, it.color);
+    }
+    ctx.fillStyle = TEXT_SECONDARY;
+    ctx.fillText(it.label, x + 18 + 8, y);
+    x += sizes[i].w + gap;
+  }
   ctx.textBaseline = 'top';
 }
 
-async function drawRow(ctx, snapshot, i, x, y, w, h) {
+function drawRow(ctx, snapshot, i, x, y, w, h) {
   const round = snapshot.rounds[i];
   const character = snapshot.characters[i];
   const max = maxGuessesFor(character);
 
-  const portraitSize = h;
-  const portraitX = x;
-  const portraitY = y;
+  // Row card background — gives each round its own visual container.
+  ctx.save();
+  ctx.fillStyle = CARD_BG;
+  ctx.strokeStyle = CARD_STROKE;
+  ctx.lineWidth = 1;
+  roundRect(ctx, x, y, w, h, 22);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  const innerPad = 14;
+  const portraitSize = h - innerPad * 2;
+  const portraitX = x + innerPad;
+  const portraitY = y + innerPad;
 
   drawPortraitFrame(ctx, portraitX, portraitY, portraitSize);
-  await drawPortrait(ctx, character.imageSrc, portraitX, portraitY, portraitSize);
+  drawPortrait(ctx, character, portraitX, portraitY, portraitSize);
 
-  const rightX = portraitX + portraitSize + 32;
-  const rightW = w - portraitSize - 32;
+  // Name + color swatch column.
+  const textX = portraitX + portraitSize + 20;
+  const nameMax = w - portraitSize - innerPad * 3 - boxesAreaWidth(h, max) - 24;
+  drawCharacterMeta(ctx, character, textX, y, h, nameMax);
 
-  // Boxes only — no name, subtitle, or swatch pip. Quad rows render a single
-  // large box (one guess, win/lose); grid rows render the per-guess sequence.
-  const boxGap = 18;
-  const slotSize = Math.min(h, (rightW - boxGap * (max - 1)) / max);
-  const totalBoxesW = slotSize * max + boxGap * Math.max(0, max - 1);
-  const boxesX = rightX + (rightW - totalBoxesW) / 2;
-  const boxesY = y + (h - slotSize) / 2;
+  // Boxes area on the right.
+  const boxesArea = boxesAreaWidth(h, max);
+  const boxesRight = x + w - innerPad;
+  const boxesLeft = boxesRight - boxesArea;
+  drawGuessRow(ctx, round, max, boxesLeft, y, boxesArea, h);
+}
+
+function boxesAreaWidth(rowH, max) {
+  const boxGap = 14;
+  const slotSize = Math.min(rowH - 28, 110);
+  return slotSize * max + boxGap * Math.max(0, max - 1);
+}
+
+function drawCharacterMeta(ctx, character, x, rowY, rowH, maxWidth) {
+  if (maxWidth <= 40) return;
+  const nameY = rowY + rowH / 2 - 16;
+  const swatchY = rowY + rowH / 2 + 14;
+
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.font = '800 26px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textBaseline = 'middle';
+  const name = truncate(ctx, character.name, maxWidth);
+  ctx.fillText(name, x, nameY);
+
+  // Color swatch + hex.
+  const swatchSize = 18;
+  ctx.fillStyle = (character.color?.hex || '#888').toUpperCase();
+  roundRect(ctx, x, swatchY - swatchSize / 2, swatchSize, swatchSize, 5);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = TEXT_MUTED;
+  ctx.font = '600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  const hex = (character.color?.hex || '').toUpperCase();
+  ctx.fillText(hex, x + swatchSize + 10, swatchY);
+  ctx.textBaseline = 'top';
+}
+
+function truncate(ctx, text, maxWidth) {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  const ell = '…';
+  let lo = 0, hi = text.length;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (ctx.measureText(text.slice(0, mid) + ell).width <= maxWidth) lo = mid;
+    else hi = mid - 1;
+  }
+  return text.slice(0, lo) + ell;
+}
+
+function drawGuessRow(ctx, round, max, x, rowY, areaW, rowH) {
+  const boxGap = 14;
+  const slotSize = Math.min(rowH - 28, 110);
+  const totalW = slotSize * max + boxGap * Math.max(0, max - 1);
+  const startX = x + (areaW - totalW);
+  const y = rowY + (rowH - slotSize) / 2;
   for (let b = 0; b < max; b++) {
-    const bx = boxesX + b * (slotSize + boxGap);
-    drawGuessBox(ctx, round, b, bx, boxesY, slotSize);
+    const bx = startX + b * (slotSize + boxGap);
+    drawGuessBox(ctx, round, b, bx, y, slotSize);
   }
 }
 
 function drawPortraitFrame(ctx, x, y, size) {
   ctx.save();
-  ctx.fillStyle = '#161b22';
-  ctx.strokeStyle = '#262d38';
-  ctx.lineWidth = 2;
-  roundRect(ctx, x, y, size, size, 18);
+  ctx.fillStyle = '#0e1218';
+  ctx.strokeStyle = '#2a3140';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, x, y, size, size, 16);
   ctx.fill();
   ctx.stroke();
   ctx.restore();
 }
 
-async function drawPortrait(ctx, src, x, y, size) {
-  try {
-    const img = await loadImage(src);
+function drawPortrait(ctx, character, x, y, size) {
+  // Synchronous: relies on the in-game preload so the image is already in the
+  // browser cache by the time the share card renders. Falls back to initials
+  // if the image isn't ready or fails to decode.
+  const src = character.imageSrc;
+  const cached = portraitCache.get(src);
+  if (cached && cached.complete && cached.naturalWidth > 0) {
     ctx.save();
-    roundRect(ctx, x, y, size, size, 18);
+    roundRect(ctx, x, y, size, size, 16);
     ctx.clip();
-    const ratio = img.width / img.height;
+    const ratio = cached.width / cached.height;
     let dw, dh;
-    if (ratio > 1) {
-      dh = size;
-      dw = size * ratio;
-    } else {
-      dw = size;
-      dh = size / ratio;
-    }
+    if (ratio > 1) { dh = size; dw = size * ratio; }
+    else { dw = size; dh = size / ratio; }
     const dx = x + (size - dw) / 2;
     const dy = y + (size - dh) / 2;
-    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.drawImage(cached, dx, dy, dw, dh);
     ctx.restore();
-  } catch {
-    // Frame stays empty on failure.
+  } else {
+    drawInitials(ctx, character.name, x, y, size);
   }
+}
+
+function drawInitials(ctx, name, x, y, size) {
+  const initials = String(name || '?')
+    .split(/\s+/)
+    .map(w => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+  ctx.save();
+  ctx.fillStyle = '#cfd6e2';
+  ctx.font = `900 ${Math.floor(size * 0.4)}px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.fillText(initials, x + size / 2, y + size / 2);
+  ctx.restore();
+  ctx.textAlign = 'start';
+  ctx.textBaseline = 'top';
 }
 
 function drawGuessBox(ctx, round, idx, x, y, size) {
   const guess = round.guesses[idx];
-  const radius = 16;
-  ctx.save();
+  const radius = Math.max(10, Math.floor(size * 0.18));
   if (!guess) {
-    // Empty slot (or a skipped round): solid dark square mirroring ⬛.
-    ctx.fillStyle = BOX_COLORS.empty;
-    ctx.strokeStyle = BOX_COLORS.emptyStroke;
-    ctx.lineWidth = 2;
-    roundRect(ctx, x, y, size, size, radius);
-    ctx.fill();
-    ctx.stroke();
+    drawEmptyBox(ctx, x, y, size, radius);
   } else if (guess.correct) {
     drawSolidBox(ctx, x, y, size, radius, BOX_COLORS.correct);
   } else {
     drawSolidBox(ctx, x, y, size, radius, BOX_COLORS.wrong);
   }
-  drawBoxLabel(ctx, guess, x, y, size);
+}
+
+function drawEmptyBox(ctx, x, y, size, radius) {
+  ctx.save();
+  ctx.fillStyle = BOX_COLORS.empty;
+  ctx.strokeStyle = BOX_COLORS.emptyStroke;
+  ctx.lineWidth = 2;
+  roundRect(ctx, x, y, size, size, radius);
+  ctx.fill();
+  ctx.stroke();
   ctx.restore();
 }
 
 function drawSolidBox(ctx, x, y, size, radius, fill) {
+  ctx.save();
   ctx.fillStyle = fill;
   roundRect(ctx, x, y, size, size, radius);
   ctx.fill();
-  // Subtle inner highlight so the boxes feel "filled" rather than flat.
-  ctx.save();
-  ctx.globalAlpha = 0.18;
+  // Inner highlight band for a softer "filled" feel.
+  ctx.globalAlpha = 0.22;
   const grd = ctx.createLinearGradient(x, y, x, y + size);
   grd.addColorStop(0, '#ffffff');
-  grd.addColorStop(0.6, 'rgba(255,255,255,0)');
+  grd.addColorStop(0.55, 'rgba(255,255,255,0)');
   ctx.fillStyle = grd;
   roundRect(ctx, x, y, size, size, radius);
   ctx.fill();
+  // Subtle inner border for crispness.
+  ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+  ctx.lineWidth = 1;
+  roundRect(ctx, x + 0.5, y + 0.5, size - 1, size - 1, Math.max(0, radius - 0.5));
+  ctx.stroke();
   ctx.restore();
-}
-
-function drawBoxLabel(ctx, guess, x, y, size) {
-  if (!guess) return;
-  // Grid guesses get the cell coordinate (A1, B3); quad guesses don't.
-  if (!Number.isInteger(guess.col) || !Number.isInteger(guess.row)) return;
-  ctx.fillStyle = guess.correct ? 'rgba(6,36,32,0.85)' : 'rgba(255,240,240,0.92)';
-  ctx.textBaseline = 'top';
-  ctx.font = '800 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  const tag = `${COL_LABELS[guess.col] ?? '?'}${guess.row + 1}`;
-  ctx.fillText(tag, x + 10, y + 8);
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -268,14 +460,35 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = reject;
+// Portraits go through a small in-module cache so repeated draws don't refetch.
+// Each entry is the HTMLImageElement itself (the browser handles decode).
+const portraitCache = new Map();
+function preloadPortrait(src) {
+  if (!src) return Promise.resolve(null);
+  const existing = portraitCache.get(src);
+  if (existing) {
+    if (existing.complete) return Promise.resolve(existing);
+    return new Promise((res) => {
+      existing.addEventListener('load', () => res(existing), { once: true });
+      existing.addEventListener('error', () => res(null), { once: true });
+    });
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.decoding = 'async';
+  portraitCache.set(src, img);
+  return new Promise((res) => {
+    img.onload = () => res(img);
+    img.onerror = () => res(null);
     img.src = src;
   });
+}
+
+// Preload all portraits up-front so the synchronous draw path can read them
+// from cache. Returning a promise lets renderShareCard remain async without
+// scattering awaits through each row.
+async function preloadAllPortraits(characters) {
+  await Promise.all(characters.map(c => preloadPortrait(c.imageSrc)));
 }
 
 export async function shareCanvas(canvas, snapshot) {
