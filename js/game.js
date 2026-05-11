@@ -13,6 +13,7 @@
 
 import { buildGrid } from './grid.js';
 import { buildQuad } from './quad.js';
+import { positionForRound } from './daily.js';
 
 const STORAGE_KEYS = {
   bestStreak: 'wcat:bestStreak',
@@ -22,7 +23,7 @@ const STORAGE_KEYS = {
 const GRID_MAX_GUESSES = 3;
 const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 4;
-export const MAX_SKIPS_PER_MODE = 999;
+export const MAX_SKIPS_PER_MODE = 2;
 
 export function maxGuessesFor(character) {
   return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;
@@ -92,30 +93,22 @@ export function createDailyGame(dailyCharacters, dateKey, options = {}) {
       persist();
     }
     if (c.type === 'item') {
+      const correctIndex = positionForRound(state.date, state.currentIndex, 4);
       state.board = buildQuad(c.color.hex, {
         seed: round.seed,
         palette: c.quadPalette,
+        correctIndex,
       });
     } else {
-      // Look up the previous grid round's correct cell so we can avoid
-      // landing on the same (row, col) two rounds in a row. buildGrid is
-      // pure, so we can recompute the previous round's board cheaply
-      // instead of caching the position alongside state.
-      let avoidRow = null, avoidCol = null;
-      const prevChar = state.characters[state.currentIndex - 1];
-      const prevRound = state.rounds[state.currentIndex - 1];
-      if (prevChar && prevChar.type !== 'item' && prevRound?.seed != null) {
-        const prev = buildGrid(prevChar.color.hex, {
-          rows: GRID_SIZE, cols: GRID_SIZE, seed: prevRound.seed,
-        });
-        avoidRow = prev.correctRow;
-        avoidCol = prev.correctCol;
-      }
+      const cells = GRID_SIZE * GRID_SIZE;
+      const pos = positionForRound(state.date, state.currentIndex, cells);
+      const correctRow = Math.floor(pos / GRID_SIZE);
+      const correctCol = pos % GRID_SIZE;
       state.board = {
         kind: 'grid',
         ...buildGrid(c.color.hex, {
           rows: GRID_SIZE, cols: GRID_SIZE, seed: round.seed,
-          avoidRow, avoidCol,
+          correctRow, correctCol,
         }),
       };
     }

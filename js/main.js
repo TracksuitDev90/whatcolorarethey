@@ -17,7 +17,7 @@ import {
 
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
-const ROUNDS_PER_DAY = 999;
+const ROUNDS_PER_DAY = 3;
 
 const els = {
   img: document.getElementById('character-img'),
