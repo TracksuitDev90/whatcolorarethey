@@ -17,7 +17,10 @@ import {
 
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
-const ROUNDS_PER_DAY = 3;
+// Temporarily unlimited for testing — was 3. The UI already drops the "/ N"
+// totals when this exceeds 10, so a single high value is enough to surface the
+// whole roster each day without further plumbing.
+const ROUNDS_PER_DAY = 999;
 
 // Per-mode localStorage keys. Seen records the IDs the player has already
 // encountered (so each day surfaces fresh entries until the roster wraps).
@@ -807,18 +810,18 @@ function flashLabel(btn, hot, cool) {
 
 async function showFinished() {
   const s = game.snapshot();
+  // End-of-game is intentionally minimal: just the social share card and the
+  // three action buttons. The 4:3 photo card, character title, status text,
+  // and countdown all hide here and come back naturally on the next UTC day
+  // (the live game reload from init() shows them via renderRound()).
   els.characterCard.hidden = true;
   els.board.hidden = true;
   els.quad.hidden = true;
   els.next.hidden = true;
   els.skip.hidden = true;
   els.status.textContent = '';
-
-  const wins = s.rounds.filter(r => r.won).length;
-  const skipped = s.rounds.filter(r => r.skipped).length;
-  let summary = `${wins} of ${s.totalRounds} solved today.`;
-  if (skipped > 0) summary += ` (${skipped} skipped)`;
-  els.status.textContent = summary;
+  els.name.innerHTML = '&nbsp;';
+  if (els.countdown) els.countdown.textContent = '';
   updateChips();
 
   els.shareSlot.hidden = false;
@@ -835,7 +838,10 @@ async function showFinished() {
   els.link.textContent = 'Copy link';
   els.copyResult.hidden = false;
   els.copyResult.textContent = 'Copy emoji';
-  startCountdown();
+  // Countdown is suppressed on the end screen per spec, but we still need its
+  // refresh-on-new-UTC-day side effect so the page reloads at midnight and
+  // brings the 4:3 box back. Run the tick silently.
+  startCountdown({ silent: true });
 }
 
 function hideShareSlot() {
@@ -852,11 +858,13 @@ function hideShareSlot() {
   if (els.countdown) els.countdown.textContent = '';
 }
 
-function startCountdown() {
+function startCountdown({ silent = false } = {}) {
   if (!els.countdown) return;
   const tick = () => {
     const ms = msUntilNextUtcDay();
-    els.countdown.textContent = `Next puzzle in ${formatCountdown(ms)} (UTC)`;
+    if (!silent) {
+      els.countdown.textContent = `Next puzzle in ${formatCountdown(ms)} (UTC)`;
+    }
     if (ms <= 0) {
       clearInterval(countdownTimer);
       countdownTimer = null;

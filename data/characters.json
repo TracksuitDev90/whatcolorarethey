@@ -262,7 +262,7 @@
     "id": "heathcliff",
     "name": "Heathcliff",
     "era": "80s",
-    "color": { "hex": "#2596BE", "name": "Heathcliff Blue" },
+    "color": { "hex": "#c96b26", "name": "Heathcliff Orange" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Heathcliff_(comics)",
     "image": "assets/photos/heathcliff.png",
     "verified": true
