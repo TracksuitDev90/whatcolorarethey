@@ -58,28 +58,21 @@ function shuffleSeeded(items, seed) {
   return out;
 }
 
-// Walks deterministically through the pool, `count` per day starting from
-// ROTATION_EPOCH. Within a single cycle every entry appears exactly once
-// before any repeat. Each subsequent cycle uses a different seeded shuffle
-// so re-runs of the deck don't feel identical.
-export function pickDailyCharacters(allCharacters, dateKey, count = CHARACTERS_PER_DAY) {
-  if (!allCharacters?.length) return [];
-  const len = allCharacters.length;
-  const dayIndex = Math.max(0, daysBetween(ROTATION_EPOCH, dateKey));
-  let offset = dayIndex * count;
-  const baseOrder = allCharacters.slice();
-
-  const result = [];
-  while (result.length < Math.min(count, len)) {
-    const cycle = Math.floor(offset / len);
-    const within = offset % len;
-    const ordered = cycle === 0
-      ? baseOrder
-      : shuffleSeeded(baseOrder, hashString(`rotation:cycle:${cycle}`));
-    result.push(ordered[within]);
-    offset += 1;
-  }
-  return result;
+// Picks `count` entries the player hasn't seen yet, deterministically
+// seeded by date so refreshing the page returns the same trio. When the
+// unseen pool runs short of `count`, the caller is told the roster wrapped
+// so it can clear its seen-record before the next call.
+//
+// Returns { picks, exhausted } — `exhausted` is true when the unseen pool
+// could not satisfy the request and we fell back to the full pool.
+export function pickFreshDailyCharacters(allCharacters, dateKey, seenIds, mode = '', count = CHARACTERS_PER_DAY) {
+  if (!allCharacters?.length) return { picks: [], exhausted: false };
+  const seen = seenIds instanceof Set ? seenIds : new Set(seenIds || []);
+  const unseen = allCharacters.filter(c => !seen.has(c.id));
+  const exhausted = unseen.length < count;
+  const pool = exhausted ? allCharacters : unseen;
+  const ordered = shuffleSeeded(pool, hashString(`fresh:${mode}:${dateKey}`));
+  return { picks: ordered.slice(0, Math.min(count, pool.length)), exhausted };
 }
 
 // Non-deterministic Fisher-Yates. Used for the live game so every visit
