@@ -1,6 +1,6 @@
 {
-  "name": "What Color Are They?",
-  "short_name": "WhatColor",
+  "name": "Coloration",
+  "short_name": "Coloration",
   "description": "A daily color guessing game. Pick the right shade for an iconic character or item — fresh puzzles every day at UTC midnight.",
   "start_url": "./",
   "scope": "./",

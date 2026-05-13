@@ -1,4 +1,4 @@
-# What Color Are They?
+# Coloration
 
 A daily color guessing game. Each day, the puzzle presents an iconic character or item and asks you to pick the right shade — one round at a time, the same set for everyone, reset at UTC midnight.
 
