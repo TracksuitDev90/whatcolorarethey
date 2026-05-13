@@ -42,16 +42,17 @@
     var(--c-mint)  100%
   );
   --grad-tab: linear-gradient(135deg, var(--c-pink), var(--c-purple) 55%, var(--c-blue));
-  --grad-blob: conic-gradient(
-    from 210deg at 50% 50%,
-    var(--c-pink)   0deg,
-    var(--c-purple) 70deg,
-    var(--c-blue)  140deg,
-    var(--c-mint)  200deg,
-    var(--c-yellow) 270deg,
-    var(--c-orange) 320deg,
-    var(--c-pink)  360deg
-  );
+  /* Watercolor blob fill — six soft radial blooms overlap and feather into a
+     warm base, so colour transitions read as pigment bleeding rather than
+     pie-slice boundaries. Edges of each radial are fully transparent, so
+     hue-rotate drifts colour smoothly across the whole field. */
+  --grad-blob:
+    radial-gradient(ellipse 72% 60% at 22% 28%, var(--c-pink) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 68% at 78% 22%, var(--c-purple) 0%, transparent 62%),
+    radial-gradient(ellipse 66% 62% at 85% 74%, var(--c-blue) 0%, transparent 64%),
+    radial-gradient(ellipse 74% 66% at 18% 80%, var(--c-mint) 0%, transparent 64%),
+    radial-gradient(ellipse 58% 52% at 50% 52%, var(--c-yellow) 0%, transparent 58%),
+    linear-gradient(var(--c-orange), var(--c-orange));
 
   /* Geometry */
   --radius-sm: 10px;
@@ -160,52 +161,55 @@ body {
 
 .title {
   margin: 0;
-  font-size: clamp(19px, 2.6vw, 26px);
-  font-weight: 900;
-  letter-spacing: -0.025em;
+  font-family: "Bowlby One", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 400;
+  /* Bowlby One is a heavy display face; positive tracking opens the chunky
+     letterforms enough to read as a wordmark rather than a slab. */
+  letter-spacing: 0.04em;
   line-height: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.55em;
+  gap: 0.6em;
 }
 
-/* The brand blob sits in front of the wordmark. Body uses a wide conic
-   gradient that's slowly rotated by an animated `--blob-hue` filter, so the
-   colour transitions read as a slow drift rather than discrete steps. The
-   border-radius keyframes morph the silhouette through six organic poses. */
+/* The brand blob sits in front of the wordmark. Background is a stack of
+   soft radial gradients (see --grad-blob) for a watercolor look; a slow
+   hue-rotate filter drifts the whole field continuously. The border-radius
+   keyframes push through asymmetric, exaggerated shapes so the silhouette
+   reads as a wobbling blob rather than a near-circle. */
 .title::before {
   content: "";
-  width: 1.35em;
-  height: 1.35em;
+  width: 1.5em;
+  height: 1.5em;
   flex: none;
   background: var(--grad-blob);
-  border-radius: 58% 42% 63% 37% / 41% 60% 40% 59%;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
-    inset 0 6px 10px rgba(255, 255, 255, 0.18),
-    inset 0 -6px 12px rgba(0, 0, 0, 0.25),
-    0 8px 22px rgba(176, 107, 255, 0.35),
-    0 2px 6px rgba(255, 107, 181, 0.28);
-  filter: saturate(115%);
+  border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%;
+  /* Soft blur lets the radial blooms bleed into each other like watercolor
+     on wet paper, with no hard edges between colour zones. */
+  filter: blur(0.6px) saturate(118%);
   animation:
-    blob-morph 14s ease-in-out infinite,
-    blob-drift 22s linear infinite;
+    blob-morph 11s ease-in-out infinite,
+    blob-drift 18s linear infinite;
   transform-origin: 50% 50%;
 }
 
+/* Wider amplitude than before so the silhouette swells, pinches, and tilts
+   — closer to a lava-lamp drop than a rounded square. */
 @keyframes blob-morph {
-  0%   { border-radius: 58% 42% 63% 37% / 41% 60% 40% 59%; transform: rotate(0deg) scale(1); }
-  20%  { border-radius: 42% 58% 38% 62% / 56% 42% 58% 44%; transform: rotate(14deg) scale(1.02); }
-  40%  { border-radius: 64% 36% 49% 51% / 60% 36% 64% 40%; transform: rotate(-8deg) scale(0.99); }
-  60%  { border-radius: 38% 62% 67% 33% / 36% 65% 35% 64%; transform: rotate(20deg) scale(1.03); }
-  80%  { border-radius: 55% 45% 33% 67% / 49% 30% 70% 51%; transform: rotate(-14deg) scale(1.01); }
-  100% { border-radius: 58% 42% 63% 37% / 41% 60% 40% 59%; transform: rotate(0deg) scale(1); }
+  0%   { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: rotate(0deg)   scale(1); }
+  16%  { border-radius: 38% 62% 30% 70% / 64% 38% 62% 36%; transform: rotate(18deg)  scale(1.04); }
+  33%  { border-radius: 72% 28% 55% 45% / 30% 70% 30% 70%; transform: rotate(-12deg) scale(0.97); }
+  50%  { border-radius: 30% 70% 78% 22% / 70% 30% 70% 30%; transform: rotate(24deg)  scale(1.05); }
+  66%  { border-radius: 55% 45% 25% 75% / 38% 25% 75% 62%; transform: rotate(-20deg) scale(0.98); }
+  83%  { border-radius: 68% 32% 42% 58% / 56% 72% 28% 44%; transform: rotate(10deg)  scale(1.03); }
+  100% { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: rotate(0deg)   scale(1); }
 }
-/* Slow continuous hue drift — gives the impression that the rainbow rotates
-   through the blob, with no visible boundaries between stops. */
+/* Hue-rotate the whole stack continuously — colours wash across the blob
+   like pigment swirling in water. */
 @keyframes blob-drift {
-  0%   { filter: saturate(115%) hue-rotate(0deg); }
-  100% { filter: saturate(115%) hue-rotate(360deg); }
+  0%   { filter: blur(0.6px) saturate(118%) hue-rotate(0deg); }
+  100% { filter: blur(0.6px) saturate(118%) hue-rotate(360deg); }
 }
 
 /* Title wordmark — single locked rainbow gradient, no shimmer so it stays
@@ -295,12 +299,11 @@ body {
   gap: 4px;
   padding: 5px;
   margin: clamp(18px, 3vw, 28px) auto 0;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
-    var(--bg-elev);
+  /* Solid track — no overlay gradient. */
+  background: var(--bg-elev);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-soft), var(--ring);
+  box-shadow: var(--shadow-soft);
   align-self: center;
   width: max-content;
   max-width: calc(100% - 24px);
@@ -335,13 +338,13 @@ body {
 .tab:hover { color: var(--text); transform: translateY(-1px); }
 
 .tab--active {
+  /* Solid bright fill against a dark track — maximum contrast so the
+     current tab is unmistakable. Dark text on light bg reverses the
+     foreground/background relationship of inactive tabs entirely. */
   color: #0e1116;
-  background: var(--grad-tab);
-  box-shadow:
-    0 8px 22px rgba(176, 107, 255, 0.40),
-    0 2px 6px rgba(255, 107, 181, 0.25),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.20);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
+  background: var(--text);
+  box-shadow: none;
+  text-shadow: none;
 }
 
 .tab--active:hover { transform: none; }
@@ -546,7 +549,9 @@ body {
 
 .cell {
   appearance: none;
-  border: 1px solid rgba(0, 0, 0, 0.28);
+  /* Color swatches are the game — no border, no inset shadow, no gloss.
+     The grid gap separates them; any tint here would distort the answer. */
+  border: 0;
   border-radius: 8px;
   aspect-ratio: 1 / 1;
   cursor: pointer;
@@ -558,9 +563,6 @@ body {
     box-shadow 180ms var(--ease-out),
     filter 180ms var(--ease-out);
   -webkit-tap-highlight-color: transparent;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.22);
 }
 
 /* ---------- Quad board (4 distinct color choices, 1 guess) ---------- */
@@ -581,18 +583,15 @@ body {
 
 .quad-cell {
   border-radius: 14px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -4px 8px rgba(0, 0, 0, 0.22);
 }
 
 @media (hover: hover) {
   .cell:hover {
     transform: scale(1.04);
+    /* Outer ring + drop only — no inset shadow that would tint the swatch. */
     box-shadow:
       0 0 0 2px rgba(255, 255, 255, 0.55),
-      0 6px 18px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      0 6px 18px rgba(0, 0, 0, 0.45);
     z-index: 1;
   }
 }
