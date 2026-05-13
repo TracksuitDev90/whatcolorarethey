@@ -1,15 +1,32 @@
 :root {
   --bg: #0e1116;
   --bg-elev: #161b22;
+  --bg-elev-2: #1c2230;
   --border: #262d38;
+  --border-strong: #313a4a;
   --text: #e6ebf2;
   --muted: #8b95a7;
   --accent: #4dd9c0;
+  --accent-soft: rgba(77, 217, 192, 0.16);
   --danger: #ff5970;
   --success: #4dd9c0;
-  --radius: 12px;
+  /* Whimsy palette — used for tabs, title, chips, decorative accents. */
+  --c-pink:   #ff6bb5;
+  --c-purple: #b06bff;
+  --c-yellow: #ffd76b;
+  --c-orange: #ff9d4d;
+  --c-mint:   #4dd9c0;
+  --c-blue:   #6aa9ff;
+  /* Reusable gradients for the playful chrome. */
+  --grad-rainbow: linear-gradient(90deg, var(--c-pink), var(--c-purple), var(--c-blue), var(--c-mint), var(--c-yellow), var(--c-orange));
+  --grad-tab: linear-gradient(135deg, var(--c-pink), var(--c-purple) 55%, var(--c-blue));
+  --radius: 14px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
   --gap: clamp(6px, 1.2vw, 12px);
   --shadow-soft: 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-pop: 0 12px 32px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3);
+  --ring: 0 0 0 1px rgba(255,255,255,0.04) inset;
   /* Cap the photo's rendered height so the colour board still fits in the
      viewport on bigger screens. Phone defaults stay generous; the breakpoint
      below tightens this for tablets and desktops. */
@@ -29,6 +46,24 @@ html, body {
   font-feature-settings: "ss01", "cv11";
 }
 
+/* Soft, decorative colour wash anchored at the top — gives the dark theme a
+   playful glow without distracting from the photo or colour board. Uses
+   `fixed` so it doesn't scroll with content; pointer-events are off so it
+   never intercepts clicks. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10% -10% auto -10%;
+  height: 60vh;
+  background:
+    radial-gradient(40rem 24rem at 20% 0%, rgba(176, 107, 255, 0.18), transparent 60%),
+    radial-gradient(36rem 22rem at 80% 0%, rgba(255, 107, 181, 0.16), transparent 60%),
+    radial-gradient(30rem 20rem at 50% 10%, rgba(77, 217, 192, 0.10), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+body > * { position: relative; z-index: 1; }
+
 img {
   image-rendering: -webkit-optimize-contrast;
   image-rendering: high-quality;
@@ -47,81 +82,177 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 12px clamp(12px, 3vw, 24px);
+  gap: 10px 14px;
+  padding: 14px clamp(14px, 3vw, 28px);
   border-bottom: 1px solid var(--border);
-  background: var(--bg-elev);
+  background:
+    linear-gradient(180deg, rgba(22, 27, 34, 0.85), rgba(14, 17, 22, 0.85));
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  backdrop-filter: saturate(140%) blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .title {
   margin: 0;
-  font-size: clamp(16px, 2.4vw, 22px);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: clamp(18px, 2.6vw, 24px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+
+/* Rainbow gradient on the title text for a fun, friendly brand mark. The
+   sticky ::before swatch is a tiny round colour chip — the visual "logo". */
+.title::before {
+  content: "";
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 30% 70% 70% 30% / 40% 40% 60% 60%;
+  background: var(--grad-tab);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,0.06) inset,
+    0 4px 14px rgba(176, 107, 255, 0.45);
+  flex: none;
+  animation: blob 9s ease-in-out infinite;
+}
+
+@keyframes blob {
+  0%, 100% { border-radius: 30% 70% 70% 30% / 40% 40% 60% 60%; transform: rotate(0deg); }
+  50%      { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(8deg); }
+}
+
+.title-text {
+  background: var(--grad-rainbow);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: title-shimmer 12s linear infinite;
+}
+
+@keyframes title-shimmer {
+  to { background-position: 200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title::before { animation: none; }
+  .title-text { animation: none; background-position: 0 0; }
 }
 
 .scoreboard {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: clamp(11px, 1.4vw, 13px);
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: #1f2530;
-  border: 1px solid var(--border);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , #1c2230;
+  border: 1px solid var(--border-strong);
   color: var(--text);
   white-space: nowrap;
+  box-shadow: var(--ring), 0 1px 0 rgba(0,0,0,0.25);
+  transition: transform 120ms ease, border-color 120ms ease;
 }
 
+.chip:hover { transform: translateY(-1px); }
+
+/* Tiny coloured dot prefix per chip — visual hook + at-a-glance grouping. */
+.chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.95;
+  box-shadow: 0 0 8px currentColor;
+  flex: none;
+}
+
+#round-chip   { color: var(--c-purple); }
+#streak-chip  { color: var(--c-pink); }
+#best-chip    { color: var(--c-yellow); }
 .chip--guesses { color: var(--accent); }
-.chip--skips { color: #f4d36a; }
+.chip--skips  { color: var(--c-orange); }
 .chip--skips.chip--depleted { color: var(--muted); opacity: 0.7; }
+.chip--skips.chip--depleted::before { box-shadow: none; opacity: 0.5; }
 
 /* ---------- Tabs ---------- */
 .tabs {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
-  gap: 6px;
-  padding: 10px clamp(12px, 3vw, 24px) 0;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  padding: 6px;
+  margin: clamp(14px, 2.4vw, 22px) auto 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , #161b22;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft), var(--ring);
+  align-self: center;
+  width: max-content;
+  max-width: calc(100% - 24px);
 }
 
 .tab {
   appearance: none;
   background: transparent;
   color: var(--muted);
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  padding: 10px 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 10px 22px;
   font: inherit;
-  font-weight: 700;
+  font-weight: 800;
   font-size: clamp(13px, 1.7vw, 15px);
   cursor: pointer;
   letter-spacing: 0.01em;
   position: relative;
-  top: 1px;
   min-height: 40px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition: color 180ms ease, transform 120ms ease, background 200ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.tab:hover { color: var(--text); }
+/* Subtle emoji-ish ornaments so each tab has a personality without needing
+   an icon library. Pseudo-elements keep the DOM clean. */
+#tab-items::before { content: "✨"; font-size: 1em; }
+#tab-grid::before  { content: "🎨"; font-size: 1em; }
+
+.tab:hover { color: var(--text); transform: translateY(-1px); }
 
 .tab--active {
-  background: var(--bg-elev);
-  color: var(--text);
-  border-color: var(--border);
+  color: #0e1116;
+  background: var(--grad-tab);
+  box-shadow:
+    0 6px 18px rgba(176, 107, 255, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
 }
+
+.tab--active:hover { transform: none; }
 
 .tab:focus-visible {
   outline: 3px solid #fff;
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
+
 
 /* ---------- Stage ---------- */
 .stage {
@@ -430,34 +561,52 @@ body {
 
 .btn {
   appearance: none;
-  border: 1px solid var(--border);
-  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , var(--bg-elev);
   color: var(--text);
-  font-weight: 600;
-  padding: 12px 20px;
-  border-radius: 10px;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   font-size: 15px;
-  min-height: 44px;
+  min-height: 46px;
+  letter-spacing: 0.01em;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--ring), 0 1px 0 rgba(0,0,0,0.25);
+  transition: transform 100ms ease, box-shadow 200ms ease, background 200ms ease, color 200ms ease;
 }
+
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
 
 .btn--primary {
-  background: var(--accent);
-  color: #062420;
-  border-color: var(--accent);
+  background: var(--grad-tab);
+  color: #0e1116;
+  border-color: transparent;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.18);
+  box-shadow:
+    0 8px 22px rgba(176, 107, 255, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
-.btn--ghost { opacity: 0.85; }
+.btn--ghost {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border);
+}
+.btn--ghost:hover { color: var(--text); border-color: var(--border-strong); }
 
 .btn:focus-visible {
   outline: 3px solid #fff;
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .btn[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Three-up share row that appears when the daily run finishes. Stacks on
@@ -475,7 +624,7 @@ body {
 /* ---------- Footer ---------- */
 .bottombar {
   text-align: center;
-  padding: 10px;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
   color: var(--muted);
   font-size: 12px;
   border-top: 1px solid var(--border);
@@ -483,6 +632,18 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  position: relative;
+}
+
+/* A thin rainbow accent above the footer ties the chrome together. */
+.bottombar::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -1px;
+  height: 2px;
+  background: var(--grad-rainbow);
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 /* ---------- Animations ---------- */
@@ -539,14 +700,15 @@ body {
   bottom: calc(env(safe-area-inset-bottom) + 24px);
   transform: translate(-50%, 12px);
   max-width: min(90vw, 420px);
-  padding: 10px 16px;
-  background: var(--bg-elev);
+  padding: 11px 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , var(--bg-elev);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
   font-size: 14px;
+  font-weight: 600;
   text-align: center;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-pop), var(--ring);
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms ease, transform 200ms ease;
@@ -564,6 +726,18 @@ body {
 }
 
 /* ---------- Breakpoints ---------- */
+/* Narrow phones: tighten topbar padding + chip size so the scoreboard wraps
+   gracefully under the title without looking cramped. */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 12px 14px;
+    gap: 8px 10px;
+  }
+  .scoreboard { width: 100%; }
+  .chip { padding: 5px 10px; font-size: 11px; }
+  .tab { padding: 9px 16px; }
+}
+
 @media (min-width: 700px) {
   .board { grid-template-columns: 32px 1fr; grid-template-rows: 32px 1fr; }
 }

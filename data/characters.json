@@ -55,7 +55,7 @@
   {
     "id": "smurfs",
     "name": "Smurfs",
-    "color": { "hex": "#4695D6", "name": "Smurf Blue (PMS 318C)" },
+    "color": { "hex": "#58B2E6", "name": "Smurf Blue" },
     "colorSource": "https://www.color-name.com/smurf.color",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Smurfs",
     "image": "assets/photos/smurfs.png",
@@ -73,7 +73,7 @@
   {
     "id": "elmo",
     "name": "Elmo",
-    "color": { "hex": "#D6292D", "name": "Elmo Red (Alizarin)" },
+    "color": { "hex": "#AB0E23", "name": "Elmo Red" },
     "colorSource": "https://www.schemecolor.com/elmo-sesame-street-colors.php",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Elmo",
     "image": "assets/photos/elmo.png",
@@ -82,7 +82,7 @@
   {
     "id": "kermit",
     "name": "Kermit the Frog",
-    "color": { "hex": "#5CB200", "name": "Kermit Green" },
+    "color": { "hex": "#5E7D07", "name": "Kermit Green" },
     "colorSource": "https://icolorpalette.com/color/5cb200",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Kermit_the_Frog",
     "image": "assets/photos/kermit.png",
@@ -100,7 +100,7 @@
   {
     "id": "barney",
     "name": "Barney the Dinosaur",
-    "color": { "hex": "#B2008B", "name": "Barney Purple (PMS 2405 C)" },
+    "color": { "hex": "#B61C7A", "name": "Barney Purple" },
     "colorSource": "https://brandpalettes.com/barney-friends-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Barney_(character)",
     "image": "assets/photos/barney.png",
@@ -118,7 +118,7 @@
   {
     "id": "beast-boy",
     "name": "Beast Boy",
-    "color": { "hex": "#8CC871", "name": "Beast Boy Green" },
+    "color": { "hex": "#7DA159", "name": "Beast Boy Green" },
     "colorSource": "https://www.color-hex.com/color-palette/72954",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Beast_Boy",
     "image": "assets/photos/beast-boy.png",
@@ -127,7 +127,7 @@
   {
     "id": "squidward",
     "name": "Squidward Tentacles",
-    "color": { "hex": "#a0ccbc", "name": "Squidward Sage" },
+    "color": { "hex": "#A1CCBB", "name": "Squidward Sage" },
     "colorSource": "https://brandpalettes.com/spongebob-squarepants-color-codes/",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Squidward_Tentacles",
     "image": "assets/photos/squidward.png",
@@ -334,7 +334,7 @@
     "id": "jenny-xj9",
     "name": "Jenny Wakeman",
     "era": "00s",
-    "color": { "hex": "#6FAEDB", "name": "XJ-9 Blue" },
+    "color": { "hex": "#39AEB6", "name": "XJ-9 Teal" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/My_Life_as_a_Teenage_Robot",
     "image": "assets/photos/jenny-xj9.png",
     "verified": true
@@ -369,7 +369,7 @@
   {
     "id": "genie",
     "name": "Genie",
-    "color": { "hex": "#4DB1E8", "name": "Genie Blue" },
+    "color": { "hex": "#5854E8", "name": "Genie Blue" },
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Genie_(Aladdin)",
     "image": "assets/photos/genie.png",
     "verified": true
