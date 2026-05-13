@@ -125,23 +125,31 @@ body {
   50%      { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(8deg); }
 }
 
+/* Static rainbow gradient — bright across the whole word, no shimmer. The
+   previous animated background-position caused the text to wash out (and
+   sometimes disappear entirely) as the gradient cycled through its low-
+   contrast midpoints. Locking it in place keeps "Coloration" legible at
+   every frame. */
 .title-text {
-  background: var(--grad-rainbow);
-  background-size: 200% 100%;
+  background: linear-gradient(90deg, #ff6bb5 0%, #b06bff 35%, #6aa9ff 65%, #4dd9c0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  animation: title-shimmer 12s linear infinite;
+  /* Safety net for browsers that don't support background-clip: text — the
+   text still shows in a vivid solid color rather than disappearing. */
+  text-shadow: none;
 }
-
-@keyframes title-shimmer {
-  to { background-position: 200% 0; }
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .title-text {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--c-pink);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .title::before { animation: none; }
-  .title-text { animation: none; background-position: 0 0; }
 }
 
 .scoreboard {
@@ -228,11 +236,6 @@ body {
   justify-content: center;
   gap: 8px;
 }
-
-/* Subtle emoji-ish ornaments so each tab has a personality without needing
-   an icon library. Pseudo-elements keep the DOM clean. */
-#tab-items::before { content: "✨"; font-size: 1em; }
-#tab-grid::before  { content: "🎨"; font-size: 1em; }
 
 .tab:hover { color: var(--text); transform: translateY(-1px); }
 
@@ -597,6 +600,22 @@ body {
   border-color: var(--border);
 }
 .btn--ghost:hover { color: var(--text); border-color: var(--border-strong); }
+
+/* Skip button: solid amber pill — distinct from the primary "Next" gradient,
+   but bright enough that players notice the option when they're stuck. */
+#skip-btn.btn,
+#skip-btn.btn--ghost {
+  background: linear-gradient(180deg, #ffce5e, #ff9d4d);
+  color: #2a1700;
+  border-color: transparent;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  font-weight: 800;
+  box-shadow:
+    0 8px 18px rgba(255, 157, 77, 0.32),
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+#skip-btn.btn:hover { color: #2a1700; }
 
 .btn:focus-visible {
   outline: 3px solid #fff;

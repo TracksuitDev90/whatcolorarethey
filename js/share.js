@@ -156,7 +156,7 @@ function drawHeader(ctx, snapshot) {
   // Title.
   ctx.fillStyle = TEXT_PRIMARY;
   ctx.font = '900 72px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('What Color Are They?', PADDING, 100);
+  ctx.fillText('Coloration', PADDING, 100);
 
   // Subhead — mode + scoreline.
   const wonCount = snapshot.rounds.filter(r => r.won).length;
