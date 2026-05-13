@@ -47,6 +47,9 @@ PRECROP = {
     "IMG_0395.png": {"top": 0.01, "bottom": 0.01, "left": 0.01, "right": 0.01},
     # New Pikachu source - GalleryPops watermark band along the bottom.
     "IMG_0560.webp": {"bottom": 0.14},
+    # Genie source is widescreen with thin black letterbox bars top/bottom —
+    # strip them so the cover_crop fills the entire 4:3 frame with content.
+    "IMG_0468.jpeg": {"top": 0.02, "bottom": 0.02},
 }
 
 # Vertical anchor for isolated-subject crops. 0.5 (default) centers the
@@ -80,6 +83,7 @@ EXPAND = {
 FORCE_COVER = {
     "IMG_0520.webp",  # Him - all four corners pink
     "IMG_0547.png",   # Tito Makani - corners near-black, RGBA fully opaque
+    "IMG_0468.jpeg",  # Genie - dark blue scene, fill the 4:3 frame
     # Cartoon scene crops where the subject sits centred against a flat-ish
     # bg. Without FORCE_COVER they'd be detected as isolated subjects, get a
     # tight bbox, then get padded back out to 4:3 with the bg colour — so the
