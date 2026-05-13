@@ -1,35 +1,77 @@
+/* ---------- Tokens ---------- */
 :root {
-  --bg: #0e1116;
-  --bg-elev: #161b22;
-  --bg-elev-2: #1c2230;
-  --border: #262d38;
-  --border-strong: #313a4a;
-  --text: #e6ebf2;
+  /* Surfaces */
+  --bg: #0b0e14;
+  --bg-elev: #141821;
+  --bg-elev-2: #1a2030;
+  --surface-quiet: #11151d;
+  --surface-glass: rgba(20, 24, 33, 0.72);
+
+  /* Hairlines */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  /* Type */
+  --text: #ecf0f7;
   --muted: #8b95a7;
+  --muted-soft: #5d6678;
+
+  /* Accents */
   --accent: #4dd9c0;
   --accent-soft: rgba(77, 217, 192, 0.16);
   --danger: #ff5970;
   --success: #4dd9c0;
-  /* Whimsy palette — used for tabs, title, chips, decorative accents. */
+
+  /* Whimsy palette — drives the title, blob, tab gradient, chip dots, and
+     the rainbow seam above the footer. Six stops on a single gradient keep
+     each transition gradual rather than banded. */
   --c-pink:   #ff6bb5;
   --c-purple: #b06bff;
   --c-yellow: #ffd76b;
   --c-orange: #ff9d4d;
   --c-mint:   #4dd9c0;
   --c-blue:   #6aa9ff;
-  /* Reusable gradients for the playful chrome. */
-  --grad-rainbow: linear-gradient(90deg, var(--c-pink), var(--c-purple), var(--c-blue), var(--c-mint), var(--c-yellow), var(--c-orange));
+
+  --grad-rainbow: linear-gradient(
+    90deg,
+    var(--c-yellow)  0%,
+    var(--c-orange) 18%,
+    var(--c-pink)   38%,
+    var(--c-purple) 58%,
+    var(--c-blue)   78%,
+    var(--c-mint)  100%
+  );
   --grad-tab: linear-gradient(135deg, var(--c-pink), var(--c-purple) 55%, var(--c-blue));
+  --grad-blob: conic-gradient(
+    from 210deg at 50% 50%,
+    var(--c-pink)   0deg,
+    var(--c-purple) 70deg,
+    var(--c-blue)  140deg,
+    var(--c-mint)  200deg,
+    var(--c-yellow) 270deg,
+    var(--c-orange) 320deg,
+    var(--c-pink)  360deg
+  );
+
+  /* Geometry */
+  --radius-sm: 10px;
   --radius: 14px;
-  --radius-lg: 18px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
   --radius-pill: 999px;
   --gap: clamp(6px, 1.2vw, 12px);
-  --shadow-soft: 0 8px 24px rgba(0,0,0,0.35);
-  --shadow-pop: 0 12px 32px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3);
-  --ring: 0 0 0 1px rgba(255,255,255,0.04) inset;
-  /* Cap the photo's rendered height so the colour board still fits in the
-     viewport on bigger screens. Phone defaults stay generous; the breakpoint
-     below tightens this for tablets and desktops. */
+
+  /* Elevation */
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --ring: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-spring: cubic-bezier(0.2, 1.5, 0.4, 1);
+
+  /* Photo height ceiling — phones stay generous, desktop tightens below. */
   --photo-max-h: 480px;
 }
 
@@ -44,23 +86,35 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
   font-feature-settings: "ss01", "cv11";
+  font-variant-ligatures: contextual;
 }
 
-/* Soft, decorative colour wash anchored at the top — gives the dark theme a
-   playful glow without distracting from the photo or colour board. Uses
-   `fixed` so it doesn't scroll with content; pointer-events are off so it
-   never intercepts clicks. */
+/* Ambient colour wash anchored at the top — three radial blooms that softly
+   tint the dark theme. `fixed` keeps it locked behind scroll; pointer-events
+   off so it never intercepts taps. */
 body::before {
   content: "";
   position: fixed;
   inset: -10% -10% auto -10%;
-  height: 60vh;
+  height: 70vh;
   background:
-    radial-gradient(40rem 24rem at 20% 0%, rgba(176, 107, 255, 0.18), transparent 60%),
-    radial-gradient(36rem 22rem at 80% 0%, rgba(255, 107, 181, 0.16), transparent 60%),
-    radial-gradient(30rem 20rem at 50% 10%, rgba(77, 217, 192, 0.10), transparent 60%);
+    radial-gradient(42rem 26rem at 18% 0%, rgba(176, 107, 255, 0.20), transparent 62%),
+    radial-gradient(38rem 24rem at 82% 4%, rgba(255, 107, 181, 0.18), transparent 60%),
+    radial-gradient(32rem 22rem at 50% 14%, rgba(77, 217, 192, 0.10), transparent 60%);
   pointer-events: none;
   z-index: 0;
+}
+/* Subtle grain on top of the wash — keeps large flat areas from looking
+   plastic. Painted with a tiny SVG noise so we don't ship an asset. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/></svg>");
 }
 body > * { position: relative; z-index: 1; }
 
@@ -82,62 +136,93 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px 14px;
-  padding: 14px clamp(14px, 3vw, 28px);
+  gap: 10px 18px;
+  padding: 14px clamp(16px, 3vw, 32px);
   border-bottom: 1px solid var(--border);
-  background:
-    linear-gradient(180deg, rgba(22, 27, 34, 0.85), rgba(14, 17, 22, 0.85));
-  -webkit-backdrop-filter: saturate(140%) blur(10px);
-  backdrop-filter: saturate(140%) blur(10px);
+  background: var(--surface-glass);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  backdrop-filter: saturate(150%) blur(14px);
   position: sticky;
   top: 0;
   z-index: 20;
 }
+/* Hairline rainbow seam at the bottom edge — ties the topbar to the footer's
+   accent without adding any extra DOM weight. */
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: var(--grad-rainbow);
+  opacity: 0.4;
+  pointer-events: none;
+}
 
 .title {
   margin: 0;
-  font-size: clamp(18px, 2.6vw, 24px);
+  font-size: clamp(19px, 2.6vw, 26px);
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1;
   display: inline-flex;
   align-items: center;
-  gap: 0.45em;
+  gap: 0.55em;
 }
 
-/* Rainbow gradient on the title text for a fun, friendly brand mark. The
-   sticky ::before swatch is a tiny round colour chip — the visual "logo". */
+/* The brand blob sits in front of the wordmark. Body uses a wide conic
+   gradient that's slowly rotated by an animated `--blob-hue` filter, so the
+   colour transitions read as a slow drift rather than discrete steps. The
+   border-radius keyframes morph the silhouette through six organic poses. */
 .title::before {
   content: "";
-  width: 1.1em;
-  height: 1.1em;
-  border-radius: 30% 70% 70% 30% / 40% 40% 60% 60%;
-  background: var(--grad-tab);
-  box-shadow:
-    0 0 0 2px rgba(255,255,255,0.06) inset,
-    0 4px 14px rgba(176, 107, 255, 0.45);
+  width: 1.35em;
+  height: 1.35em;
   flex: none;
-  animation: blob 9s ease-in-out infinite;
+  background: var(--grad-blob);
+  border-radius: 58% 42% 63% 37% / 41% 60% 40% 59%;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 6px 10px rgba(255, 255, 255, 0.18),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.25),
+    0 8px 22px rgba(176, 107, 255, 0.35),
+    0 2px 6px rgba(255, 107, 181, 0.28);
+  filter: saturate(115%);
+  animation:
+    blob-morph 14s ease-in-out infinite,
+    blob-drift 22s linear infinite;
+  transform-origin: 50% 50%;
 }
 
-@keyframes blob {
-  0%, 100% { border-radius: 30% 70% 70% 30% / 40% 40% 60% 60%; transform: rotate(0deg); }
-  50%      { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(8deg); }
+@keyframes blob-morph {
+  0%   { border-radius: 58% 42% 63% 37% / 41% 60% 40% 59%; transform: rotate(0deg) scale(1); }
+  20%  { border-radius: 42% 58% 38% 62% / 56% 42% 58% 44%; transform: rotate(14deg) scale(1.02); }
+  40%  { border-radius: 64% 36% 49% 51% / 60% 36% 64% 40%; transform: rotate(-8deg) scale(0.99); }
+  60%  { border-radius: 38% 62% 67% 33% / 36% 65% 35% 64%; transform: rotate(20deg) scale(1.03); }
+  80%  { border-radius: 55% 45% 33% 67% / 49% 30% 70% 51%; transform: rotate(-14deg) scale(1.01); }
+  100% { border-radius: 58% 42% 63% 37% / 41% 60% 40% 59%; transform: rotate(0deg) scale(1); }
+}
+/* Slow continuous hue drift — gives the impression that the rainbow rotates
+   through the blob, with no visible boundaries between stops. */
+@keyframes blob-drift {
+  0%   { filter: saturate(115%) hue-rotate(0deg); }
+  100% { filter: saturate(115%) hue-rotate(360deg); }
 }
 
-/* Static rainbow gradient — bright across the whole word, no shimmer. The
-   previous animated background-position caused the text to wash out (and
-   sometimes disappear entirely) as the gradient cycled through its low-
-   contrast midpoints. Locking it in place keeps "Coloration" legible at
-   every frame. */
+/* Title wordmark — single locked rainbow gradient, no shimmer so it stays
+   legible at every frame. Fallback for browsers without background-clip. */
 .title-text {
-  background: linear-gradient(90deg, #ff6bb5 0%, #b06bff 35%, #6aa9ff 65%, #4dd9c0 100%);
+  background: linear-gradient(
+    92deg,
+    #ff6bb5  0%,
+    #b06bff 28%,
+    #6aa9ff 52%,
+    #4dd9c0 74%,
+    #ffd76b 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  /* Safety net for browsers that don't support background-clip: text — the
-   text still shows in a vivid solid color rather than disappearing. */
   text-shadow: none;
 }
 @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
@@ -152,6 +237,7 @@ body {
   .title::before { animation: none; }
 }
 
+/* ---------- Scoreboard chips ---------- */
 .scoreboard {
   display: flex;
   flex-wrap: wrap;
@@ -162,23 +248,27 @@ body {
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: clamp(11px, 1.4vw, 13px);
   font-weight: 700;
   letter-spacing: 0.01em;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , #1c2230;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--bg-elev);
   border: 1px solid var(--border-strong);
   color: var(--text);
   white-space: nowrap;
-  box-shadow: var(--ring), 0 1px 0 rgba(0,0,0,0.25);
-  transition: transform 120ms ease, border-color 120ms ease;
+  box-shadow: var(--ring), 0 1px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 160ms var(--ease-out), border-color 160ms var(--ease-out);
 }
 
 .chip:hover { transform: translateY(-1px); }
 
-/* Tiny coloured dot prefix per chip — visual hook + at-a-glance grouping. */
+/* Tiny coloured dot prefix per chip — gives each chip a personality without
+   inflating its visual weight. The glow uses the chip's own currentColor so
+   we can recolour with a single rule below. */
 .chip::before {
   content: "";
   width: 7px;
@@ -190,11 +280,11 @@ body {
   flex: none;
 }
 
-#round-chip   { color: var(--c-purple); }
-#streak-chip  { color: var(--c-pink); }
-#best-chip    { color: var(--c-yellow); }
+#round-chip    { color: var(--c-purple); }
+#streak-chip   { color: var(--c-pink); }
+#best-chip     { color: var(--c-yellow); }
 .chip--guesses { color: var(--accent); }
-.chip--skips  { color: var(--c-orange); }
+.chip--skips   { color: var(--c-orange); }
 .chip--skips.chip--depleted { color: var(--muted); opacity: 0.7; }
 .chip--skips.chip--depleted::before { box-shadow: none; opacity: 0.5; }
 
@@ -203,9 +293,11 @@ body {
   display: inline-flex;
   justify-content: center;
   gap: 4px;
-  padding: 6px;
-  margin: clamp(14px, 2.4vw, 22px) auto 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , #161b22;
+  padding: 5px;
+  margin: clamp(18px, 3vw, 28px) auto 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--bg-elev);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   box-shadow: var(--shadow-soft), var(--ring);
@@ -227,10 +319,13 @@ body {
   cursor: pointer;
   letter-spacing: 0.01em;
   position: relative;
-  min-height: 40px;
+  min-height: 42px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: color 180ms ease, transform 120ms ease, background 200ms ease;
+  transition:
+    color 200ms var(--ease-out),
+    background 240ms var(--ease-out),
+    transform 140ms var(--ease-out);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -243,9 +338,9 @@ body {
   color: #0e1116;
   background: var(--grad-tab);
   box-shadow:
-    0 6px 18px rgba(176, 107, 255, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    0 8px 22px rgba(176, 107, 255, 0.40),
+    0 2px 6px rgba(255, 107, 181, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.20);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
@@ -256,15 +351,14 @@ body {
   outline-offset: 3px;
 }
 
-
 /* ---------- Stage ---------- */
 .stage {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(10px, 2vw, 18px);
-  padding: clamp(12px, 2.5vw, 22px);
+  gap: clamp(12px, 2.2vw, 22px);
+  padding: clamp(14px, 2.8vw, 28px) clamp(14px, 3vw, 28px);
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
@@ -291,9 +385,11 @@ body {
      a visible bright sliver in each inner corner. */
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
   /* `none` would block vertical page scrolling that starts on the photo;
      `pan-y` previously left iOS double-tap-to-zoom enabled, which could
      defeat the grayscale-until-revealed mechanic. `pan-y pinch-zoom` keeps
@@ -302,6 +398,14 @@ body {
   user-select: none;
   -webkit-user-select: none;
   will-change: transform;
+  transition: box-shadow 240ms var(--ease-out);
+}
+
+.photo.revealed {
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .photo img {
@@ -327,7 +431,7 @@ body {
    briefly shows the next photo (or lingering old photo) in color. */
 .photo.revealed img {
   filter: grayscale(0) contrast(1);
-  transition: filter 600ms ease;
+  transition: filter 600ms var(--ease-out);
 }
 
 /* Bold character title placed between photo and grid. Reserved height
@@ -338,8 +442,8 @@ body {
   text-align: center;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-weight: 900;
-  font-size: clamp(20px, 4.2vw, 34px);
-  letter-spacing: -0.02em;
+  font-size: clamp(22px, 4.2vw, 36px);
+  letter-spacing: -0.025em;
   line-height: 1.1;
   color: var(--text);
   min-height: 1.2em;
@@ -379,27 +483,32 @@ body {
   gap: var(--gap);
 }
 
+/* Dark-theme-friendly axis headers. Light text on a subtle gradient slab so
+   they read as part of the board instead of pure-white stickers floating on
+   top of it. */
 .hdr {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  color: #11151c;
-  border-radius: 6px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)),
+    var(--bg-elev-2);
+  color: var(--text);
+  border-radius: 7px;
   font-weight: 800;
   font-size: clamp(11px, 1.6vw, 14px);
-  border: 1px solid #c8cdd6;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--ring), 0 1px 0 rgba(0, 0, 0, 0.25);
   min-height: 22px;
-  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+  transition: background 220ms var(--ease-out), color 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
 }
 
 /* Hint: this row/column contains the correct cell. Surfaced after the
    second wrong guess — vivid green so it's unmistakable. */
 .hdr--hint {
-  background: #21c47a;
-  color: #062420;
-  border-color: #15a05f;
+  background: linear-gradient(180deg, #2bd685, #18a463);
+  color: #052015;
+  border-color: rgba(33, 196, 122, 0.7);
   font-weight: 900;
   box-shadow:
     0 0 0 2px rgba(33, 196, 122, 0.45),
@@ -416,7 +525,7 @@ body {
   50% {
     box-shadow:
       0 0 0 3px rgba(33, 196, 122, 0.7),
-      0 0 22px rgba(33, 196, 122, 0.95);
+      0 0 24px rgba(33, 196, 122, 0.95);
   }
 }
 
@@ -427,22 +536,31 @@ body {
   grid-template-rows: repeat(4, 1fr);
   gap: var(--gap);
   padding: var(--gap);
-  background: #1c2230;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+    var(--bg-elev-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--ring), 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 .cell {
   appearance: none;
   border: 1px solid rgba(0, 0, 0, 0.28);
-  border-radius: 6px;
+  border-radius: 8px;
   aspect-ratio: 1 / 1;
   cursor: pointer;
   position: relative;
   padding: 0;
   touch-action: manipulation;
-  transition: transform 80ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms var(--ease-out),
+    box-shadow 180ms var(--ease-out),
+    filter 180ms var(--ease-out);
   -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.22);
 }
 
 /* ---------- Quad board (4 distinct color choices, 1 guess) ---------- */
@@ -451,21 +569,30 @@ body {
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: clamp(10px, 1.8vw, 16px);
-  padding: clamp(10px, 1.8vw, 16px);
+  padding: clamp(12px, 1.8vw, 18px);
   width: 100%;
-  background: #1c2230;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+    var(--bg-elev-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--ring), 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 .quad-cell {
-  border-radius: 12px;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.22);
 }
 
 @media (hover: hover) {
   .cell:hover {
     transform: scale(1.04);
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.45), 0 4px 14px rgba(0,0,0,0.4);
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.55),
+      0 6px 18px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
     z-index: 1;
   }
 }
@@ -489,8 +616,8 @@ body {
   background:
     linear-gradient(45deg, transparent calc(50% - 2px), #fff calc(50% - 2px), #fff calc(50% + 2px), transparent calc(50% + 2px)),
     linear-gradient(-45deg, transparent calc(50% - 2px), #fff calc(50% - 2px), #fff calc(50% + 2px), transparent calc(50% + 2px)),
-    rgba(0,0,0,0.55);
-  border-radius: 5px;
+    rgba(0, 0, 0, 0.55);
+  border-radius: 7px;
 }
 
 /* Correct: glow + check */
@@ -499,9 +626,10 @@ body {
   box-shadow:
     0 0 0 3px #fff,
     0 0 0 6px var(--success),
-    0 6px 18px rgba(0,0,0,0.5);
+    0 8px 22px rgba(77, 217, 192, 0.45),
+    0 6px 18px rgba(0, 0, 0, 0.5);
   z-index: 3;
-  animation: pop 360ms cubic-bezier(0.2, 1.5, 0.4, 1);
+  animation: pop 420ms var(--ease-spring);
 }
 .cell--correct::after {
   content: '✓';
@@ -510,14 +638,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(18px, 4vw, 28px);
+  font-size: clamp(20px, 4vw, 30px);
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
 
 .cell--dim {
-  opacity: 0.55;
+  opacity: 0.5;
+  filter: saturate(0.7);
   cursor: default;
 }
 
@@ -532,10 +661,10 @@ body {
   width: 100%;
   max-width: 540px;
   height: auto;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-soft);
-  background: #0e1116;
+  box-shadow: var(--shadow-pop);
+  background: var(--bg);
 }
 
 .countdown {
@@ -544,6 +673,7 @@ body {
   font-size: clamp(12px, 1.6vw, 14px);
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   min-height: 1.4em;
 }
 
@@ -553,11 +683,12 @@ body {
   font-size: clamp(13px, 1.8vw, 16px);
   color: var(--muted);
   min-height: 1.4em;
+  line-height: 1.45;
 }
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -565,19 +696,26 @@ body {
 .btn {
   appearance: none;
   border: 1px solid var(--border-strong);
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , var(--bg-elev);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--bg-elev);
   color: var(--text);
   font-weight: 700;
-  padding: 12px 22px;
+  padding: 12px 24px;
   border-radius: var(--radius-pill);
   cursor: pointer;
   font-size: 15px;
-  min-height: 46px;
+  min-height: 48px;
   letter-spacing: 0.01em;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: var(--ring), 0 1px 0 rgba(0,0,0,0.25);
-  transition: transform 100ms ease, box-shadow 200ms ease, background 200ms ease, color 200ms ease;
+  box-shadow: var(--ring), 0 1px 0 rgba(0, 0, 0, 0.25);
+  transition:
+    transform 140ms var(--ease-out),
+    box-shadow 220ms var(--ease-out),
+    background 220ms var(--ease-out),
+    color 220ms var(--ease-out),
+    border-color 220ms var(--ease-out);
 }
 
 .btn:hover { transform: translateY(-1px); }
@@ -587,17 +725,24 @@ body {
   background: var(--grad-tab);
   color: #0e1116;
   border-color: transparent;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.18);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.18);
   box-shadow:
-    0 8px 22px rgba(176, 107, 255, 0.35),
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+    0 10px 26px rgba(176, 107, 255, 0.40),
+    0 2px 6px rgba(255, 107, 181, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.20);
+}
+.btn--primary:hover {
+  box-shadow:
+    0 14px 32px rgba(176, 107, 255, 0.50),
+    0 2px 6px rgba(255, 107, 181, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.24);
 }
 
 .btn--ghost {
   background: transparent;
   color: var(--muted);
   border-color: var(--border);
+  box-shadow: none;
 }
 .btn--ghost:hover { color: var(--text); border-color: var(--border-strong); }
 
@@ -608,12 +753,12 @@ body {
   background: linear-gradient(180deg, #ffce5e, #ff9d4d);
   color: #2a1700;
   border-color: transparent;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
   font-weight: 800;
   box-shadow:
-    0 8px 18px rgba(255, 157, 77, 0.32),
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+    0 10px 22px rgba(255, 157, 77, 0.36),
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28);
 }
 #skip-btn.btn:hover { color: #2a1700; }
 
@@ -643,15 +788,17 @@ body {
 /* ---------- Footer ---------- */
 .bottombar {
   text-align: center;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
   color: var(--muted);
   font-size: 12px;
+  letter-spacing: 0.02em;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   position: relative;
+  margin-top: clamp(20px, 4vw, 36px);
 }
 
 /* A thin rainbow accent above the footer ties the chrome together. */
@@ -668,7 +815,7 @@ body {
 /* ---------- Animations ---------- */
 @keyframes pop {
   0%   { transform: scale(0.85); }
-  60%  { transform: scale(1.15); }
+  60%  { transform: scale(1.18); }
   100% { transform: scale(1); }
 }
 
@@ -689,7 +836,7 @@ body {
   height: 14px;
   margin-right: 8px;
   vertical-align: -2px;
-  border: 2px solid var(--border);
+  border: 2px solid var(--border-strong);
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 800ms linear infinite;
@@ -719,8 +866,10 @@ body {
   bottom: calc(env(safe-area-inset-bottom) + 24px);
   transform: translate(-50%, 12px);
   max-width: min(90vw, 420px);
-  padding: 11px 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)) , var(--bg-elev);
+  padding: 12px 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    var(--bg-elev);
   color: var(--text);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
@@ -730,7 +879,7 @@ body {
   box-shadow: var(--shadow-pop), var(--ring);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms ease, transform 200ms ease;
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
   z-index: 50;
 }
 
@@ -753,12 +902,23 @@ body {
     gap: 8px 10px;
   }
   .scoreboard { width: 100%; }
-  .chip { padding: 5px 10px; font-size: 11px; }
-  .tab { padding: 9px 16px; }
+  .chip {
+    padding: 5px 10px;
+    font-size: 11px;
+    /* Hairline border keeps chips legible at small sizes without crowding. */
+    border-color: var(--border);
+  }
+  .tab { padding: 10px 18px; min-height: 44px; }
+  .character-title { font-size: clamp(20px, 6vw, 26px); }
+  .btn { padding: 12px 20px; min-height: 48px; }
+  .actions { gap: 10px; }
+  .share-actions .btn { flex: 1 1 100%; min-width: 0; max-width: none; }
 }
 
+/* Slightly larger axis headers on roomy phones / tablets. */
 @media (min-width: 700px) {
-  .board { grid-template-columns: 32px 1fr; grid-template-rows: 32px 1fr; }
+  .board { grid-template-columns: 34px 1fr; grid-template-rows: 34px 1fr; }
+  .hdr { font-size: 14px; min-height: 26px; }
 }
 
 /* Tablet + desktop: photo on the left, title + colour board on the right.
@@ -772,7 +932,7 @@ body {
     --photo-max-h: min(56dvh, 480px);
   }
   .stage {
-    max-width: 1100px;
+    max-width: 1120px;
     display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     grid-template-areas:
@@ -783,8 +943,8 @@ body {
       "countdown countdown"
       "actions   actions"
       "shareacts shareacts";
-    column-gap: clamp(18px, 3vw, 36px);
-    row-gap: clamp(8px, 1.5vw, 16px);
+    column-gap: clamp(22px, 3.4vw, 44px);
+    row-gap: clamp(10px, 1.6vw, 18px);
     align-items: start;
   }
   /* Bottom-align the photo and the colour board so their lower edges meet
@@ -792,7 +952,7 @@ body {
      stacked strips with mismatched baselines. The title floats up to the
      start of its row above the board. */
   .card            { grid-area: photo; align-self: end; }
-  .character-title { grid-area: title; align-self: end; }
+  .character-title { grid-area: title; align-self: end; text-align: left; }
   .board           { grid-area: board; align-self: end; max-width: 100%; }
   .quad            { grid-area: board; align-self: end; max-width: 100%; }
   .status          { grid-area: status; }
@@ -800,4 +960,11 @@ body {
   .countdown       { grid-area: countdown; }
   .actions         { grid-area: actions; }
   .share-actions   { grid-area: shareacts; }
+}
+
+/* Wide desktop polish — slightly larger title and a touch more space between
+   the column-pair and the action row below. */
+@media (min-width: 1024px) {
+  .character-title { font-size: clamp(26px, 2.4vw, 38px); }
+  .stage { padding-block: clamp(20px, 2.5vw, 36px); }
 }
