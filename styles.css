@@ -46,17 +46,6 @@
     var(--c-mint)  100%
   );
   --grad-tab: linear-gradient(135deg, var(--c-pink), var(--c-purple) 55%, var(--c-blue));
-  /* Watercolor blob fill — six soft radial blooms overlap and feather into a
-     warm base, so colour transitions read as pigment bleeding rather than
-     pie-slice boundaries. Edges of each radial are fully transparent, so
-     hue-rotate drifts colour smoothly across the whole field. */
-  --grad-blob:
-    radial-gradient(ellipse 72% 60% at 22% 28%, var(--c-pink) 0%, transparent 62%),
-    radial-gradient(ellipse 70% 68% at 78% 22%, var(--c-purple) 0%, transparent 62%),
-    radial-gradient(ellipse 66% 62% at 85% 74%, var(--c-blue) 0%, transparent 64%),
-    radial-gradient(ellipse 74% 66% at 18% 80%, var(--c-mint) 0%, transparent 64%),
-    radial-gradient(ellipse 58% 52% at 50% 52%, var(--c-yellow) 0%, transparent 58%),
-    linear-gradient(var(--c-orange), var(--c-orange));
 
   /* Geometry */
   --radius-sm: 10px;
@@ -146,6 +135,14 @@ body {
   position: sticky;
   top: 0;
   z-index: 20;
+  /* Mirror the body's radial wash inside the topbar so it visually
+     matches the rest of the page, but layer over a solid --bg so
+     scrolled content is fully occluded as it slips behind. */
+  background:
+    radial-gradient(42rem 26rem at 18% 0%, rgba(176, 107, 255, 0.20), transparent 62%),
+    radial-gradient(38rem 24rem at 82% 4%, rgba(255, 107, 181, 0.18), transparent 60%),
+    radial-gradient(32rem 22rem at 50% 14%, rgba(77, 217, 192, 0.10), transparent 60%),
+    var(--bg);
 }
 
 .title {
@@ -160,43 +157,43 @@ body {
   gap: 0.55em;
 }
 
-/* The brand blob sits in front of the wordmark. Background is a stack of
-   soft radial gradients (see --grad-blob) for a watercolor look; a slow
-   hue-rotate filter drifts the whole field continuously. The border-radius
-   keyframes push through asymmetric, exaggerated shapes so the silhouette
-   reads as a wobbling blob rather than a near-circle. */
+/* Brand blob: a single solid colour that cycles through the rainbow,
+   inside a lava-lamp silhouette that swells, pinches, and drifts. The
+   shape morph uses wide-amplitude border-radius and scale keyframes so
+   the blob reads as fluid rather than a wobbly disc. */
 .title::before {
   content: "";
   width: 1.275em;
   height: 1.275em;
   flex: none;
-  background: var(--grad-blob);
+  background: var(--c-pink);
   border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%;
-  /* Soft blur lets the radial blooms bleed into each other like watercolor
-     on wet paper, with no hard edges between colour zones. */
-  filter: blur(0.6px) saturate(118%);
   animation:
-    blob-morph 11s ease-in-out infinite,
-    blob-drift 18s linear infinite;
+    blob-morph 9s ease-in-out infinite,
+    blob-color 16s linear infinite;
   transform-origin: 50% 50%;
 }
 
-/* Wider amplitude than before so the silhouette swells, pinches, and tilts
-   — closer to a lava-lamp drop than a rounded square. */
 @keyframes blob-morph {
-  0%   { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: rotate(0deg)   scale(1); }
-  16%  { border-radius: 38% 62% 30% 70% / 64% 38% 62% 36%; transform: rotate(18deg)  scale(1.04); }
-  33%  { border-radius: 72% 28% 55% 45% / 30% 70% 30% 70%; transform: rotate(-12deg) scale(0.97); }
-  50%  { border-radius: 30% 70% 78% 22% / 70% 30% 70% 30%; transform: rotate(24deg)  scale(1.05); }
-  66%  { border-radius: 55% 45% 25% 75% / 38% 25% 75% 62%; transform: rotate(-20deg) scale(0.98); }
-  83%  { border-radius: 68% 32% 42% 58% / 56% 72% 28% 44%; transform: rotate(10deg)  scale(1.03); }
-  100% { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: rotate(0deg)   scale(1); }
+  0%   { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: translate(0, 0)         rotate(0deg)   scale(1); }
+  18%  { border-radius: 28% 72% 22% 78% / 72% 24% 76% 28%; transform: translate(2%, -3%)      rotate(22deg)  scale(1.12); }
+  36%  { border-radius: 78% 22% 60% 40% / 22% 78% 22% 78%; transform: translate(-3%, 2%)      rotate(-18deg) scale(0.88); }
+  54%  { border-radius: 22% 78% 82% 18% / 78% 26% 74% 22%; transform: translate(3%, 3%)       rotate(30deg)  scale(1.10); }
+  72%  { border-radius: 70% 30% 35% 65% / 38% 18% 82% 62%; transform: translate(-2%, -2%)     rotate(-12deg) scale(0.92); }
+  88%  { border-radius: 45% 55% 65% 35% / 60% 40% 60% 40%; transform: translate(1%, 2%)       rotate(8deg)   scale(1.06); }
+  100% { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: translate(0, 0)         rotate(0deg)   scale(1); }
 }
-/* Hue-rotate the whole stack continuously — colours wash across the blob
-   like pigment swirling in water. */
-@keyframes blob-drift {
-  0%   { filter: blur(0.6px) saturate(118%) hue-rotate(0deg); }
-  100% { filter: blur(0.6px) saturate(118%) hue-rotate(360deg); }
+
+/* Solid colour fades from one stop to the next around the full
+   rainbow, then loops smoothly back to the starting hue. */
+@keyframes blob-color {
+  0%   { background-color: #ff6bb5; }
+  16%  { background-color: #b06bff; }
+  33%  { background-color: #6aa9ff; }
+  50%  { background-color: #4dd9c0; }
+  66%  { background-color: #ffd76b; }
+  83%  { background-color: #ff9d4d; }
+  100% { background-color: #ff6bb5; }
 }
 
 /* Title wordmark — creamy off-white base with the faintest pastel gradient
@@ -204,17 +201,19 @@ body {
    weight; the rainbow sits on top at low opacity for a hint of colour only
    where it brushes against a stroke. */
 .title-text {
-  /* Cream base layered under a low-opacity rainbow. The cream comes last in
-     the stack so it shows through any gaps in the gradient when the
-     gradient stops dip toward transparency at the seams. */
+  /* Cream base with a rainbow tint that ramps in across the word:
+     "col" 0%, "ora" 1-5%, "tion" 6-10%. The gradient stops align to
+     the section boundaries so the rainbow stays absent on "col",
+     hints in on "ora", and reaches ~10% by the end of "tion". */
   background:
     linear-gradient(
-      92deg,
-      rgba(255, 107, 181, 0.45) 0%,
-      rgba(176, 107, 255, 0.38) 28%,
-      rgba(106, 169, 255, 0.34) 52%,
-      rgba(77, 217, 192, 0.38) 74%,
-      rgba(255, 215, 107, 0.45) 100%
+      90deg,
+      rgba(255, 107, 181, 0.00)  0%,
+      rgba(255, 107, 181, 0.00) 30%,
+      rgba(176, 107, 255, 0.03) 45%,
+      rgba(106, 169, 255, 0.05) 60%,
+      rgba(77,  217, 192, 0.08) 80%,
+      rgba(255, 215, 107, 0.10) 100%
     ),
     linear-gradient(#f6efdc, #f6efdc);
   -webkit-background-clip: text;
