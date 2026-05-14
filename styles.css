@@ -142,8 +142,8 @@ body {
    sine sums and periodically pulls the fifth one outward like a lava-lamp
    drip. The fill cycles through the rainbow on a separate CSS timer. */
 .title-blob {
-  width: 1.275em;
-  height: 1.275em;
+  width: 1.6em;
+  height: 1.6em;
   flex: none;
   display: block;
   /* Let the drop circle escape the viewBox edge during its peak without being
