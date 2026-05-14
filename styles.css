@@ -583,6 +583,18 @@ body {
 
 .cell:active { transform: scale(0.96); }
 
+/* Armed: finger is down on this swatch but we haven't committed yet. Lift
+   on the same swatch to lock in; drag off, scroll, or hold too long to
+   cancel. Stronger ring than :active so the player can see which swatch
+   is about to be selected even while their finger is occluding it. */
+.cell--armed {
+  transform: scale(0.96);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.75),
+    0 6px 16px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+}
+
 /* Wrong: dim with X */
 .cell--wrong {
   cursor: default;
@@ -901,6 +913,21 @@ body {
   .btn { padding: 12px 20px; min-height: 48px; }
   .actions { gap: 10px; }
   .share-actions .btn { flex: 1 1 100%; min-width: 0; max-width: none; }
+}
+
+/* Phones (anything below the desktop two-column threshold): bound the
+   photo height so the colour board can fit within the same viewport,
+   removing the scroll that previously sat between photo and grid. The
+   inner `min()` reserves ~440px of vertical room for the title, board,
+   gaps, and stage padding so the photo yields space on shorter phones
+   instead of crowding the swatches off-screen; the outer `max()` keeps
+   the photo from collapsing to nothing in landscape orientation, where
+   it's better to allow a small scroll than show a sliver. dvh units
+   stay stable across iOS Safari's address-bar collapse. */
+@media (max-width: 759px) {
+  :root {
+    --photo-max-h: max(180px, min(40dvh, 100dvh - 440px));
+  }
 }
 
 /* Slightly larger axis headers on roomy phones / tablets. */
