@@ -415,7 +415,8 @@ function renderGridBoard(s) {
       btn.setAttribute('role', 'gridcell');
       btn.setAttribute('aria-label', `Row ${r + 1} column ${COL_LABELS[col]}`);
       btn.tabIndex = (r === 0 && col === 0) ? 0 : -1;
-      btn.addEventListener('pointerdown', onGridPointerDown);
+      const row = r, column = col;
+      attachArmedTap(btn, () => submitGuess({ row, col: column }, btn));
       btn.addEventListener('keydown', onGridKeyDown);
       els.grid.appendChild(btn);
     }
@@ -436,7 +437,8 @@ function renderQuadBoard(s) {
     btn.dataset.index = box.index;
     btn.setAttribute('aria-label', `Color choice ${box.index + 1}`);
     btn.tabIndex = box.index === 0 ? 0 : -1;
-    btn.addEventListener('pointerdown', onQuadPointerDown);
+    const index = box.index;
+    attachArmedTap(btn, () => submitGuess({ index }, btn));
     btn.addEventListener('keydown', onQuadKeyDown);
     els.quad.appendChild(btn);
   }
@@ -457,10 +459,65 @@ function quadButton(index) {
   return els.quad.querySelector(`.quad-cell[data-index="${index}"]`);
 }
 
-function onGridPointerDown(e) {
-  e.preventDefault();
-  const btn = e.currentTarget;
-  submitGuess({ row: Number(btn.dataset.row), col: Number(btn.dataset.col) }, btn);
+// Swatch tap gesture. Arms the cell on pointerdown, commits on pointerup
+// only if the finger barely moved, the page didn't scroll, and the press
+// was short. A scroll initiated on a swatch (which fires pointercancel as
+// the browser takes over) leaves no commit behind, so accidental taps
+// while scrolling on mobile are silently dropped instead of locking in a
+// guess. Mouse clicks satisfy the guard trivially (zero drift, zero
+// scroll) and feel instant.
+const ARM_MOVE_PX = 10;
+const ARM_SCROLL_PX = 4;
+const ARM_MAX_MS = 500;
+
+function attachArmedTap(btn, commit) {
+  let armed = null;
+
+  const disarm = () => {
+    if (!armed) return;
+    btn.classList.remove('cell--armed');
+    try { btn.releasePointerCapture(armed.pointerId); } catch {}
+    armed = null;
+  };
+
+  btn.addEventListener('pointerdown', (e) => {
+    if (btn.classList.contains('cell--wrong') || btn.classList.contains('cell--correct')) return;
+    if (armed) disarm();
+    armed = {
+      pointerId: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      scrollY: window.scrollY,
+      t: performance.now(),
+    };
+    btn.classList.add('cell--armed');
+    try { btn.setPointerCapture(e.pointerId); } catch {}
+  });
+
+  btn.addEventListener('pointermove', (e) => {
+    if (!armed || e.pointerId !== armed.pointerId) return;
+    const dx = Math.abs(e.clientX - armed.x);
+    const dy = Math.abs(e.clientY - armed.y);
+    if (dx + dy > ARM_MOVE_PX) disarm();
+  });
+
+  btn.addEventListener('pointerup', (e) => {
+    if (!armed || e.pointerId !== armed.pointerId) {
+      disarm();
+      return;
+    }
+    const dScroll = Math.abs(window.scrollY - armed.scrollY);
+    const elapsed = performance.now() - armed.t;
+    const shouldCommit = dScroll <= ARM_SCROLL_PX && elapsed <= ARM_MAX_MS;
+    disarm();
+    if (shouldCommit) {
+      commit();
+      navigator.vibrate?.(10);
+    }
+  });
+
+  btn.addEventListener('pointercancel', disarm);
+  btn.addEventListener('lostpointercapture', disarm);
 }
 
 function onGridKeyDown(e) {
@@ -487,12 +544,6 @@ function onGridKeyDown(e) {
     default: return;
   }
   e.preventDefault();
-}
-
-function onQuadPointerDown(e) {
-  e.preventDefault();
-  const btn = e.currentTarget;
-  submitGuess({ index: Number(btn.dataset.index) }, btn);
 }
 
 function onQuadKeyDown(e) {
