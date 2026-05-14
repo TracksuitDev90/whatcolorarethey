@@ -1,7 +1,7 @@
 /* ---------- Tokens ---------- */
 :root {
   /* Surfaces */
-  --bg: #05080d;
+  --bg: #000;
   --bg-elev: #141821;
   --bg-elev-2: #1a2030;
   /* Board surface sits behind the colour swatches. Kept distinct from
@@ -83,22 +83,7 @@ html, body {
   font-variant-ligatures: contextual;
 }
 
-/* Ambient colour wash anchored at the top — three radial blooms that softly
-   tint the dark theme. `fixed` keeps it locked behind scroll; pointer-events
-   off so it never intercepts taps. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: -10% -10% auto -10%;
-  height: 70vh;
-  background:
-    radial-gradient(42rem 26rem at 18% 0%, rgba(176, 107, 255, 0.20), transparent 62%),
-    radial-gradient(38rem 24rem at 82% 4%, rgba(255, 107, 181, 0.18), transparent 60%),
-    radial-gradient(32rem 22rem at 50% 14%, rgba(77, 217, 192, 0.10), transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-/* Subtle grain on top of the wash — keeps large flat areas from looking
+/* Subtle grain over the page — keeps large flat black areas from looking
    plastic. Painted with a tiny SVG noise so we don't ship an asset. */
 body::after {
   content: "";
@@ -152,43 +137,35 @@ body {
   gap: 0.55em;
 }
 
-/* Brand blob: a single solid colour that cycles through the rainbow,
-   inside a lava-lamp silhouette that swells, pinches, and drifts. The
-   shape morph uses wide-amplitude border-radius and scale keyframes so
-   the blob reads as fluid rather than a wobbly disc. */
-.title::before {
-  content: "";
+/* Brand blob: a metaball-style lava lamp painted as five SVG circles inside a
+   gooey filter. JS (js/blob.js) drifts four of the circles with non-repeating
+   sine sums and periodically pulls the fifth one outward like a lava-lamp
+   drip. The fill cycles through the rainbow on a separate CSS timer. */
+.title-blob {
   width: 1.275em;
   height: 1.275em;
   flex: none;
-  background: var(--c-pink);
-  border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%;
-  animation:
-    blob-morph 9s ease-in-out infinite,
-    blob-color 16s linear infinite;
-  transform-origin: 50% 50%;
+  display: block;
+  /* Let the drop circle escape the viewBox edge during its peak without being
+     clipped to the box. */
+  overflow: visible;
 }
 
-@keyframes blob-morph {
-  0%   { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: translate(0, 0)         rotate(0deg)   scale(1); }
-  18%  { border-radius: 28% 72% 22% 78% / 72% 24% 76% 28%; transform: translate(2%, -3%)      rotate(22deg)  scale(1.12); }
-  36%  { border-radius: 78% 22% 60% 40% / 22% 78% 22% 78%; transform: translate(-3%, 2%)      rotate(-18deg) scale(0.88); }
-  54%  { border-radius: 22% 78% 82% 18% / 78% 26% 74% 22%; transform: translate(3%, 3%)       rotate(30deg)  scale(1.10); }
-  72%  { border-radius: 70% 30% 35% 65% / 38% 18% 82% 62%; transform: translate(-2%, -2%)     rotate(-12deg) scale(0.92); }
-  88%  { border-radius: 45% 55% 65% 35% / 60% 40% 60% 40%; transform: translate(1%, 2%)       rotate(8deg)   scale(1.06); }
-  100% { border-radius: 63% 37% 71% 29% / 42% 67% 33% 58%; transform: translate(0, 0)         rotate(0deg)   scale(1); }
+.title-blob-shape {
+  fill: #ff6bb5;
+  animation: blob-color 16s linear infinite;
 }
 
 /* Solid colour fades from one stop to the next around the full
    rainbow, then loops smoothly back to the starting hue. */
 @keyframes blob-color {
-  0%   { background-color: #ff6bb5; }
-  16%  { background-color: #b06bff; }
-  33%  { background-color: #6aa9ff; }
-  50%  { background-color: #4dd9c0; }
-  66%  { background-color: #ffd76b; }
-  83%  { background-color: #ff9d4d; }
-  100% { background-color: #ff6bb5; }
+  0%   { fill: #ff6bb5; }
+  16%  { fill: #b06bff; }
+  33%  { fill: #6aa9ff; }
+  50%  { fill: #4dd9c0; }
+  66%  { fill: #ffd76b; }
+  83%  { fill: #ff9d4d; }
+  100% { fill: #ff6bb5; }
 }
 
 /* Title wordmark — creamy off-white base with the faintest pastel gradient
@@ -216,6 +193,12 @@ body {
   -webkit-text-fill-color: transparent;
   color: transparent;
   text-shadow: none;
+  /* Bulk up each glyph by a fraction of an em so the wordmark reads as a
+     heavier weight than Cormorant's max 700. paint-order ensures the cream
+     stroke sits behind the gradient-clipped fill, so it only widens the
+     outline rather than overpainting the rainbow tint. */
+  -webkit-text-stroke: 0.025em #f6efdc;
+  paint-order: stroke fill;
 }
 @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
   .title-text {
@@ -226,7 +209,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .title::before { animation: none; }
+  .title-blob-shape { animation: none; }
 }
 
 /* ---------- Scoreboard chips ---------- */
