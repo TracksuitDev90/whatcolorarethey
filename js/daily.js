@@ -127,7 +127,7 @@ function spreadByHueFamily(list, seed) {
 // Bucket a hex into a coarse perceived hue family. Saturation + lightness
 // gate the chromatic-vs-neutral split so very light/dark or grayish colors
 // don't get lumped in with vivid hues that happen to share their angle.
-function hueFamily(hex) {
+export function hueFamily(hex) {
   if (!hex) return 'unknown';
   const { h, s, l } = hexToHsl(hex);
   if (s < 14 || l < 12 || l > 92) {

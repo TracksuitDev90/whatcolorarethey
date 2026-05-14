@@ -97,6 +97,8 @@ const els = {
   skipsChip: document.getElementById('skips-chip'),
   tabItems: document.getElementById('tab-items'),
   tabGrid: document.getElementById('tab-grid'),
+  tabs: document.getElementById('tabs'),
+  stage: document.getElementById('stage'),
 };
 
 // Each tab is a separate experience: items use the 4-swatch quad and
@@ -229,22 +231,43 @@ async function tryRenderSharedView(s, allCharacters) {
 function setMode(next) {
   if (next !== 'items' && next !== 'grid') return;
   if (!games[next]) return;
+  const changing = next !== mode;
   mode = next;
   game = games[mode];
+  if (els.tabs) els.tabs.dataset.active = mode;
   els.tabItems.classList.toggle('tab--active', mode === 'items');
   els.tabItems.setAttribute('aria-selected', mode === 'items' ? 'true' : 'false');
   els.tabGrid.classList.toggle('tab--active', mode === 'grid');
   els.tabGrid.setAttribute('aria-selected', mode === 'grid' ? 'true' : 'false');
-  const stage = document.getElementById('stage');
-  if (stage) {
-    stage.setAttribute('aria-labelledby', mode === 'items' ? 'tab-items' : 'tab-grid');
+  if (els.stage) {
+    els.stage.setAttribute('aria-labelledby', mode === 'items' ? 'tab-items' : 'tab-grid');
   }
   hideShareSlot();
-  if (game.snapshot().finished) {
-    showFinished();
+  const apply = () => {
+    if (game.snapshot().finished) {
+      showFinished();
+    } else {
+      renderRound();
+    }
+  };
+  if (changing && els.stage) {
+    crossfadeStage(apply);
   } else {
-    renderRound();
+    apply();
   }
+}
+
+// Two-frame opacity dip on the stage. Fade out, swap content on the next
+// frame, then fade back in — the tab indicator's CSS transition runs in
+// parallel so the whole swap reads as one motion.
+function crossfadeStage(apply) {
+  els.stage.classList.add('stage--switching');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      apply();
+      els.stage.classList.remove('stage--switching');
+    });
+  });
 }
 
 // Cheap idle-time prefetch so the next character's photo is in the HTTP
