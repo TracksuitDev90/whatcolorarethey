@@ -245,12 +245,12 @@ body {
 
 /* ---------- Tabs ---------- */
 .tabs {
-  display: inline-flex;
-  justify-content: center;
-  gap: 4px;
-  padding: 5px;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 4px;
   margin: clamp(18px, 3vw, 28px) auto 0;
-  /* Solid track — no overlay gradient. */
   background: var(--bg-elev);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
@@ -258,52 +258,67 @@ body {
   align-self: center;
   width: max-content;
   max-width: calc(100% - 24px);
+  isolation: isolate;
+}
+
+/* Sliding fill — half the track wide, translates between the two slots as
+   the active mode changes. Anchored at top/left with calc()s that account
+   for the 4px container padding so the pill fits cleanly inside the track. */
+.tabs::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--text);
+  border-radius: var(--radius-pill);
+  transform: translateX(0);
+  transition: transform 320ms var(--ease-out);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tabs[data-active="grid"]::before { transform: translateX(100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs::before { transition: none; }
 }
 
 .tab {
   appearance: none;
   background: transparent;
-  color: var(--muted);
+  color: var(--text);
   border: 0;
   border-radius: var(--radius-pill);
-  padding: 10px 22px;
+  padding: 8px 22px;
   font: inherit;
   font-weight: 800;
   font-size: clamp(13px, 1.7vw, 15px);
   cursor: pointer;
   letter-spacing: 0.01em;
   position: relative;
-  min-height: 42px;
+  z-index: 1;
+  min-height: 38px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    color 200ms var(--ease-out),
-    background 240ms var(--ease-out),
-    transform 140ms var(--ease-out);
+  transition: color 240ms var(--ease-out);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 
-.tab:hover { color: var(--text); transform: translateY(-1px); }
+.tab:hover { color: var(--text); }
 
-.tab--active {
-  /* Solid bright fill against a dark track — maximum contrast so the
-     current tab is unmistakable. Dark text on light bg reverses the
-     foreground/background relationship of inactive tabs entirely. */
-  color: #0e1116;
-  background: var(--text);
-  box-shadow: none;
-  text-shadow: none;
-}
-
-/* Hold the dark text on the active tab across hover and focus. Without
-   this, `.tab:hover { color: var(--text) }` would paint white text on the
-   light active fill mid-switch, briefly hiding the label. */
+.tab--active,
 .tab--active:hover,
 .tab--active:focus,
-.tab--active:focus-visible { transform: none; color: #0e1116; }
+.tab--active:focus-visible {
+  color: #0e1116;
+  background: transparent;
+  transform: none;
+}
 
 .tab:focus-visible {
   outline: 3px solid #fff;
@@ -321,6 +336,14 @@ body {
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
+  transition: opacity 200ms var(--ease-out);
+}
+
+.stage--switching { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stage { transition: none; }
+  .stage--switching { opacity: 1; }
 }
 
 /* ---------- Photo card ---------- */

@@ -101,7 +101,7 @@ function colorDistance(a, b) {
 const HUE_GAP_MIN = 25;
 const NEUTRAL_SAT = 15;
 const NEUTRAL_LIGHT_GAP = 18;
-function distinctTone(a, b) {
+export function distinctTone(a, b) {
   const aNeutral = a.s < NEUTRAL_SAT;
   const bNeutral = b.s < NEUTRAL_SAT;
   if (aNeutral && bNeutral) {
