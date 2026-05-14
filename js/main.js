@@ -14,6 +14,9 @@ import {
   decodeSharePayload,
   snapshotFromPayload,
 } from './share.js';
+import { initTitleBlob } from './blob.js';
+
+initTitleBlob();
 
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
