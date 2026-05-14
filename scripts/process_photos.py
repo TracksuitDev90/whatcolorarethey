@@ -25,7 +25,7 @@ OUT_DIR = REPO_ROOT / "assets" / "photos"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 TARGET_RATIO = 4 / 3
-PADDING_FRAC = 0.06
+PADDING_FRAC = 0.12
 
 # Per-image overrides: extra crop on a specific side (in fraction of source
 # image dimension) to remove watermarks or empty borders before bbox detection.

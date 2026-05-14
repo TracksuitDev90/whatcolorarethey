@@ -143,24 +143,9 @@ body {
   justify-content: space-between;
   gap: 10px 18px;
   padding: 14px clamp(16px, 3vw, 32px);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-glass);
-  -webkit-backdrop-filter: saturate(150%) blur(14px);
-  backdrop-filter: saturate(150%) blur(14px);
   position: sticky;
   top: 0;
   z-index: 20;
-}
-/* Hairline rainbow seam at the bottom edge — ties the topbar to the footer's
-   accent without adding any extra DOM weight. */
-.topbar::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -1px;
-  height: 1px;
-  background: var(--grad-rainbow);
-  opacity: 0.4;
-  pointer-events: none;
 }
 
 .title {
@@ -261,45 +246,25 @@ body {
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   font-size: clamp(11px, 1.4vw, 13px);
   font-weight: 700;
   letter-spacing: 0.01em;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
-    var(--bg-elev);
-  border: 1px solid var(--border-strong);
-  color: var(--text);
+  border: 0;
   white-space: nowrap;
-  box-shadow: var(--ring), 0 1px 0 rgba(0, 0, 0, 0.25);
-  transition: transform 160ms var(--ease-out), border-color 160ms var(--ease-out);
 }
 
-.chip:hover { transform: translateY(-1px); }
+#round-chip    { background: #f3e6ff; color: #6a2bd0; }
+#streak-chip   { background: #ffe1ee; color: #c4256a; }
+#best-chip     { background: #fff3cf; color: #8a6300; }
+.chip--guesses { background: #d4f6ef; color: #0f7a66; }
+.chip--skips   { background: #ffe4cd; color: #b85a14; }
 
-/* Tiny coloured dot prefix per chip — gives each chip a personality without
-   inflating its visual weight. The glow uses the chip's own currentColor so
-   we can recolour with a single rule below. */
-.chip::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: currentColor;
-  opacity: 0.95;
-  box-shadow: 0 0 8px currentColor;
-  flex: none;
+.chip--skips.chip--depleted {
+  background: #e6e8ee;
+  color: #6b7280;
 }
-
-#round-chip    { color: var(--c-purple); }
-#streak-chip   { color: var(--c-pink); }
-#best-chip     { color: var(--c-yellow); }
-.chip--guesses { color: var(--accent); }
-.chip--skips   { color: var(--c-orange); }
-.chip--skips.chip--depleted { color: var(--muted); opacity: 0.7; }
-.chip--skips.chip--depleted::before { box-shadow: none; opacity: 0.5; }
 
 /* ---------- Tabs ---------- */
 .tabs {
@@ -930,8 +895,6 @@ body {
   .chip {
     padding: 5px 10px;
     font-size: 11px;
-    /* Hairline border keeps chips legible at small sizes without crowding. */
-    border-color: var(--border);
   }
   .tab { padding: 10px 18px; min-height: 44px; }
   .character-title { font-size: clamp(20px, 6vw, 26px); }
