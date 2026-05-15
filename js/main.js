@@ -28,6 +28,10 @@ const ROUNDS_PER_DAY = 3;
 // even after the IDs were already moved into the seen record.
 const STORAGE_SEEN = { items: 'wcat:v2:seen:items', grid: 'wcat:v2:seen:grid' };
 const STORAGE_LOCK = { items: 'wcat:v2:daily-lock:items', grid: 'wcat:v2:daily-lock:grid' };
+// Last UTC date the player opened the app. Compared to today's key on init
+// to surface a "fresh puzzles" prompt and to detect midnight rollovers
+// while the page is backgrounded.
+const STORAGE_LAST_VISIT = 'wcat:v2:last-visit';
 
 function selectDailyFresh(pool, key, mode) {
   if (!pool.length) return [];
@@ -150,12 +154,25 @@ async function init() {
     onceStorageWriteFailed(() => {
       toast("Your progress won't be saved in this browsing mode.");
     });
+
+    // New-day awareness. If the player has visited before and the UTC date has
+    // ticked over since their last visit, surface a friendly nudge so they
+    // know the daily roster (items + characters) is freshly rotated. Always
+    // record today's visit so future returns can compare.
+    const lastVisit = readJson(STORAGE_LAST_VISIT);
+    if (typeof lastVisit === 'string' && lastVisit !== dateKey) {
+      // Defer slightly so the toast doesn't collide with the loading-state swap.
+      setTimeout(() => toast('A new day — fresh items and characters await!'), 600);
+    }
+    writeJson(STORAGE_LAST_VISIT, dateKey);
+    armDateRolloverReload();
   } catch (err) {
     showInitError(err);
   }
 }
 
 function showLoading() {
+  els.stage?.classList.remove('stage--finished');
   els.characterCard.hidden = true;
   els.board.hidden = true;
   els.quad.hidden = true;
@@ -163,6 +180,7 @@ function showLoading() {
 }
 
 function showInitError(err) {
+  els.stage?.classList.remove('stage--finished');
   els.characterCard.hidden = true;
   els.board.hidden = true;
   els.quad.hidden = true;
@@ -201,11 +219,11 @@ async function tryRenderSharedView(s, allCharacters) {
   els.name.textContent = '';
   const wins = snap.rounds.filter(r => r.won).length;
   els.status.textContent = `Shared result · ${snap.date} · ${wins} of ${snap.rounds.length} solved`;
+  els.stage?.classList.add('stage--finished');
   els.shareSlot.hidden = false;
-  els.shareSlot.innerHTML = '';
   const canvas = await renderShareCard(snap);
   canvas.classList.add('share-card');
-  els.shareSlot.appendChild(canvas);
+  els.shareSlot.replaceChildren(canvas);
   // Drop the original share-action buttons entirely and replace with a
   // single "Play today" CTA. Replacing the contents removes the stale
   // listeners so we don't accidentally fire them.
@@ -239,7 +257,11 @@ function setMode(next) {
   if (els.stage) {
     els.stage.setAttribute('aria-labelledby', mode === 'items' ? 'tab-items' : 'tab-grid');
   }
-  hideShareSlot();
+  // Don't pre-clear the share slot here. If the destination tab is also
+  // finished, showFinished() will swap the canvas in place — clearing first
+  // would briefly flash an empty slot during the async re-render.
+  // renderRound() handles its own hideShareSlot() when entering an in-progress
+  // round, so unfinished destinations are still cleaned up.
   const apply = () => {
     if (game.snapshot().finished) {
       showFinished();
@@ -313,6 +335,7 @@ function isItemRound(s) {
 
 function renderRound() {
   hideShareSlot();
+  els.stage?.classList.remove('stage--finished');
   const s = game.snapshot();
   const c = s.character;
   const round = s.rounds[s.roundIndex];
@@ -895,9 +918,9 @@ function flashLabel(btn, hot, cool) {
 async function showFinished() {
   const s = game.snapshot();
   // End-of-game is intentionally minimal: just the social share card and the
-  // three action buttons. The 4:3 photo card, character title, status text,
-  // and countdown all hide here and come back naturally on the next UTC day
-  // (the live game reload from init() shows them via renderRound()).
+  // three action buttons. The `stage--finished` class collapses the layout so
+  // the photo, title, board, status, countdown, and primary action rows take
+  // no space — the share slot and share actions are the only things on screen.
   els.characterCard.hidden = true;
   els.board.hidden = true;
   els.quad.hidden = true;
@@ -906,14 +929,10 @@ async function showFinished() {
   els.status.textContent = '';
   els.name.innerHTML = '&nbsp;';
   if (els.countdown) els.countdown.textContent = '';
+  els.stage?.classList.add('stage--finished');
   updateChips();
 
   els.shareSlot.hidden = false;
-  els.shareSlot.innerHTML = '';
-  cachedShareCanvas = await renderShareCard(s);
-  cachedShareCanvas.classList.add('share-card');
-  els.shareSlot.appendChild(cachedShareCanvas);
-
   els.shareActions.hidden = false;
   els.share.hidden = false;
   els.share.disabled = false;
@@ -922,6 +941,15 @@ async function showFinished() {
   els.link.textContent = 'Copy link';
   els.copyResult.hidden = false;
   els.copyResult.textContent = 'Copy emoji';
+
+  // Build the new canvas before swapping so the slot never goes empty during
+  // the async render — important when tab-switching between two finished
+  // modes, where any blank frame reads as the share card "disappearing".
+  const newCanvas = await renderShareCard(s);
+  newCanvas.classList.add('share-card');
+  cachedShareCanvas = newCanvas;
+  els.shareSlot.replaceChildren(newCanvas);
+
   // Countdown is suppressed on the end screen per spec, but we still need its
   // refresh-on-new-UTC-day side effect so the page reloads at midnight and
   // brings the 4:3 box back. Run the tick silently.
@@ -957,6 +985,29 @@ function startCountdown({ silent = false } = {}) {
   };
   tick();
   countdownTimer = setInterval(tick, 1000);
+}
+
+// Reload when the UTC day rolls over while the page is open or backgrounded.
+// The share-screen countdown already covers the page-visible-and-finished
+// case; this catches the player who leaves the tab open across midnight or
+// reopens it the next day. `dateKey` is captured at page load — once it no
+// longer matches today's UTC key, we reload so the fresh roster is loaded.
+let dateRolloverArmed = false;
+function armDateRolloverReload() {
+  if (dateRolloverArmed) return;
+  dateRolloverArmed = true;
+  const checkRollover = () => {
+    if (getUtcDateKey() !== dateKey) {
+      window.location.reload();
+    }
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkRollover();
+  });
+  window.addEventListener('focus', checkRollover);
+  // Periodic safety net for the "tab left open all night" path — once a
+  // minute is enough resolution to catch midnight without burning cycles.
+  setInterval(checkRollover, 60_000);
 }
 
 function flash(el, cls) {
