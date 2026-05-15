@@ -50,6 +50,10 @@ PRECROP = {
     # Genie source is widescreen with thin black letterbox bars top/bottom —
     # strip them so the cover_crop fills the entire 4:3 frame with content.
     "IMG_0468.jpeg": {"top": 0.02, "bottom": 0.02},
+    # Anxiety - Inside Out 2 ensemble shot is too wide; pull the sides in so
+    # the orange guy is unambiguously the subject instead of one of five
+    # emotions in a group photo.
+    "IMG_0599.webp": {"left": 0.28, "right": 0.24, "top": 0.0, "bottom": 0.05},
 }
 
 # Vertical anchor for isolated-subject crops. 0.5 (default) centers the
@@ -66,6 +70,9 @@ Y_ANCHOR = {
 # the top/left, >0.5 keep more of the bottom/right. Used to nudge framing
 # when the subject sits off-centre in the source.
 COVER_OFFSET = {
+    # Keep more of the top so Anxiety's tall flame-shaped hair survives the
+    # 4:3 trim after the side-tightening precrop.
+    "IMG_0599.webp": {"y": 0.35},
 }
 
 # Pad the source with the sampled background colour before any other
@@ -94,6 +101,9 @@ FORCE_COVER = {
     # which leaves Brock floating in a small portion of the 4:3 frame.
     # cover_crop trims the wider source to 4:3 so Brock fills the frame.
     "IMG_0550.webp",  # Brock vest
+    # Anxiety - corners are similar teal-ish but the scene is full-bleed;
+    # without cover_crop the precropped frame gets padded again.
+    "IMG_0599.webp",  # Anxiety
 }
 
 # Per-image override of the bbox padding fraction used by isolated_subject.
@@ -242,6 +252,16 @@ ASSIGNMENTS = {
     "zoro-hair":                "IMG_0544.png",
     "ed-bighead":               "IMG_0545.png",
     "dr-zoidberg":              "IMG_0536.webp",
+    # ---- New items / characters ----
+    "didi-glasses":             "IMG_0584.png",
+    "phoebe-sweater":           "IMG_0588.png",
+    "vince-jersey":             "IMG_0590.png",
+    "chowder":                  "IMG_0591.webp",
+    "lumpy-space-princess":     "IMG_0596.png",
+    "doraemon":                 "IMG_0598.webp",
+    "anxiety":                  "IMG_0599.webp",
+    "darwin":                   "IMG_0600.webp",
+    "donatello-mask":           "IMG_0602.webp",
 }
 
 

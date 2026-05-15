@@ -634,5 +634,55 @@
     "color": { "hex": "#9FE35F", "name": "Zoro Hair Green" },
     "image": "assets/photos/zoro-hair.png",
     "verified": true
+  },
+  {
+    "id": "didi-glasses",
+    "type": "item",
+    "name": "Didi's glasses",
+    "show": "Rugrats",
+    "color": { "hex": "#8FA256", "name": "Didi Glasses Green" },
+    "image": "assets/photos/didi-glasses.png",
+    "quadPalette": "didi-glasses",
+    "verified": true
+  },
+  {
+    "id": "phoebe-sweater",
+    "type": "item",
+    "name": "Phoebe's sweater",
+    "show": "Hey Arnold!",
+    "color": { "hex": "#57749A", "name": "Phoebe Sweater Blue" },
+    "image": "assets/photos/phoebe-sweater.png",
+    "quadPalette": "phoebe-sweater",
+    "verified": true
+  },
+  {
+    "id": "vince-jersey",
+    "type": "item",
+    "name": "Vince's jersey",
+    "show": "Recess",
+    "color": { "hex": "#5C9F31", "name": "Vince Jersey Green" },
+    "image": "assets/photos/vince-jersey.png",
+    "quadPalette": "vince-jersey",
+    "verified": true
+  },
+  {
+    "id": "anxiety",
+    "type": "item",
+    "name": "Anxiety",
+    "show": "Inside Out 2",
+    "color": { "hex": "#E26E2D", "name": "Anxiety Orange" },
+    "image": "assets/photos/anxiety.png",
+    "quadPalette": "anxiety",
+    "verified": true
+  },
+  {
+    "id": "donatello-mask",
+    "type": "item",
+    "name": "Donatello's mask",
+    "show": "Teenage Mutant Ninja Turtles",
+    "color": { "hex": "#8B5FBF", "name": "Donatello Purple" },
+    "image": "assets/photos/donatello-mask.png",
+    "quadPalette": "tmnt",
+    "verified": true
   }
 ]
