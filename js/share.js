@@ -361,11 +361,43 @@ function drawPortrait(ctx, character, x, y, size) {
     else { dw = size; dh = size / ratio; }
     const dx = x + (size - dw) / 2;
     const dy = y + (size - dh) / 2;
-    ctx.drawImage(cached, dx, dy, dw, dh);
+    drawGrayscaleImage(ctx, cached, dx, dy, dw, dh);
     ctx.restore();
   } else {
     drawInitials(ctx, character.name, x, y, size);
   }
+}
+
+// Portraits on the share card are desaturated to match the in-game
+// grayscale-until-revealed treatment — sharing a colour-true photo would
+// hand the answer to anyone who opens the image.
+function drawGrayscaleImage(ctx, img, dx, dy, dw, dh) {
+  if (typeof ctx.filter === 'string') {
+    const prev = ctx.filter;
+    ctx.filter = 'grayscale(1) contrast(1.05)';
+    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.filter = prev;
+    return;
+  }
+  // Fallback for engines without Canvas2D filter support: paint to an
+  // offscreen canvas, walk the pixels, write back.
+  const off = document.createElement('canvas');
+  off.width = Math.max(1, Math.ceil(dw));
+  off.height = Math.max(1, Math.ceil(dh));
+  const offCtx = off.getContext('2d');
+  offCtx.drawImage(img, 0, 0, off.width, off.height);
+  try {
+    const data = offCtx.getImageData(0, 0, off.width, off.height);
+    const px = data.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const y = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2];
+      px[i] = px[i + 1] = px[i + 2] = y;
+    }
+    offCtx.putImageData(data, 0, 0);
+  } catch {
+    // Tainted canvas — give up on desaturation rather than throwing.
+  }
+  ctx.drawImage(off, dx, dy, dw, dh);
 }
 
 function drawInitials(ctx, name, x, y, size) {
