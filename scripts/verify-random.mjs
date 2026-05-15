@@ -49,8 +49,9 @@ section('pool exhaustion (no repeats until drained)', () => {
     const seen = new Set();
     let exhaustedAt = -1;
     let totalPicks = 0;
-    // Walk far enough to wrap the roster at least once. Each day requests a
-    // full-roster slice — the same shape as ROUNDS_PER_DAY = 999 in main.js.
+    // Walk far enough to wrap the roster at least once. The test requests a
+    // full-roster slice to exercise the no-repeat-until-drained invariant
+    // independently of the production ROUNDS_PER_DAY value.
     for (let day = 0; day < pool.length * 2 + 5; day++) {
       const { picks, exhausted } = pickFreshDailyCharacters(
         pool,

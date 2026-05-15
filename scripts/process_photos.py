@@ -77,12 +77,10 @@ EXPAND = {
 
 # Bypass the is_solid_background heuristic and always cover-crop the source.
 # Use for full-bleed scene shots whose corners happen to be uniformly
-# coloured (eg. Him on a pink couch, or Tito on a dim porch with dark edges)
-# — without this they get treated as isolated subjects and end up with a
-# coloured pad band around them.
+# coloured (eg. Him on a pink couch) — without this they get treated as
+# isolated subjects and end up with a coloured pad band around them.
 FORCE_COVER = {
     "IMG_0520.webp",  # Him - all four corners pink
-    "IMG_0547.png",   # Tito Makani - corners near-black, RGBA fully opaque
     "IMG_0468.jpeg",  # Genie - dark blue scene, fill the 4:3 frame
     # Cartoon scene crops where the subject sits centred against a flat-ish
     # bg. Without FORCE_COVER they'd be detected as isolated subjects, get a
@@ -239,7 +237,6 @@ ASSIGNMENTS = {
     "chopper":                  "IMG_0541.png",
     "zoro-hair":                "IMG_0544.png",
     "ed-bighead":               "IMG_0545.png",
-    "tito-makani":              "IMG_0547.png",
     "dr-zoidberg":              "IMG_0536.webp",
 }
 

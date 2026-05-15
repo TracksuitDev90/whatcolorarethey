@@ -478,15 +478,6 @@
     "verified": true
   },
   {
-    "id": "tito-makani",
-    "name": "Tito Makani",
-    "era": "00s",
-    "color": { "hex": "#E05D30", "name": "Tito Orange" },
-    "wikipediaUrl": "https://en.wikipedia.org/wiki/Rocket_Power",
-    "image": "assets/photos/tito-makani.png",
-    "verified": true
-  },
-  {
     "id": "dr-zoidberg",
     "name": "Dr. Zoidberg",
     "color": { "hex": "#F56856", "name": "Zoidberg Red" },

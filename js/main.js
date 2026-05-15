@@ -20,17 +20,14 @@ initTitleBlob();
 
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
-// Temporarily unlimited for testing — was 3. The UI already drops the "/ N"
-// totals when this exceeds 10, so a single high value is enough to surface the
-// whole roster each day without further plumbing.
-const ROUNDS_PER_DAY = 999;
+const ROUNDS_PER_DAY = 3;
 
 // Per-mode localStorage keys. Seen records the IDs the player has already
 // encountered (so each day surfaces fresh entries until the roster wraps).
 // Lock pins today's selection so refreshing the page returns the same trio
 // even after the IDs were already moved into the seen record.
-const STORAGE_SEEN = { items: 'wcat:seen:items', grid: 'wcat:seen:grid' };
-const STORAGE_LOCK = { items: 'wcat:daily-lock:items', grid: 'wcat:daily-lock:grid' };
+const STORAGE_SEEN = { items: 'wcat:v2:seen:items', grid: 'wcat:v2:seen:grid' };
+const STORAGE_LOCK = { items: 'wcat:v2:daily-lock:items', grid: 'wcat:v2:daily-lock:grid' };
 
 function selectDailyFresh(pool, key, mode) {
   if (!pool.length) return [];
