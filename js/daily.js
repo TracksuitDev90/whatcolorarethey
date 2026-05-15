@@ -10,7 +10,11 @@ const CHARACTERS_PER_DAY = 3;
 // each subsequent day advances by CHARACTERS_PER_DAY so every entry surfaces
 // once before any repeat. New characters appended later don't disturb the
 // already-played schedule — they only show up on later days.
-const ROTATION_EPOCH = '2026-05-09';
+//
+// Exported so the verify scripts can derive their day-keys from the same
+// source of truth instead of hardcoding a duplicate date that would
+// silently drift if this constant ever changes.
+export const ROTATION_EPOCH = '2026-05-09';
 
 export function getUtcDateKey(now = new Date()) {
   const y = now.getUTCFullYear();

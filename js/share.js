@@ -623,7 +623,7 @@ export function shareLinkUrl(snapshot) {
     }),
   };
   const json = JSON.stringify(payload);
-  const b64 = btoa(unescape(encodeURIComponent(json)))
+  const b64 = b64UrlEncode(json)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
@@ -639,11 +639,30 @@ export function decodeSharePayload(s) {
   try {
     const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
     const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
-    const json = decodeURIComponent(escape(atob(b64 + pad)));
-    return JSON.parse(json);
+    return JSON.parse(b64UrlDecode(b64 + pad));
   } catch {
     return null;
   }
+}
+
+// UTF-8 ↔ base64 via TextEncoder/TextDecoder. Replaces the legacy
+// `btoa(unescape(encodeURIComponent(...)))` and `decodeURIComponent(escape(atob(...)))`
+// idioms, which rely on the deprecated `escape`/`unescape` globals.
+function b64UrlEncode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  // Chunked to avoid blowing the argument limit on long strings. 0x8000 is
+  // well under the spec'd cap on all current engines.
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(binary);
+}
+function b64UrlDecode(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 // Build a synthetic snapshot from a decoded share payload + the loaded

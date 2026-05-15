@@ -113,10 +113,21 @@ let focusRow = 0;
 let focusCol = 0;
 let countdownTimer = null;
 let cachedShareCanvas = null;
+// Pending "finished, show share card after 1.1s" timer. Stashed so a tab
+// switch can cancel it — without that, the timer fires against whichever
+// game is current at firing time and can blow away an in-progress UI.
+let finishedAnnounceTimer = null;
+let finishedAnnounceGame = null;
 
 init();
 
 async function init() {
+  // Tear down any rollover registration from a prior init() attempt so the
+  // retry path re-arms against a fresh `dateKey` (which may have rolled
+  // over while the user sat on the error screen) instead of leaving the
+  // previous closures bound to the old date.
+  dateRolloverTeardown?.();
+  cancelFinishedAnnounce();
   showLoading();
   try {
     const chars = await loadCharacters();
@@ -129,7 +140,14 @@ async function init() {
     const sharedParam = params.get('s');
     if (sharedParam) {
       const ok = await tryRenderSharedView(sharedParam, chars);
-      if (ok) return;
+      if (ok) {
+        // Still record today's visit and arm the midnight-rollover reload
+        // for shared views — leaving the tab open past UTC midnight should
+        // refresh into the new day rather than sit on stale shared data.
+        writeJson(STORAGE_LAST_VISIT, dateKey);
+        armDateRolloverReload();
+        return;
+      }
       // Decode failed (corrupt/expired link). Strip the param so it doesn't
       // stick around on refresh, surface a one-time toast, then fall through
       // to the normal daily game.
@@ -150,6 +168,10 @@ async function init() {
       ? createDailyGame(gridDaily, dateKey, { mode: 'grid' })
       : null;
     renderHeaders();
+    applyTabAvailability();
+    if (!games.items && !games.grid) {
+      throw new Error('No puzzles available — both rosters are empty.');
+    }
     setMode(games.items ? 'items' : 'grid');
     onceStorageWriteFailed(() => {
       toast("Your progress won't be saved in this browsing mode.");
@@ -252,8 +274,12 @@ function setMode(next) {
   if (els.tabs) els.tabs.dataset.active = mode;
   els.tabItems.classList.toggle('tab--active', mode === 'items');
   els.tabItems.setAttribute('aria-selected', mode === 'items' ? 'true' : 'false');
+  // tabindex: only the active tab is in the Tab-key order; arrow keys cycle
+  // between tabs while inside the tablist. Matches the ARIA tab pattern.
+  els.tabItems.tabIndex = mode === 'items' ? 0 : -1;
   els.tabGrid.classList.toggle('tab--active', mode === 'grid');
   els.tabGrid.setAttribute('aria-selected', mode === 'grid' ? 'true' : 'false');
+  els.tabGrid.tabIndex = mode === 'grid' ? 0 : -1;
   if (els.stage) {
     els.stage.setAttribute('aria-labelledby', mode === 'items' ? 'tab-items' : 'tab-grid');
   }
@@ -269,11 +295,36 @@ function setMode(next) {
       renderRound();
     }
   };
+  // Any deferred announce from the previous mode is now stale — its
+  // showFinished() would read the wrong game's snapshot and clobber the
+  // freshly rendered round.
+  if (changing) cancelFinishedAnnounce();
   if (changing && els.stage) {
     crossfadeStage(apply);
   } else {
     apply();
   }
+}
+
+function scheduleFinishedAnnounce() {
+  cancelFinishedAnnounce();
+  finishedAnnounceGame = game;
+  finishedAnnounceTimer = setTimeout(() => {
+    finishedAnnounceTimer = null;
+    // Bail if the player switched tabs while we were waiting — `game`
+    // would now point at the other mode.
+    if (finishedAnnounceGame !== game) return;
+    finishedAnnounceGame = null;
+    showFinished();
+  }, 1100);
+}
+
+function cancelFinishedAnnounce() {
+  if (finishedAnnounceTimer) {
+    clearTimeout(finishedAnnounceTimer);
+    finishedAnnounceTimer = null;
+  }
+  finishedAnnounceGame = null;
 }
 
 // Two-frame opacity dip on the stage. Fade out, swap content on the next
@@ -296,6 +347,23 @@ function prefetchImage(src) {
   const img = new Image();
   img.decoding = 'async';
   img.src = src;
+}
+
+function applyTabAvailability() {
+  // Hide tabs whose roster ended up empty. Clicking a no-op tab and seeing
+  // nothing happen is more confusing than just not showing it. If only one
+  // mode is available we hide the whole tablist — there's nothing to
+  // switch between, and the sliding pill is built assuming both halves
+  // exist. init() throws when neither mode is available so the error UI
+  // takes over in that case.
+  const pairs = [['items', els.tabItems], ['grid', els.tabGrid]];
+  for (const [m, btn] of pairs) {
+    btn.hidden = !games[m];
+  }
+  if (els.tabs) {
+    const count = (games.items ? 1 : 0) + (games.grid ? 1 : 0);
+    els.tabs.hidden = count < 2;
+  }
 }
 
 function renderHeaders() {
@@ -659,7 +727,7 @@ function revealRound(announce = true, skipped = false) {
   if (!hasNext) {
     els.next.hidden = true;
     if (s.finished && announce) {
-      setTimeout(showFinished, 1100);
+      scheduleFinishedAnnounce();
     }
   } else {
     els.next.hidden = false;
@@ -702,6 +770,39 @@ function updateSkipButton() {
 els.tabItems.addEventListener('click', () => setMode('items'));
 els.tabGrid.addEventListener('click', () => setMode('grid'));
 
+// ARIA tablist keyboard pattern: Left/Right (and Home/End) move focus AND
+// activate the tab. Tab key continues to escape the tablist into the rest
+// of the page — handled by the tabindex flipping in setMode().
+const TAB_ORDER = ['items', 'grid'];
+function onTabKeyDown(e) {
+  const currentIdx = TAB_ORDER.indexOf(e.currentTarget === els.tabItems ? 'items' : 'grid');
+  if (currentIdx < 0) return;
+  let nextIdx = -1;
+  switch (e.key) {
+    case 'ArrowRight':
+    case 'ArrowDown':
+      nextIdx = (currentIdx + 1) % TAB_ORDER.length;
+      break;
+    case 'ArrowLeft':
+    case 'ArrowUp':
+      nextIdx = (currentIdx - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+      break;
+    case 'Home': nextIdx = 0; break;
+    case 'End':  nextIdx = TAB_ORDER.length - 1; break;
+    default: return;
+  }
+  e.preventDefault();
+  // Skip to the next available tab if the chosen one has no game (e.g.
+  // items roster failed to load). One hop is enough — there are only two.
+  const targetMode = games[TAB_ORDER[nextIdx]] ? TAB_ORDER[nextIdx] : TAB_ORDER[(nextIdx + 1) % TAB_ORDER.length];
+  if (!games[targetMode] || targetMode === mode) return;
+  setMode(targetMode);
+  const btn = targetMode === 'items' ? els.tabItems : els.tabGrid;
+  btn.focus();
+}
+els.tabItems.addEventListener('keydown', onTabKeyDown);
+els.tabGrid.addEventListener('keydown', onTabKeyDown);
+
 function advanceRound() {
   const r = game.next();
   if (r.kind === 'finished' || game.snapshot().finished) {
@@ -723,7 +824,7 @@ function performSkip(viaSwipe = false) {
     // final unfinished round, auto-roll into the share screen.
     renderRound();
     if (game.snapshot().finished) {
-      setTimeout(showFinished, 1100);
+      scheduleFinishedAnnounce();
     }
   }
   return true;
@@ -916,6 +1017,7 @@ function flashLabel(btn, hot, cool) {
 }
 
 async function showFinished() {
+  cancelFinishedAnnounce();
   const s = game.snapshot();
   // End-of-game is intentionally minimal: just the social share card and the
   // three action buttons. The `stage--finished` class collapses the layout so
@@ -972,6 +1074,13 @@ function hideShareSlot() {
 
 function startCountdown({ silent = false } = {}) {
   if (!els.countdown) return;
+  // Tab-switching between two finished modes calls showFinished() each
+  // time, which calls startCountdown() — without clearing first we'd leak
+  // an interval per switch.
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
   const tick = () => {
     const ms = msUntilNextUtcDay();
     if (!silent) {
@@ -992,7 +1101,12 @@ function startCountdown({ silent = false } = {}) {
 // case; this catches the player who leaves the tab open across midnight or
 // reopens it the next day. `dateKey` is captured at page load — once it no
 // longer matches today's UTC key, we reload so the fresh roster is loaded.
+//
+// Registrations are kept in named refs + a teardown closure so a retry of
+// init() (or any future reset path) can rewind cleanly instead of stacking
+// listeners and intervals.
 let dateRolloverArmed = false;
+let dateRolloverTeardown = null;
 function armDateRolloverReload() {
   if (dateRolloverArmed) return;
   dateRolloverArmed = true;
@@ -1001,13 +1115,21 @@ function armDateRolloverReload() {
       window.location.reload();
     }
   };
-  document.addEventListener('visibilitychange', () => {
+  const onVisibility = () => {
     if (document.visibilityState === 'visible') checkRollover();
-  });
+  };
+  document.addEventListener('visibilitychange', onVisibility);
   window.addEventListener('focus', checkRollover);
   // Periodic safety net for the "tab left open all night" path — once a
   // minute is enough resolution to catch midnight without burning cycles.
-  setInterval(checkRollover, 60_000);
+  const intervalId = setInterval(checkRollover, 60_000);
+  dateRolloverTeardown = () => {
+    document.removeEventListener('visibilitychange', onVisibility);
+    window.removeEventListener('focus', checkRollover);
+    clearInterval(intervalId);
+    dateRolloverArmed = false;
+    dateRolloverTeardown = null;
+  };
 }
 
 function flash(el, cls) {

@@ -8,6 +8,8 @@ import {
   pickFreshDailyCharacters,
   hueFamily,
   positionForRound,
+  ROTATION_EPOCH,
+  getUtcDateKey,
 } from '../js/daily.js';
 import { buildQuad, distinctTone, QUAD_BOX_COUNT } from '../js/quad.js';
 import { hexToHsl } from '../js/grid.js';
@@ -36,10 +38,12 @@ function section(name, fn) {
   }
 }
 
+// Derived from the rotation epoch in daily.js so this script can't drift
+// out of sync if that constant changes.
+const [EPOCH_Y, EPOCH_M, EPOCH_D] = ROTATION_EPOCH.split('-').map(Number);
+const EPOCH_MS = Date.UTC(EPOCH_Y, EPOCH_M - 1, EPOCH_D);
 function dayKey(offset) {
-  const base = Date.UTC(2026, 4, 9);
-  const d = new Date(base + offset * 86400000);
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+  return getUtcDateKey(new Date(EPOCH_MS + offset * 86400000));
 }
 
 // 1) Pool exhaustion — picks never repeat until the unseen pool is drained,

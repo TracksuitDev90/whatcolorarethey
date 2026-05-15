@@ -244,6 +244,14 @@ body {
 }
 
 /* ---------- Tabs ---------- */
+.tabs[hidden],
+.tab[hidden] {
+  /* `display: inline-grid` / `inline-flex` below outrank the UA `[hidden]`
+     rule, so honour the attribute explicitly when JS hides an unavailable
+     tab (e.g. items.json failed to load). */
+  display: none;
+}
+
 .tabs {
   position: relative;
   display: inline-grid;
