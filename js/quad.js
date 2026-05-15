@@ -62,6 +62,49 @@ const PALETTES = {
     '#F39C12', // orange
     '#E63946', // red
   ],
+  // Didi Pickles's glasses are an olive-green. Distractors are clearly
+  // different hue families — a red, a purple, and a blue — so the player
+  // never sees a near-green that could be confused with the correct shade.
+  'didi-glasses': [
+    '#8FA256', // Didi glasses green (correct)
+    '#E63946', // red
+    '#8B5FBF', // purple
+    '#4A90D9', // blue
+  ],
+  // Phoebe's sweater is a muted slate-blue. Distractors come from clearly
+  // different hue families so the player can't fall for a near-blue.
+  'phoebe-sweater': [
+    '#57749A', // Phoebe sweater blue (correct)
+    '#6FB04A', // green
+    '#FF8FB3', // pink
+    '#F4D03F', // yellow
+  ],
+  // Vince's jersey is a saturated grass green. Distractors are red, blue,
+  // and a golden yellow.
+  'vince-jersey': [
+    '#5C9F31', // Vince jersey green (correct)
+    '#E63946', // red
+    '#4A90D9', // blue
+    '#DAA520', // golden yellow
+  ],
+  // Anxiety is orange. Distractors are purple, black, and yellow — three
+  // chromatic-and-neutral options that read as clearly different.
+  'anxiety': [
+    '#E26E2D', // Anxiety orange (correct)
+    '#8B5FBF', // purple
+    '#1A1A1A', // black
+    '#F4D03F', // yellow
+  ],
+  // Ninja Turtle mask colors. The four canonical turtle hues — purple
+  // (Donatello), blue (Leonardo), red (Raphael), orange (Michelangelo).
+  // Used for Donatello's mask; the photo identifies the turtle by name so
+  // the player picks the right mask color from the team's palette.
+  'tmnt': [
+    '#8B5FBF', // Donatello purple
+    '#2A6FB5', // Leonardo blue
+    '#C8102E', // Raphael red
+    '#F37614', // Michelangelo orange
+  ],
 };
 
 const BOX_COUNT = 4;

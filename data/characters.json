@@ -484,5 +484,37 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Dr._Zoidberg",
     "image": "assets/photos/dr-zoidberg.png",
     "verified": true
+  },
+  {
+    "id": "chowder",
+    "name": "Chowder",
+    "color": { "hex": "#B6ADD5", "name": "Chowder Lavender" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Chowder_(TV_series)",
+    "image": "assets/photos/chowder.png",
+    "verified": true
+  },
+  {
+    "id": "lumpy-space-princess",
+    "name": "Lumpy Space Princess",
+    "color": { "hex": "#DB8EFF", "name": "Lumpy Space Purple" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Lumpy_Space_Princess",
+    "image": "assets/photos/lumpy-space-princess.png",
+    "verified": true
+  },
+  {
+    "id": "doraemon",
+    "name": "Doraemon",
+    "color": { "hex": "#00A3E2", "name": "Doraemon Blue" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Doraemon_(character)",
+    "image": "assets/photos/doraemon.png",
+    "verified": true
+  },
+  {
+    "id": "darwin",
+    "name": "Darwin",
+    "color": { "hex": "#FF7412", "name": "Darwin Orange" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Darwin_Watterson",
+    "image": "assets/photos/darwin.png",
+    "verified": true
   }
 ]

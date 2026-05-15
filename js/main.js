@@ -22,7 +22,7 @@ initTitleBlob();
 
 const COL_LABELS = ['A', 'B', 'C', 'D'];
 const GRID_SIZE = 4;
-const ROUNDS_PER_DAY = 3;
+const ROUNDS_PER_DAY = 999;
 
 // Per-mode localStorage keys. Seen records the IDs the player has already
 // encountered (so each day surfaces fresh entries until the roster wraps).

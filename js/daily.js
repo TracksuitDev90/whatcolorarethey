@@ -4,7 +4,7 @@
 
 import { hexToHsl } from './grid.js';
 
-const CHARACTERS_PER_DAY = 3;
+const CHARACTERS_PER_DAY = 999;
 
 // Day 0 of the rotation. Day index 0 picks the first slice of the pool;
 // each subsequent day advances by CHARACTERS_PER_DAY so every entry surfaces
