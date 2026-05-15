@@ -35,6 +35,9 @@ export async function renderShareCard(snapshot) {
   // Preload all portraits up-front so the draw path can pull them
   // synchronously from cache. The in-game prefetch usually has them already.
   await preloadAllPortraits(snapshot.characters || []);
+  // Cormorant Garamond is used for the wordmark — canvas2d won't wait for
+  // remote fonts, so trigger and await its load before drawing.
+  await ensureFontsReady();
 
   const canvas = document.createElement('canvas');
   canvas.width = W * PIXEL_RATIO;
@@ -153,15 +156,15 @@ function drawHeader(ctx, snapshot) {
   ctx.font = '800 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillText('DAILY · ' + snapshot.date, PADDING, 64);
 
-  // Title.
+  // Title — matches the page wordmark (Cormorant Garamond 700).
   ctx.fillStyle = TEXT_PRIMARY;
-  ctx.font = '900 72px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '700 80px "Cormorant Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif';
   ctx.fillText('Coloration', PADDING, 100);
 
   // Subhead — mode + scoreline.
   const wonCount = snapshot.rounds.filter(r => r.won).length;
   const total = snapshot.rounds.length;
-  const modeLabel = snapshot.mode === 'items' ? 'Items' : 'Characters';
+  const modeLabel = snapshot.mode === 'items' ? 'Item Colors' : 'Character Colors';
 
   ctx.fillStyle = TEXT_SECONDARY;
   ctx.font = '600 28px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -207,8 +210,8 @@ function drawFooter(ctx) {
 
   ctx.textBaseline = 'top';
   ctx.fillStyle = TEXT_PRIMARY;
-  ctx.font = '800 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('whatcolorarethey', PADDING, H - 74);
+  ctx.font = '700 26px "Cormorant Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif';
+  ctx.fillText('Coloration', PADDING, H - 78);
 
   ctx.fillStyle = TEXT_MUTED;
   ctx.font = '600 20px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -298,28 +301,12 @@ function boxesAreaWidth(rowH, max) {
 
 function drawCharacterMeta(ctx, character, x, rowY, rowH, maxWidth) {
   if (maxWidth <= 40) return;
-  const nameY = rowY + rowH / 2 - 16;
-  const swatchY = rowY + rowH / 2 + 14;
 
   ctx.fillStyle = TEXT_PRIMARY;
   ctx.font = '800 26px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textBaseline = 'middle';
   const name = truncate(ctx, character.name, maxWidth);
-  ctx.fillText(name, x, nameY);
-
-  // Color swatch + hex.
-  const swatchSize = 18;
-  ctx.fillStyle = (character.color?.hex || '#888').toUpperCase();
-  roundRect(ctx, x, swatchY - swatchSize / 2, swatchSize, swatchSize, 5);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  ctx.fillStyle = TEXT_MUTED;
-  ctx.font = '600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  const hex = (character.color?.hex || '').toUpperCase();
-  ctx.fillText(hex, x + swatchSize + 10, swatchY);
+  ctx.fillText(name, x, rowY + rowH / 2);
   ctx.textBaseline = 'top';
 }
 
@@ -458,6 +445,18 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.lineTo(x, y + rr);
   ctx.quadraticCurveTo(x, y, x + rr, y);
   ctx.closePath();
+}
+
+async function ensureFontsReady() {
+  if (!document.fonts || typeof document.fonts.load !== 'function') return;
+  try {
+    await Promise.all([
+      document.fonts.load('700 80px "Cormorant Garamond"'),
+      document.fonts.load('700 26px "Cormorant Garamond"'),
+    ]);
+  } catch {
+    // Fall back to the system serif if the font fails to load.
+  }
 }
 
 // Portraits go through a small in-module cache so repeated draws don't refetch.

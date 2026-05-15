@@ -154,8 +154,8 @@
   {
     "id": "kirby",
     "name": "Kirby",
-    "color": { "hex": "#D74894", "name": "Kirby Pink (Pantone 239 C)" },
-    "colorSource": "https://colorswall.com/color/d74894",
+    "color": { "hex": "#EA8FAE", "name": "Kirby Pink" },
+    "colorSource": "https://colorswall.com/color/ea8fae",
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Kirby_(character)",
     "image": "assets/photos/kirby.png",
     "verified": true
