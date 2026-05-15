@@ -90,6 +90,10 @@ FORCE_COVER = {
     "IMG_0395.png",   # Boo Boo - light gray scene
     "IMG_0464.png",   # Fred Flintstone - khaki scene
     "IMG_0438.jpeg",  # Danny Phantom - teal locker scene
+    # Brock source is ~2:1 — isolated_subject pads top/bottom with white
+    # which leaves Brock floating in a small portion of the 4:3 frame.
+    # cover_crop trims the wider source to 4:3 so Brock fills the frame.
+    "IMG_0550.webp",  # Brock vest
 }
 
 # Per-image override of the bbox padding fraction used by isolated_subject.
