@@ -16,16 +16,14 @@ import { buildQuad } from './quad.js';
 import { positionForRound } from './daily.js';
 
 const STORAGE_KEYS = {
-  bestStreak: 'wcat:bestStreak',
-  daily: 'wcat:daily',
+  bestStreak: 'wcat:v2:bestStreak',
+  daily: 'wcat:v2:daily',
 };
 
 const GRID_MAX_GUESSES = 3;
 const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 4;
-// Temporarily unlimited for testing — was 2. UI hides the "X of Y" suffix when
-// this is >= 10 and shows a simple "Skip available" chip.
-export const MAX_SKIPS_PER_MODE = 999;
+export const MAX_SKIPS_PER_MODE = 2;
 
 export function maxGuessesFor(character) {
   return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;
