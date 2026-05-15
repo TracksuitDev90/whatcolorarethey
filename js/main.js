@@ -381,27 +381,71 @@ function renderHeaders() {
 }
 
 function clearHints() {
-  for (const h of document.querySelectorAll('.hdr--hint')) {
-    h.classList.remove('hdr--hint');
+  for (const h of document.querySelectorAll('.hdr--hint-negative')) {
+    h.classList.remove('hdr--hint-negative');
   }
 }
 
-function applyAxisHints() {
+// After two wrong guesses, mark one row OR column as "not the answer". The
+// player goes from 16 → 12 candidates without the previous behavior's
+// failure mode where a row-match and column-match together pinpointed the
+// exact cell. Choice of which axis and which row/col is seeded so it stays
+// stable across reloads.
+function applyNegativeHint() {
   const s = game.snapshot();
   if (s.board.kind !== 'grid') return;
-  const { correctRow, correctCol } = s.board;
-  for (const w of s.wrongGuesses) {
-    if (w.row === correctRow) {
-      els.rowHeaders
-        .querySelector(`.hdr[data-row="${w.row}"]`)
-        ?.classList.add('hdr--hint');
+  const { correctRow, correctCol, rows, cols } = s.board;
+  const rng = hintRng(s);
+
+  // Candidate axes: a row/col is eligible if it is not the correct
+  // row/col. We prefer rows/cols the player hasn't guessed in yet —
+  // they're strictly new information. Fall back to any non-correct
+  // row/col if every non-correct one already has a wrong guess.
+  const guessedRows = new Set(s.wrongGuesses.map(w => w.row));
+  const guessedCols = new Set(s.wrongGuesses.map(w => w.col));
+  const fresh = (size, correct, guessed) => {
+    const all = [];
+    const preferred = [];
+    for (let i = 0; i < size; i++) {
+      if (i === correct) continue;
+      all.push(i);
+      if (!guessed.has(i)) preferred.push(i);
     }
-    if (w.col === correctCol) {
-      els.colHeaders
-        .querySelector(`.hdr[data-col="${w.col}"]`)
-        ?.classList.add('hdr--hint');
-    }
+    return preferred.length ? preferred : all;
+  };
+  const rowCandidates = fresh(rows, correctRow, guessedRows);
+  const colCandidates = fresh(cols, correctCol, guessedCols);
+
+  if (!rowCandidates.length && !colCandidates.length) return;
+  const useRow = !colCandidates.length
+    ? true
+    : !rowCandidates.length
+      ? false
+      : rng() < 0.5;
+  if (useRow) {
+    const r = rowCandidates[Math.floor(rng() * rowCandidates.length)];
+    els.rowHeaders
+      .querySelector(`.hdr[data-row="${r}"]`)
+      ?.classList.add('hdr--hint-negative');
+  } else {
+    const c = colCandidates[Math.floor(rng() * colCandidates.length)];
+    els.colHeaders
+      .querySelector(`.hdr[data-col="${c}"]`)
+      ?.classList.add('hdr--hint-negative');
   }
+}
+
+// Seeded so the negative hint is identical across reloads within a round.
+function hintRng(s) {
+  const round = s.rounds[s.roundIndex];
+  let a = ((round?.seed ?? 0) ^ 0x9E3779B9) >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
 }
 
 function isItemRound(s) {
@@ -472,7 +516,7 @@ function renderRound() {
   if (s.revealed) {
     revealRound(/*announce*/ false, /*skipped*/ round.skipped);
   } else if (s.board.kind === 'grid' && s.wrongGuesses.length >= 2) {
-    applyAxisHints();
+    applyNegativeHint();
   }
 
   updateChips();
@@ -700,7 +744,7 @@ function submitGuess(pos, btn) {
     btn.classList.add('cell--wrong');
     flash(els.photoFrame, 'shake');
     els.status.textContent = `Not quite. ${result.guessesLeft} guess${result.guessesLeft === 1 ? '' : 'es'} left.`;
-    if (result.guessesLeft === 1) applyAxisHints();
+    if (result.guessesLeft === 1) applyNegativeHint();
     updateChips();
   } else if (result.kind === 'exhausted') {
     btn.classList.add('cell--wrong');

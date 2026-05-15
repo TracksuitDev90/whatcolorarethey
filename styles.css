@@ -520,30 +520,21 @@ body {
   transition: background 220ms var(--ease-out), color 220ms var(--ease-out), border-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
 }
 
-/* Hint: this row/column contains the correct cell. Surfaced after the
-   second wrong guess — vivid green so it's unmistakable. */
-.hdr--hint {
-  background: linear-gradient(180deg, #2bd685, #18a463);
-  color: #052015;
-  border-color: rgba(33, 196, 122, 0.7);
+/* Negative hint: this row/column is NOT the answer. Surfaced after the
+   second wrong guess — muted red with a strikethrough so it reads as
+   "ruled out" rather than "is the answer". Narrows 16 candidates to 12
+   without ever pinpointing the exact cell. */
+.hdr--hint-negative {
+  background: linear-gradient(180deg, rgba(60, 22, 24, 0.95), rgba(40, 14, 16, 0.95));
+  color: rgba(255, 170, 170, 0.55);
+  border-color: rgba(190, 70, 75, 0.55);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(230, 110, 115, 0.85);
   font-weight: 900;
   box-shadow:
-    0 0 0 2px rgba(33, 196, 122, 0.45),
-    0 0 14px rgba(33, 196, 122, 0.65);
-  animation: hint-pulse 1400ms ease-in-out infinite;
-}
-
-@keyframes hint-pulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 2px rgba(33, 196, 122, 0.45),
-      0 0 14px rgba(33, 196, 122, 0.55);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px rgba(33, 196, 122, 0.7),
-      0 0 24px rgba(33, 196, 122, 0.95);
-  }
+    0 0 0 1px rgba(190, 70, 75, 0.35),
+    0 0 10px rgba(190, 70, 75, 0.35);
 }
 
 .grid {
