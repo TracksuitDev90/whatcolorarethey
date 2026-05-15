@@ -118,6 +118,11 @@ let cachedShareCanvas = null;
 // game is current at firing time and can blow away an in-progress UI.
 let finishedAnnounceTimer = null;
 let finishedAnnounceGame = null;
+// armDateRolloverReload is defined far below, but init() pokes at the
+// teardown handle synchronously on entry — so the bindings have to exist
+// before the `init()` call below to avoid a TDZ ReferenceError.
+let dateRolloverArmed = false;
+let dateRolloverTeardown = null;
 
 init();
 
@@ -1104,9 +1109,9 @@ function startCountdown({ silent = false } = {}) {
 //
 // Registrations are kept in named refs + a teardown closure so a retry of
 // init() (or any future reset path) can rewind cleanly instead of stacking
-// listeners and intervals.
-let dateRolloverArmed = false;
-let dateRolloverTeardown = null;
+// listeners and intervals. `dateRolloverArmed` / `dateRolloverTeardown`
+// are declared at the top of the module — they're poked from init()
+// before this point in module evaluation is reached.
 function armDateRolloverReload() {
   if (dateRolloverArmed) return;
   dateRolloverArmed = true;
