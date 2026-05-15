@@ -73,6 +73,223 @@ export async function renderShareCard(snapshot) {
   return canvas;
 }
 
+// Combined share card for the "finished both experiences" celebration. Same
+// 1080x1080 footprint as the single-mode card — the body splits into two
+// columns (Items on the left, Characters on the right) so the player can
+// brag about both runs in one image without the card changing size.
+export async function renderCombinedShareCard({ items, grid }) {
+  // Preload portraits from both runs up-front; the in-game cache usually
+  // already has them but the share view is sometimes hit from a cold start.
+  const allChars = [...(items?.characters || []), ...(grid?.characters || [])];
+  await preloadAllPortraits(allChars);
+  await ensureFontsReady();
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W * PIXEL_RATIO;
+  canvas.height = H * PIXEL_RATIO;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.scale(PIXEL_RATIO, PIXEL_RATIO);
+
+  drawBackground(ctx);
+  drawCombinedHeader(ctx, { items, grid });
+
+  const bodyTop = 280;
+  const bodyBottom = H - 110;
+  const bodyLeft = PADDING;
+  const bodyRight = W - PADDING;
+  const columnGap = 28;
+  const columnWidth = (bodyRight - bodyLeft - columnGap) / 2;
+
+  // Two equal-width columns: Items left, Characters right.
+  drawColumn(
+    ctx,
+    items,
+    'Items',
+    bodyLeft,
+    bodyTop,
+    columnWidth,
+    bodyBottom - bodyTop,
+  );
+  drawColumn(
+    ctx,
+    grid,
+    'Characters',
+    bodyLeft + columnWidth + columnGap,
+    bodyTop,
+    columnWidth,
+    bodyBottom - bodyTop,
+  );
+
+  drawFooter(ctx);
+  return canvas;
+}
+
+function drawCombinedHeader(ctx, { items, grid }) {
+  ctx.textBaseline = 'top';
+
+  const dateLabel = items?.date || grid?.date || '';
+  ctx.fillStyle = ACCENT;
+  ctx.font = '800 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('DAILY · ' + dateLabel, PADDING, 64);
+
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.font = '700 80px "Cormorant Garamond", "Iowan Old Style", Georgia, "Times New Roman", serif';
+  ctx.fillText('Coloration', PADDING, 100);
+
+  // Subhead celebrates the double clear; the score pill shows the combined
+  // result so a quick glance reads the day in one number.
+  ctx.fillStyle = TEXT_SECONDARY;
+  ctx.font = '600 28px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText('Items + Characters', PADDING, 188);
+
+  const wonCount =
+    (items?.rounds || []).filter(r => r.won).length +
+    (grid?.rounds || []).filter(r => r.won).length;
+  const total = (items?.rounds?.length || 0) + (grid?.rounds?.length || 0);
+  drawScorePill(ctx, `${wonCount} / ${total}`, W - PADDING, 178);
+}
+
+function drawColumn(ctx, snapshot, label, x, y, w, h) {
+  // Column "card" — soft surface tying the rows together so each side reads
+  // as its own bracket without dominating the canvas.
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+  ctx.lineWidth = 1;
+  roundRect(ctx, x, y, w, h, 24);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  const colPad = 18;
+  const headerH = 64;
+  const innerLeft = x + colPad;
+  const innerRight = x + w - colPad;
+  const innerWidth = innerRight - innerLeft;
+
+  // Mode label (left) + score pill (right) form the column header.
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.font = '800 26px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillText(label, innerLeft, y + colPad);
+
+  const rounds = snapshot?.rounds || [];
+  const wins = rounds.filter(r => r.won).length;
+  drawSmallScorePill(ctx, `${wins} / ${rounds.length}`, innerRight, y + colPad - 2);
+
+  // Played rows fill the rest of the column.
+  const playedRounds = rounds
+    .map((r, i) => ({ r, i }))
+    .filter(({ r }) => r.won || r.lost || r.skipped);
+
+  if (playedRounds.length === 0) {
+    ctx.fillStyle = TEXT_MUTED;
+    ctx.font = '600 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('No rounds played.', innerLeft, y + headerH + colPad);
+    return;
+  }
+
+  const rowsTop = y + headerH + colPad;
+  const rowsBottom = y + h - colPad;
+  const rowGap = 14;
+  const rowH = Math.min(
+    150,
+    (rowsBottom - rowsTop - rowGap * (playedRounds.length - 1)) / playedRounds.length,
+  );
+  for (let k = 0; k < playedRounds.length; k++) {
+    const ry = rowsTop + k * (rowH + rowGap);
+    drawColumnRow(
+      ctx,
+      snapshot,
+      playedRounds[k].i,
+      innerLeft,
+      ry,
+      innerWidth,
+      rowH,
+    );
+  }
+}
+
+function drawSmallScorePill(ctx, text, right, top) {
+  const font = '900 22px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = font;
+  const padX = 14;
+  const padY = 6;
+  const metrics = ctx.measureText(text);
+  const w = metrics.width + padX * 2;
+  const h = 22 + padY * 2;
+  const x = right - w;
+  const y = top;
+
+  ctx.save();
+  const grd = ctx.createLinearGradient(x, y, x, y + h);
+  grd.addColorStop(0, 'rgba(77,217,192,0.22)');
+  grd.addColorStop(1, 'rgba(77,217,192,0.10)');
+  ctx.fillStyle = grd;
+  ctx.strokeStyle = 'rgba(77,217,192,0.55)';
+  ctx.lineWidth = 1.25;
+  roundRect(ctx, x, y, w, h, h / 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle = TEXT_PRIMARY;
+  ctx.textBaseline = 'top';
+  ctx.font = font;
+  ctx.fillText(text, x + padX, y + padY);
+}
+
+function drawColumnRow(ctx, snapshot, i, x, y, w, h) {
+  const round = snapshot.rounds[i];
+  const character = snapshot.characters[i];
+  const max = maxGuessesFor(character);
+
+  // Row card — slightly elevated against the column background.
+  ctx.save();
+  ctx.fillStyle = CARD_BG;
+  ctx.strokeStyle = CARD_STROKE;
+  ctx.lineWidth = 1;
+  roundRect(ctx, x, y, w, h, 16);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  const innerPad = 10;
+  const portraitSize = h - innerPad * 2;
+  const portraitX = x + innerPad;
+  const portraitY = y + innerPad;
+
+  drawPortraitFrame(ctx, portraitX, portraitY, portraitSize);
+  drawPortrait(ctx, character, portraitX, portraitY, portraitSize);
+
+  // Guess boxes scaled down so up-to-three slots still fit alongside the name.
+  const boxGap = 8;
+  const slotSize = Math.min(Math.floor((h - 28)), max === 1 ? 64 : 42);
+  const boxesAreaW = slotSize * max + boxGap * Math.max(0, max - 1);
+
+  const textX = portraitX + portraitSize + 14;
+  const textRight = x + w - innerPad - boxesAreaW - 12;
+  const nameMax = Math.max(0, textRight - textX);
+
+  if (nameMax > 30) {
+    ctx.fillStyle = TEXT_PRIMARY;
+    ctx.font = '700 18px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textBaseline = 'middle';
+    const name = truncate(ctx, character.name, nameMax);
+    ctx.fillText(name, textX, y + h / 2);
+    ctx.textBaseline = 'top';
+  }
+
+  const boxesLeft = x + w - innerPad - boxesAreaW;
+  const boxesY = y + (h - slotSize) / 2;
+  for (let b = 0; b < max; b++) {
+    const bx = boxesLeft + b * (slotSize + boxGap);
+    drawGuessBox(ctx, round, b, bx, boxesY, slotSize);
+  }
+}
+
 function drawPortraitRows(ctx, snapshot, played, left, top, right, bottom) {
   const rowGap = 18;
   const n = played.length;
@@ -592,6 +809,36 @@ export function shareText(snapshot) {
     return `${c.name}: ${cells}`;
   });
   return ['Color Guesser', '', ...lines].join('\n');
+}
+
+// Combined text share — emoji ribbon for both modes side by side. Used when
+// the player has finished both items and characters on the same day so the
+// "Copy emoji" affordance reflects what's actually on screen.
+export function combinedShareText({ items, grid }) {
+  const lines = ['Color Guesser', ''];
+  for (const snap of [items, grid]) {
+    if (!snap) continue;
+    const played = snap.rounds
+      .map((r, i) => ({ r, i }))
+      .filter(({ r }) => r.won || r.lost || r.skipped);
+    const wins = played.filter(({ r }) => r.won).length;
+    const label = snap.mode === 'items' ? 'Items' : 'Characters';
+    lines.push(`${label}: ${wins} / ${played.length}`);
+    for (const { r, i } of played) {
+      const c = snap.characters[i];
+      const max = maxGuessesFor(c);
+      const cells = Array.from({ length: max }, (_, k) => {
+        const g = r.guesses[k];
+        if (!g) return '⬛';
+        return g.correct ? '🟩' : '🟥';
+      }).join('');
+      lines.push(`  ${c.name}: ${cells}`);
+    }
+    lines.push('');
+  }
+  // Trim trailing blank line.
+  while (lines.length && lines[lines.length - 1] === '') lines.pop();
+  return lines.join('\n');
 }
 
 // Build a shareable URL that encodes today's results into a query param.

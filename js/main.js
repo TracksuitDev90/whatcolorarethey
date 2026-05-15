@@ -8,8 +8,10 @@ import {
 } from './daily.js';
 import {
   renderShareCard,
+  renderCombinedShareCard,
   shareCanvas,
   shareText,
+  combinedShareText,
   shareLinkUrl,
   decodeSharePayload,
   snapshotFromPayload,
@@ -437,9 +439,13 @@ function renderRound() {
   const nextChar = s.characters[s.roundIndex + 1];
   if (nextChar) prefetchImage(nextChar.imageSrc);
 
-  // Title slot doubles as the question for quad rounds (so the player
-  // knows which item they're identifying) and as the reveal for both.
-  els.name.innerHTML = isItemRound(s) ? promptText(c) : '&nbsp;';
+  // Title slot doubles as the question (centered above the colour grid)
+  // and as the reveal for both modes. Item rounds embed the item name in
+  // the question since the photo doesn't give it away; character rounds
+  // stay coy with a generic prompt so the name remains the answer.
+  els.name.textContent = isItemRound(s)
+    ? promptText(c)
+    : 'What color are they?';
 
   els.next.hidden = true;
   els.share.hidden = true;
@@ -447,7 +453,7 @@ function renderRound() {
   if (els.copyResult) els.copyResult.hidden = true;
   els.status.textContent = isItemRound(s)
     ? 'Pick the correct color.'
-    : 'What color are they? Pick a swatch.';
+    : 'Pick a swatch to guess.';
   clearHints();
 
   if (s.board.kind === 'quad') {
@@ -979,14 +985,20 @@ if (els.share) {
 
 if (els.link) {
   els.link.addEventListener('click', async () => {
+    const itemsSnap = games.items?.snapshot();
+    const gridSnap = games.grid?.snapshot();
+    const both = !!(itemsSnap?.finished && gridSnap?.finished);
     const url = shareLinkUrl(game.snapshot());
+    const text = both
+      ? combinedShareText({ items: itemsSnap, grid: gridSnap })
+      : shareText(game.snapshot());
     // Prefer the native share sheet so users on phones can fling the URL
     // straight into Messages / Mail. Falls back to clipboard otherwise.
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Color Guesser',
-          text: shareText(game.snapshot()),
+          text,
           url,
         });
         return;
@@ -1006,7 +1018,13 @@ if (els.link) {
 
 if (els.copyResult) {
   els.copyResult.addEventListener('click', async () => {
-    const text = shareText(game.snapshot());
+    // If both modes are finished, the on-screen card is the combined view —
+    // mirror that in the emoji text so the copy matches what the user sees.
+    const itemsSnap = games.items?.snapshot();
+    const gridSnap = games.grid?.snapshot();
+    const text = (itemsSnap?.finished && gridSnap?.finished)
+      ? combinedShareText({ items: itemsSnap, grid: gridSnap })
+      : shareText(game.snapshot());
     try {
       await navigator.clipboard.writeText(text);
       flashLabel(els.copyResult, 'Copied!', 'Copy emoji');
@@ -1049,10 +1067,17 @@ async function showFinished() {
   els.copyResult.hidden = false;
   els.copyResult.textContent = 'Copy emoji';
 
-  // Build the new canvas before swapping so the slot never goes empty during
-  // the async render — important when tab-switching between two finished
-  // modes, where any blank frame reads as the share card "disappearing".
-  const newCanvas = await renderShareCard(s);
+  // If the player has finished BOTH experiences, the share card celebrates the
+  // double run in a single 1080x1080 image with two side-by-side columns. If
+  // only one mode is done, fall back to the original single-mode card. The
+  // dimensions don't change — only the layout — so the slot height stays
+  // identical between the two states.
+  const itemsSnap = games.items?.snapshot();
+  const gridSnap = games.grid?.snapshot();
+  const bothDone = !!(itemsSnap?.finished && gridSnap?.finished);
+  const newCanvas = bothDone
+    ? await renderCombinedShareCard({ items: itemsSnap, grid: gridSnap })
+    : await renderShareCard(s);
   newCanvas.classList.add('share-card');
   cachedShareCanvas = newCanvas;
   els.shareSlot.replaceChildren(newCanvas);
