@@ -193,55 +193,44 @@ const NEUTRAL_STEP_L_COL = 0.025;
 const L_MIN = 0.05;
 const L_MAX = 0.95;
 
-// Choose a set of signed magnitudes for `n` cells along an axis, with one
-// reserved for the correct cell (offset 0). The magnitudes are returned as
-// integer multipliers; the caller multiplies by the step size.
+// Choose a sorted set of signed offsets for an axis of `n` cells with the
+// correct cell at `correctIdx`. Cells fan out from correct in monotone
+// order: rank `i - correctIdx` becomes the offset multiplier, then the
+// step is multiplied in. Result reads as a smooth ramp (the original
+// "gradient" feel) because the offsets are NOT shuffled.
 //
-// When both directions have enough headroom for two step units, use the
-// balanced pool {-2, -1, +1, +2} and drop one at random — the correct cell
-// then sits at rank 2 or 3 out of 4 (always mid-spread, never an extreme).
-//
-// When one direction is starved (e.g. base lightness near 1.0 leaves no
-// room to go lighter), flip to a one-sided pool so all (n-1) distractors
-// step into the available direction. The correct cell becomes an extreme
-// in that case, but we'd otherwise be forced to collapse cells onto each
-// other — and these edge canonicals are rare.
-function pickOffsetMultipliers(rng, n, upRoom, downRoom) {
-  const canUp2 = upRoom >= 2;
-  const canDown2 = downRoom >= 2;
-  let pool;
-  if (canUp2 && canDown2) {
-    pool = [-2, -1, +1, +2];
-  } else if (upRoom < 1 && downRoom >= n - 1) {
-    pool = [];
-    for (let i = 1; i <= n - 1; i++) pool.push(-i);
-  } else if (downRoom < 1 && upRoom >= n - 1) {
-    pool = [];
-    for (let i = 1; i <= n - 1; i++) pool.push(+i);
-  } else if (upRoom < 2 && downRoom >= 3) {
-    pool = [-3, -2, -1, +1];
-  } else if (downRoom < 2 && upRoom >= 3) {
-    pool = [-1, +1, +2, +3];
-  } else {
-    pool = [-2, -1, +1, +2];
-  }
+// Two orientations exist — ascending (positive offsets above correctIdx)
+// and descending (negative above). Pick whichever fits the available
+// headroom best; if neither fits at the full step, shrink the step
+// proportionally so the spread fits in the tighter direction.
+function assignOffsets(rng, n, correctIdx, baseStep, upRoom, downRoom) {
+  const negCount = correctIdx;
+  const posCount = n - 1 - correctIdx;
+  if (negCount === 0 && posCount === 0) return [0];
 
-  while (pool.length > n - 1) {
-    pool.splice(Math.floor(rng() * pool.length), 1);
+  // Effective step multiplier (≤ 1) that fits the direction. Each
+  // orientation needs `needUp` units of room above and `needDown` below.
+  function fitFor(needUp, needDown) {
+    let s = 1;
+    if (needUp > 0) s = Math.min(s, upRoom / needUp);
+    if (needDown > 0) s = Math.min(s, downRoom / needDown);
+    return s;
   }
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool;
-}
+  const ascFit = fitFor(posCount, negCount);
+  const descFit = fitFor(negCount, posCount);
 
-function assignOffsets(rng, n, correctIdx, step, upRoom, downRoom) {
-  const mults = pickOffsetMultipliers(rng, n, upRoom, downRoom);
+  let flip;
+  if (ascFit > descFit + 0.001) flip = false;
+  else if (descFit > ascFit + 0.001) flip = true;
+  else flip = rng() < 0.5;
+
+  const stepMult = Math.min(1, flip ? descFit : ascFit);
+  const step = Math.max(0.003, baseStep * stepMult);
+
   const offsets = new Array(n);
-  let p = 0;
   for (let i = 0; i < n; i++) {
-    offsets[i] = i === correctIdx ? 0 : mults[p++] * step;
+    const rank = i - correctIdx;
+    offsets[i] = (flip ? -rank : rank) * step;
   }
   return offsets;
 }

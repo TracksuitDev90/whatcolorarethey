@@ -25,6 +25,17 @@ const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 4;
 export const MAX_SKIPS_PER_MODE = 999;
 
+// The 12 non-corner positions on the 4x4 grid, ordered row-major. The
+// answer rotates through these (corners excluded) so the correct cell
+// can sit at an edge of one axis but never both — eliminates the
+// "corner extreme" failure mode while keeping monotone gradient feel.
+const GRID_POSITIONS = [
+  [0, 1], [0, 2],
+  [1, 0], [1, 1], [1, 2], [1, 3],
+  [2, 0], [2, 1], [2, 2], [2, 3],
+  [3, 1], [3, 2],
+];
+
 export function maxGuessesFor(character) {
   return character?.type === 'item' ? QUAD_MAX_GUESSES : GRID_MAX_GUESSES;
 }
@@ -100,10 +111,8 @@ export function createDailyGame(dailyCharacters, dateKey, options = {}) {
         correctIndex,
       });
     } else {
-      const cells = GRID_SIZE * GRID_SIZE;
-      const pos = positionForRound(state.date, state.currentIndex, cells);
-      const correctRow = Math.floor(pos / GRID_SIZE);
-      const correctCol = pos % GRID_SIZE;
+      const pos = positionForRound(state.date, state.currentIndex, GRID_POSITIONS.length);
+      const [correctRow, correctCol] = GRID_POSITIONS[pos];
       state.board = {
         kind: 'grid',
         ...buildGrid(c.color.hex, {
