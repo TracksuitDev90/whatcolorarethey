@@ -497,7 +497,7 @@ function renderRound() {
   if (els.copyResult) els.copyResult.hidden = true;
   els.status.textContent = isItemRound(s)
     ? 'Pick the correct color.'
-    : 'Pick a swatch to guess.';
+    : 'Pick a shade to guess.';
   clearHints();
 
   if (s.board.kind === 'quad') {

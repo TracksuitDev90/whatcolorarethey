@@ -175,6 +175,17 @@ export function shuffleCharacters(allCharacters) {
 export function positionForRound(dateKey, slotIndex, totalCells, slotsPerDay = CHARACTERS_PER_DAY) {
   if (!Number.isInteger(totalCells) || totalCells <= 0) return 0;
   const dayIndex = Math.max(0, daysBetween(ROTATION_EPOCH, dateKey));
+  if (totalCells === 12) {
+    // The 12-cell board (non-corner positions on the 4x4 grid) needs a
+    // different formula: CHARACTERS_PER_DAY (999) shares factor 3 with
+    // 12, so the standard (day*slotsPerDay + slot) * step path caps at
+    // a 4-position cycle per slot. Use coprime multipliers on each
+    // axis instead so each slot rotates through all 12 across days,
+    // and each day uses all 12 across slots.
+    const DAY_STEP = 5;
+    const SLOT_STEP = 7;
+    return ((dayIndex * DAY_STEP + slotIndex * SLOT_STEP) % 12 + 12) % 12;
+  }
   const linear = dayIndex * slotsPerDay + slotIndex;
   const step = totalCells === 16 ? 7 : totalCells === 4 ? 3 : 1;
   return ((linear * step) % totalCells + totalCells) % totalCells;

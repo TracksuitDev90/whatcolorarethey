@@ -447,25 +447,22 @@ body {
   transition: filter 600ms var(--ease-out);
 }
 
-/* Bold character title placed between photo and grid. Reserved height
-   keeps the layout from jumping when the name appears on reveal.
-   Font stack prefers Greycliff CF (a licensed Connary Fagen face that may be
-   installed locally or served from elsewhere) and falls back to Manrope —
-   a free Google Font with a comparable geometric-humanist tone — so the
-   prompt still reads with the same character when Greycliff CF is missing. */
+/* Character title / round prompt placed between photo and grid. Reserved
+   height keeps the layout from jumping when the name appears on reveal.
+   Outfit Regular 400 reads as the calm caption font across both prompt
+   ("What color is X?") and reveal states. */
 .character-title {
   margin: 0;
   width: 100%;
   text-align: center;
-  font-family: "Greycliff CF", "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-weight: 700;
+  font-family: "Outfit", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 400;
   font-size: clamp(22px, 4.2vw, 36px);
   letter-spacing: -0.015em;
   line-height: 1.15;
   color: var(--text);
   min-height: 1.2em;
   text-rendering: geometricPrecision;
-  font-feature-settings: "ss01";
   text-wrap: balance;
 }
 
@@ -694,6 +691,8 @@ body {
 /* ---------- Status / actions ---------- */
 .status {
   text-align: center;
+  font-family: "Outfit", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 300;
   font-size: clamp(13px, 1.8vw, 16px);
   color: var(--muted);
   min-height: 1.4em;

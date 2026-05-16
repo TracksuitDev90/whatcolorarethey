@@ -105,6 +105,27 @@ const PALETTES = {
     '#C8102E', // Raphael red
     '#F37614', // Michelangelo orange
   ],
+  // Phineas's hair is the orange of the Flynn-Fletcher household. Pair it
+  // with Ferb's iconic green (the obvious "wrong sibling" trap) plus two
+  // other family hair colors so the round is grounded in show lore.
+  // All distractors sit >=14 ΔE from canonical in OKLab so none of them
+  // can be confused with Phineas's orange.
+  'phineas-hair': [
+    '#E94E1B', // Phineas Hair Orange (correct, mirrors items.json)
+    '#32B336', // Ferb Hair Green (mirrors items.json)
+    '#4A2A1A', // Lawrence's dark brown (Ferb's dad)
+    '#7E4624', // Linda's muted red-brown (Phineas's mom)
+  ],
+  // Nigel Thornberry's hair is his signature deep red-orange. Distractors
+  // come from the rest of the family: Marianne/Eliza blonde, Debbie
+  // black, and a Donnie pale red-orange that's kept far enough from
+  // Nigel's canonical (>12 ΔE in OKLab) to never confuse for the answer.
+  'nigel-hair': [
+    '#D14528', // Nigel Hair Red (correct, mirrors items.json)
+    '#E8C880', // Marianne / Eliza blonde
+    '#1A1410', // Debbie black
+    '#F08C5C', // Donnie's pale reddish-orange (>12 ΔE from canonical)
+  ],
 };
 
 const BOX_COUNT = 4;

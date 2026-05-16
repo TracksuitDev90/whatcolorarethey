@@ -332,6 +332,7 @@
     "show": "Phineas and Ferb",
     "color": { "hex": "#E94E1B", "name": "Phineas Hair Orange" },
     "image": "assets/photos/phineas-hair.png",
+    "quadPalette": "phineas-hair",
     "verified": true
   },
   {
@@ -423,6 +424,7 @@
     "show": "The Wild Thornberrys",
     "color": { "hex": "#D14528", "name": "Nigel Hair Red" },
     "image": "assets/photos/nigel-hair.png",
+    "quadPalette": "nigel-hair",
     "verified": true
   },
   {
