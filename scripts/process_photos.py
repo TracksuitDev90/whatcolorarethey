@@ -54,6 +54,12 @@ PRECROP = {
     # the orange guy is unambiguously the subject instead of one of five
     # emotions in a group photo.
     "IMG_0599.webp": {"left": 0.28, "right": 0.24, "top": 0.0, "bottom": 0.05},
+    # Blue / Black Rangers are full-body action poses with legs splayed wide,
+    # which shrinks the head + suit emblems in the final 4:3 frame. Trim a
+    # chunk off the bottom so the eventual cover_crop centres on the head and
+    # torso (priority: waist-up with the full head + suit triangle visible).
+    "IMG_0555.webp": {"bottom": 0.40},
+    "IMG_0558.webp": {"bottom": 0.40},
 }
 
 # Vertical anchor for isolated-subject crops. 0.5 (default) centers the
@@ -104,6 +110,11 @@ FORCE_COVER = {
     # Anxiety - corners are similar teal-ish but the scene is full-bleed;
     # without cover_crop the precropped frame gets padded again.
     "IMG_0599.webp",  # Anxiety
+    # Power Ranger sources: after the bottom precrop they're wider than 4:3,
+    # so cover_crop just trims the sides to land a tight upper-body framing
+    # instead of padding back out to a wide frame around a small subject.
+    "IMG_0555.webp",  # Blue Ranger
+    "IMG_0558.webp",  # Black Ranger
 }
 
 # Per-image override of the bbox padding fraction used by isolated_subject.

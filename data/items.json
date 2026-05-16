@@ -87,6 +87,7 @@
     "show": "Scooby-Doo, Where Are You!",
     "color": { "hex": "#7C3FAF", "name": "Daphne Purple" },
     "image": "assets/photos/daphne-dress.png",
+    "quadPalette": "daphne-dress",
     "verified": true
   },
   {
@@ -96,6 +97,7 @@
     "show": "Scooby-Doo, Where Are You!",
     "color": { "hex": "#DD7B30", "name": "Velma Sweater Orange" },
     "image": "assets/photos/velma-sweater.png",
+    "quadPalette": "velma-sweater",
     "verified": true
   },
   {
@@ -177,6 +179,7 @@
     "show": "Ed, Edd n Eddy",
     "color": { "hex": "#F2C94C", "name": "Eddy Shirt Yellow" },
     "image": "assets/photos/eddy-shirt.png",
+    "quadPalette": "eddy-shirt",
     "verified": true
   },
   {
@@ -224,6 +227,7 @@
     "show": "Aaahh!!! Real Monsters",
     "color": { "hex": "#5780B5", "name": "Krumm Lip Blue" },
     "image": "assets/photos/krumm-lips.png",
+    "quadPalette": "krumm-lips",
     "verified": true
   },
   {
@@ -260,6 +264,7 @@
     "show": "Foster's Home for Imaginary Friends",
     "color": { "hex": "#D2292A", "name": "Mac Shirt Red" },
     "image": "assets/photos/mac-shirt.png",
+    "quadPalette": "mac-shirt",
     "verified": true
   },
   {
@@ -323,6 +328,7 @@
     "show": "Arthur",
     "color": { "hex": "#F3D949", "name": "Arthur Sweater Yellow" },
     "image": "assets/photos/arthur-sweater.png",
+    "quadPalette": "arthur-sweater",
     "verified": true
   },
   {
@@ -397,6 +403,7 @@
     "show": "CatDog",
     "color": { "hex": "#2D2080", "name": "Dog Nose Indigo" },
     "image": "assets/photos/catdog-nose.png",
+    "quadPalette": "catdog-nose",
     "verified": true
   },
   {
@@ -452,6 +459,7 @@
     "show": "The Flintstones",
     "color": { "hex": "#E97B36", "name": "Fred Shirt Orange" },
     "image": "assets/photos/fred-flintstone-shirt.png",
+    "quadPalette": "fred-flintstone",
     "verified": true
   },
   {
@@ -461,6 +469,7 @@
     "show": "Jonny Quest",
     "color": { "hex": "#F0C84B", "name": "Jonny Quest Blonde" },
     "image": "assets/photos/johnny-quest-hair.png",
+    "quadPalette": "johnny-quest-hair",
     "verified": true
   },
   {
@@ -524,6 +533,7 @@
     "show": "The Grim Adventures of Billy & Mandy",
     "color": { "hex": "#F4E03A", "name": "Mandy Flower Yellow" },
     "image": "assets/photos/mandy-flower.png",
+    "quadPalette": "mandy-flower",
     "verified": true
   },
   {
@@ -608,6 +618,7 @@
     "show": "South Park",
     "color": { "hex": "#C13524", "name": "Kyle Hair Red" },
     "image": "assets/photos/kyle-hair.png",
+    "quadPalette": "kyle-hair",
     "verified": true
   },
   {

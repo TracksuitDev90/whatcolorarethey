@@ -126,6 +126,102 @@ const PALETTES = {
     '#1A1410', // Debbie black
     '#F08C5C', // Donnie's pale reddish-orange (>12 ΔE from canonical)
   ],
+  // Jonny Quest is a blond boy. Distractors are the other common cartoon
+  // hair colors — brown, red, and a blueish-green that sits far from
+  // canonical so a player can't confuse it for blonde.
+  'johnny-quest-hair': [
+    '#F0C84B', // Jonny Quest blonde (correct, mirrors items.json)
+    '#7B4F2C', // brown
+    '#E63946', // red
+    '#2A9D8F', // blueish-green / teal
+  ],
+  // Velma's sweater is the orange of the Mystery Inc. wardrobe. Distractors
+  // are purple, green, and teal — three distinct hue families that bracket
+  // the orange without bleeding into yellow or red shades.
+  'velma-sweater': [
+    '#DD7B30', // Velma sweater orange (correct, mirrors items.json)
+    '#8B5FBF', // purple
+    '#6FB04A', // green
+    '#2A9D8F', // teal
+  ],
+  // Mandy's shirt flower is bright yellow. Distractors are green, red, and
+  // rose pink — distinct hues from across the wheel.
+  'mandy-flower': [
+    '#F4E03A', // Mandy flower yellow (correct, mirrors items.json)
+    '#6FB04A', // green
+    '#E63946', // red
+    '#E63B97', // rose pink
+  ],
+  // Daphne's iconic purple dress. Distractors are orange, white, and a
+  // muted navy blue — three clearly different tones that don't bleed into
+  // purple.
+  'daphne-dress': [
+    '#7C3FAF', // Daphne dress purple (correct, mirrors items.json)
+    '#F39C12', // orange
+    '#FFFFFF', // white
+    '#5B7B9D', // muted / light navy blue
+  ],
+  // Mac's red shirt from Foster's. Distractors are green, baby blue, and
+  // lilac purple so the round picks between four distinct hues.
+  'mac-shirt': [
+    '#D2292A', // Mac shirt red (correct, mirrors items.json)
+    '#6FB04A', // green
+    '#89CFF0', // baby blue
+    '#C8A2C8', // lilac purple
+  ],
+  // CatDog — Dog's nose is a deep indigo. The "near miss" distractor is a
+  // clearly lighter purple-blue (well above the canonical's lightness so it
+  // never reads as the same colour), paired with a green and a yellow from
+  // unrelated hue families.
+  'catdog-nose': [
+    '#2D2080', // Dog nose indigo (correct, mirrors items.json)
+    '#7B73D1', // lighter purple-blue near-miss
+    '#6FB04A', // green
+    '#F4D03F', // yellow
+  ],
+  // Arthur's yellow sweater. Distractors are red, teal blue, and a dark
+  // burnt orange — three saturated hue families clearly apart from yellow.
+  'arthur-sweater': [
+    '#F3D949', // Arthur sweater yellow (correct, mirrors items.json)
+    '#E63946', // red
+    '#1B6E8A', // teal blue
+    '#B8651C', // dark orange
+  ],
+  // Fred Flintstone's tunic is orange. Distractors are sky blue, a clearly
+  // green-leaning green (not a teal that could half-read as blue), and a
+  // lighter peach near-miss synthesized from the canonical orange.
+  'fred-flintstone': [
+    '#E97B36', // Fred tunic orange (correct, mirrors items.json)
+    '#87CEEB', // sky blue
+    '#3CB371', // medium sea green (greener than a teal)
+    '#F4B186', // lighter peach orange (near-miss)
+  ],
+  // Eddy's yellow shirt. Distractors are blue, orange, and green — four
+  // canonical cartoon hues for a clean colour-family pick.
+  'eddy-shirt': [
+    '#F2C94C', // Eddy shirt yellow (correct, mirrors items.json)
+    '#4A90D9', // blue
+    '#E97B36', // orange
+    '#6FB04A', // green
+  ],
+  // Krumm's lips read as a slate blue in canon. Distractors are red (the
+  // "Krumm's lips are surely red, right?" trap), a yellow, and a green —
+  // each from a clearly distinct hue family.
+  'krumm-lips': [
+    '#5780B5', // Krumm lip blue (correct, mirrors items.json)
+    '#E63946', // red
+    '#F4D03F', // yellow
+    '#6FB04A', // green
+  ],
+  // Kyle's hair is red. Distractors are blonde (the obvious other "kid
+  // hair" colour), a green, and a blue — distinct hues so no near-red can
+  // muddy the round.
+  'kyle-hair': [
+    '#C13524', // Kyle hair red (correct, mirrors items.json)
+    '#F0C84B', // blonde
+    '#6FB04A', // green
+    '#4A90D9', // blue
+  ],
 };
 
 const BOX_COUNT = 4;
