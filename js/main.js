@@ -1213,6 +1213,23 @@ function flash(el, cls) {
   setTimeout(() => el.classList.remove(cls), 500);
 }
 
+const hardResetBtn = document.getElementById('hard-reset-btn');
+if (hardResetBtn) {
+  hardResetBtn.addEventListener('click', () => {
+    if (!confirm('Hard reset? This wipes all played games, streaks, and skips.')) return;
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('wcat:')) localStorage.removeItem(key);
+      }
+    } catch { /* private mode — nothing to clear */ }
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    window.location.replace(url.toString());
+  });
+}
+
 let toastTimer = null;
 function toast(message) {
   let host = document.getElementById('toast');
