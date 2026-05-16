@@ -1215,8 +1215,23 @@ function flash(el, cls) {
 
 const hardResetBtn = document.getElementById('hard-reset-btn');
 if (hardResetBtn) {
+  const idleLabel = 'Hard reset';
+  const armedLabel = 'Tap again to confirm';
+  let armedTimer = null;
+  const disarm = () => {
+    hardResetBtn.textContent = idleLabel;
+    hardResetBtn.classList.remove('btn--hard-reset-armed');
+    armedTimer = null;
+  };
   hardResetBtn.addEventListener('click', () => {
-    if (!confirm('Hard reset? This wipes all played games, streaks, and skips.')) return;
+    if (!armedTimer) {
+      hardResetBtn.textContent = armedLabel;
+      hardResetBtn.classList.add('btn--hard-reset-armed');
+      armedTimer = setTimeout(disarm, 3000);
+      return;
+    }
+    clearTimeout(armedTimer);
+    armedTimer = null;
     try {
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);

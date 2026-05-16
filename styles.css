@@ -835,6 +835,12 @@ body {
   text-transform: uppercase;
 }
 .btn--hard-reset:hover { opacity: 1; }
+.btn--hard-reset-armed {
+  opacity: 1;
+  color: #2a1700;
+  background: #ffb24d;
+  border-color: transparent;
+}
 
 /* A thin rainbow accent above the footer ties the chrome together. */
 .bottombar::before {
