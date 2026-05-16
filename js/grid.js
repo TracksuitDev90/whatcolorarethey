@@ -170,13 +170,26 @@ function mulberry32(seed) {
 
 // --- Grid generation ----------------------------------------------------
 
-// Step sizes are target perceptual offsets per unit of the balanced offset
-// pool (e.g., {-2, -1, +1, +2} for a 4-cell axis). STEP_L ≈ 0.035 in OKLab
-// L is roughly a 3.5-ΔE difference — close enough to demand careful looking
-// but far enough that no two neighbors are visually identical.
-const STEP_L = 0.035;
-const STEP_C = 0.020;
-const STEP_H = 8;
+// OKLab is perceptually uniform on average but human vision is hue-anisotropic:
+// a 0.035 lightness step on a yellow doesn't read the same as on a deep blue,
+// and 8° of hue shift is invisible on a saturated red but reads as "different
+// color" on a pale yellow. The JND_TABLE assigns hue-specific step sizes so
+// difficulty stays roughly constant across characters. Values are interpolated
+// linearly between bins on the OKLCH hue circle.
+const JND_TABLE = [
+  { h:   0, stepL: 0.035, stepC: 0.022, stepH: 9 },  // red
+  { h:  30, stepL: 0.035, stepC: 0.022, stepH: 8 },  // red-orange
+  { h:  60, stepL: 0.037, stepC: 0.022, stepH: 7 },  // orange
+  { h:  90, stepL: 0.040, stepC: 0.025, stepH: 5 },  // yellow — hue invisible, lean on L+C
+  { h: 120, stepL: 0.038, stepC: 0.024, stepH: 6 },  // yellow-green
+  { h: 150, stepL: 0.035, stepC: 0.022, stepH: 8 },  // green
+  { h: 180, stepL: 0.033, stepC: 0.022, stepH: 9 },  // cyan
+  { h: 210, stepL: 0.033, stepC: 0.022, stepH: 9 },  // sky
+  { h: 240, stepL: 0.033, stepC: 0.023, stepH: 10 }, // blue
+  { h: 270, stepL: 0.033, stepC: 0.022, stepH: 10 }, // violet
+  { h: 300, stepL: 0.034, stepC: 0.022, stepH: 9 },  // magenta
+  { h: 330, stepL: 0.035, stepC: 0.022, stepH: 9 },  // pink
+];
 
 // Per-round jitter on each step (±20%) so consecutive rounds don't reuse
 // the exact same gradient magnitude.
@@ -184,14 +197,109 @@ const JITTER_LO = 0.8;
 const JITTER_HI = 1.2;
 
 // Neutrals (chroma below this) skip the chroma/hue sweep entirely and
-// vary lightness on both axes instead.
+// vary lightness on both axes instead. The two step sizes are
+// deliberately non-commensurate (ratio ≈ 2.27, not 2.00) so diagonal
+// cells don't collapse onto identical combined lightness values.
 const NEUTRAL_CHROMA_THRESHOLD = 0.03;
 const NEUTRAL_STEP_L_ROW = 0.05;
-const NEUTRAL_STEP_L_COL = 0.025;
+const NEUTRAL_STEP_L_COL = 0.022;
 
 // Lightness bounds (avoid pure black / pure white clipping).
 const L_MIN = 0.05;
 const L_MAX = 0.95;
+
+// ΔE invariants enforced on every generated grid. Values are on the
+// conventional ΔE scale where ~2 is a just-noticeable difference.
+//
+// The "correct max" is hue-family aware: for low-chroma or extreme-L
+// colors (Ice King, Bugs Bunny), decoys are allowed to be much more
+// saturated or much darker than the correct, because the player's task
+// reframes as "pick the right shade of blue" rather than "pick the
+// exact pale blue." Constraining the ceiling tight for pales just
+// collapses the grid into 16 near-identical swatches; opening it lets
+// the row axis sweep through the whole blue family.
+const DELTA_E_PAIR_MIN = 2.0;
+const DELTA_E_CORRECT_MIN = 2.5;
+function deltaECorrectMaxFor({ C, L }) {
+  // Saturated mid-L colors: tight ceiling — wide spread reads as a
+  // different color family. Low-chroma or extreme-L colors: loose
+  // ceiling — they need room to spread through their hue family.
+  const extremeL = L > 0.85 || L < 0.30;
+  if (C < 0.04 || extremeL) return 30.0;
+  if (C < 0.09) return 22.0;
+  return 16.0;
+}
+const MAX_ATTEMPTS = 8;
+const INFLATE_PER_ATTEMPT = 1.25;
+
+// Linearly interpolate hue-specific JND steps for the given OKLCH base.
+// No chroma damping: `assignOffsets` already scales steps to fit available
+// chroma headroom, so near-neutrals get the right behavior automatically.
+function jndStepsFor({ H }) {
+  const hue = ((H % 360) + 360) % 360;
+  const bin = 360 / JND_TABLE.length;
+  const i = Math.floor(hue / bin);
+  const next = (i + 1) % JND_TABLE.length;
+  const t = (hue - i * bin) / bin;
+  const a = JND_TABLE[i];
+  const b = JND_TABLE[next];
+  return {
+    stepL: a.stepL + (b.stepL - a.stepL) * t,
+    stepC: a.stepC + (b.stepC - a.stepC) * t,
+    stepH: a.stepH + (b.stepH - a.stepH) * t,
+  };
+}
+
+// Euclidean distance in OKLab, scaled by 100 to land on the conventional
+// ΔE axis (~2 = just noticeable). Used to validate that generated grids
+// meet the perceptibility invariants.
+function deltaE(hex1, hex2) {
+  const [L1, a1, b1] = linearRgbToOklab(hexToLinearRgb(hex1));
+  const [L2, a2, b2] = linearRgbToOklab(hexToLinearRgb(hex2));
+  const dL = L1 - L2;
+  const da = a1 - a2;
+  const db = b1 - b2;
+  return Math.sqrt(dL * dL + da * da + db * db) * 100;
+}
+
+// Inspect the grid against all three ΔE invariants. Reports separately
+// whether the ramp is too tight (floor violated: cells too similar) or
+// too spread (ceiling violated: a decoy reads as a different color
+// family). The retry loop uses this signal to decide whether to inflate
+// or deflate the step magnitudes — exponentially climbing in one
+// direction would overshoot in the other.
+//
+// `score` is the total magnitude of violations: smaller is better. Used
+// to pick the best-of-attempts grid when no attempt passes cleanly.
+function inspectGrid(cells, correctHex, ceilingMax) {
+  const flat = cells.flat();
+  let floorViolation = 0;
+  let ceilingViolation = 0;
+  for (let i = 0; i < flat.length; i++) {
+    const cell = flat[i];
+    if (!cell.isCorrect) {
+      const d = deltaE(cell.hex, correctHex);
+      if (d < DELTA_E_CORRECT_MIN) {
+        floorViolation += DELTA_E_CORRECT_MIN - d;
+      }
+      if (d > ceilingMax) {
+        ceilingViolation += d - ceilingMax;
+      }
+    }
+    for (let j = i + 1; j < flat.length; j++) {
+      const d = deltaE(cell.hex, flat[j].hex);
+      if (d < DELTA_E_PAIR_MIN) {
+        floorViolation += DELTA_E_PAIR_MIN - d;
+      }
+    }
+  }
+  return {
+    ok: floorViolation === 0 && ceilingViolation === 0,
+    floorViolation,
+    ceilingViolation,
+    score: floorViolation + ceilingViolation,
+  };
+}
 
 // Choose a sorted set of signed offsets for an axis of `n` cells with the
 // correct cell at `correctIdx`. Cells fan out from correct in monotone
@@ -239,6 +347,179 @@ function jitter(rng, base) {
   return base * (JITTER_LO + rng() * (JITTER_HI - JITTER_LO));
 }
 
+// Single attempt at building a grid. The retry loop in `buildGrid` calls
+// this with increasing `inflate` until the ΔE invariants are met. The
+// correct-cell position is fixed by `seed` (NOT mixed with attempt) so
+// the player doesn't see the answer jump position between retries on the
+// same round.
+function generateGridOnce(correctHex, opts, inflate) {
+  const { rows, cols, baseSeed, forcedRow, forcedCol, attempt } = opts;
+  const base = oklchFromHex(correctHex);
+  // Position RNG uses the stable seed; step/jitter RNG mixes in attempt
+  // so each retry produces a genuinely different spread.
+  const posRng = mulberry32(baseSeed * 2654435761 + 17);
+  const stepRng = mulberry32(baseSeed * 2654435761 + 17 + attempt * 0x9E3779B9);
+
+  let correctRow = Number.isInteger(forcedRow) && forcedRow >= 0 && forcedRow < rows
+    ? forcedRow
+    : Math.floor(posRng() * rows);
+  const correctCol = Number.isInteger(forcedCol) && forcedCol >= 0 && forcedCol < cols
+    ? forcedCol
+    : Math.floor(posRng() * cols);
+
+  // If base.L is at the gamut extreme (pure white, pure black), the
+  // symmetric ramp can't fit cells on both sides — there's no upward
+  // headroom past L=1.0 or downward past L=0.0. `assignOffsets` would
+  // collapse step to its minimum, making every cell collide. Pin the
+  // correct cell to whichever edge of the grid lets all decoys live in
+  // the available direction. The player still sees a random column.
+  if (!Number.isInteger(forcedRow)) {
+    if (base.L > 0.97) correctRow = 0;
+    else if (base.L < 0.05) correctRow = rows - 1;
+  }
+
+  const isNeutral = base.C < NEUTRAL_CHROMA_THRESHOLD;
+  // Effective lightness bounds: never tighter than the base color itself.
+  // If base.L sits above L_MAX (e.g. pure white) or below L_MIN (e.g.
+  // pure black), the fixed clamp would collapse multiple cells onto the
+  // same value. Letting the bound extend to base.L preserves cell
+  // identity at the extremes.
+  const effLMin = Math.min(L_MIN, base.L);
+  const effLMax = Math.max(L_MAX, base.L);
+  const steps = jndStepsFor(base);
+
+  // For pale or low-chroma colors (Ice King, Bugs Bunny, Jigglypuff),
+  // the decoys are allowed to span a much wider slice of the hue family
+  // — "other shades of blue" rather than "other near-identical pales."
+  // Boost the base row step so the first attempt already produces a
+  // visible L spread instead of waiting for the retry loop to inflate.
+  let lowChromaBoost = 1.0;
+  if (isNeutral) {
+    lowChromaBoost = 1.8;
+  } else if (base.C < 0.05) {
+    lowChromaBoost = 1.8;
+  } else if (base.C < 0.08) {
+    lowChromaBoost = 1.5;
+  } else if (base.C < 0.12) {
+    lowChromaBoost = 1.2;
+  }
+
+  // Row offsets vary lightness. Headroom is distance to the effective
+  // L bounds, measured in step units.
+  const baseRowStepL = isNeutral ? NEUTRAL_STEP_L_ROW : steps.stepL;
+  const stepL = jitter(stepRng, baseRowStepL * lowChromaBoost) * inflate;
+  const lUpRoom = (effLMax - base.L) / stepL;
+  const lDownRoom = (base.L - effLMin) / stepL;
+  const rowDeltaL = assignOffsets(stepRng, rows, correctRow, stepL, lUpRoom, lDownRoom);
+
+  // Column axis: chroma + hue. For neutrals (base.C ≈ 0) we synthesize a
+  // small chroma so the column has a perceptual dimension to walk — the
+  // hue gets seeded randomly so two neutrals on the same day don't pick
+  // the same tint direction. Without this, the only column variation
+  // would be lightness, and `rowDeltaL[r] + colDeltaL[c]` linear sums
+  // collide on diagonals (cells coincide on identical L values).
+  const SYNTH_C_FOR_NEUTRAL = 0.018;
+  const colC = isNeutral ? SYNTH_C_FOR_NEUTRAL : base.C;
+  const colH = isNeutral ? posRng() * 360 : base.H;
+  const colStepsSrc = isNeutral
+    ? { stepC: SYNTH_C_FOR_NEUTRAL * 0.9, stepH: 25 }
+    : steps;
+  const stepC = jitter(stepRng, colStepsSrc.stepC * lowChromaBoost) * inflate;
+  let stepH = jitter(stepRng, colStepsSrc.stepH) * inflate;
+  const cMax = maxChromaAt(base.L, colH);
+  const cUpRoom = stepC > 0 ? Math.max(0, (cMax - colC) / stepC) : 0;
+  const cDownRoom = stepC > 0 ? colC / stepC : 0;
+  const colDeltaC = stepC > 0
+    ? assignOffsets(stepRng, cols, correctCol, stepC, cUpRoom, cDownRoom)
+    : new Array(cols).fill(0);
+
+  // Effective chroma step after gamut compression. If the column axis is
+  // gamut-bound (chroma headroom < what stepC asked for), the actual
+  // rank-1 chroma delta can fall below the JND. Compensate by widening
+  // the hue step — hue has no gamut clamp, and at moderate-to-high
+  // chroma a hue offset produces a visible color shift even when chroma
+  // can't move further. Cap at 20° to avoid crossing color families.
+  const effectiveStepC = colDeltaC.length > 1
+    ? Math.abs(colDeltaC[1] - colDeltaC[0])
+    : stepC;
+  const TARGET_RANK_ONE_DE = DELTA_E_PAIR_MIN / 100;
+  const dcEffect = effectiveStepC;
+  if (dcEffect < TARGET_RANK_ONE_DE && colC > 0.01) {
+    const dhEffectNeeded = Math.sqrt(
+      Math.max(0, TARGET_RANK_ONE_DE * TARGET_RANK_ONE_DE - dcEffect * dcEffect)
+    );
+    const requiredStepH = dhEffectNeeded / (colC * Math.PI / 180);
+    if (requiredStepH > stepH) stepH = Math.min(requiredStepH, 20);
+  }
+  // Hue can always go either way (no clamp).
+  const colDeltaH = assignOffsets(stepRng, cols, correctCol, stepH, 4, 4);
+
+  const cells = [];
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) {
+      if (r === correctRow && c === correctCol) {
+        row.push({ row: r, col: c, hex: correctHex.toUpperCase(), isCorrect: true });
+        continue;
+      }
+      const L = clamp(base.L + rowDeltaL[r], effLMin, effLMax);
+      const C = Math.max(0, colC + colDeltaC[c]);
+      const H = colH + colDeltaH[c];
+      row.push({
+        row: r,
+        col: c,
+        L, C, H,
+        hex: hexFromOklch(L, C, H),
+        isCorrect: false,
+      });
+    }
+    cells.push(row);
+  }
+
+  // Final dedup pass: pathological cases (pure white at L=1.0 with zero
+  // chroma headroom, etc.) can produce two cells with nearly-identical
+  // perceptual color even after the structural fixes — the gamut clamp
+  // collapses everything to the same near-white when L is extreme. Walk
+  // the cells and nudge L by a small per-cell salt until each cell is
+  // perceptibly distinct (>1 ΔE) from every prior cell. The nudges are
+  // small (≤ 0.04 L) but guarantee distinguishable swatches — duplicate
+  // or near-duplicate cells would break the game outright.
+  const SEP_MIN = 1.0;
+  const NUDGE_STEP = 0.006;
+  const NUDGE_MAX = 0.04;
+  const flat = cells.flat();
+  // Seed `accepted` with the correct cell up front. Otherwise decoys
+  // iterated BEFORE the correct cell in row-major order wouldn't be
+  // checked against it — at extreme L (#FFFFFF) those decoys are often
+  // also gamut-clipped to pure white, creating duplicates of the answer.
+  const correctCell = flat.find(c => c.isCorrect);
+  const accepted = correctCell ? [correctCell] : [];
+  for (const cell of flat) {
+    if (cell === correctCell) {
+      delete cell.L; delete cell.C; delete cell.H;
+      continue;
+    }
+    let nudge = 0;
+    let attempt = 0;
+    const tooClose = () => accepted.some(p => deltaE(p.hex, cell.hex) < SEP_MIN);
+    while (tooClose() && nudge <= NUDGE_MAX) {
+      attempt++;
+      // Walk nudge magnitude outward, alternating direction so the
+      // dedup explores both lighter and darker than the original L.
+      nudge = Math.ceil(attempt / 2) * NUDGE_STEP;
+      const dir = (attempt % 2 === 1) ? -1 : 1;
+      const newL = clamp(cell.L + dir * nudge, effLMin, effLMax);
+      cell.hex = hexFromOklch(newL, cell.C, cell.H);
+    }
+    accepted.push(cell);
+    delete cell.L;
+    delete cell.C;
+    delete cell.H;
+  }
+
+  return { cells, correctRow, correctCol, rows, cols };
+}
+
 export function buildGrid(
   correctHex,
   {
@@ -249,76 +530,30 @@ export function buildGrid(
     correctCol: forcedCol = null,
   } = {},
 ) {
+  const opts = { rows, cols, baseSeed: seed, forcedRow, forcedCol, attempt: 0 };
   const base = oklchFromHex(correctHex);
-  const rng = mulberry32(seed * 2654435761 + 17);
-  const correctRow = Number.isInteger(forcedRow) && forcedRow >= 0 && forcedRow < rows
-    ? forcedRow
-    : Math.floor(rng() * rows);
-  const correctCol = Number.isInteger(forcedCol) && forcedCol >= 0 && forcedCol < cols
-    ? forcedCol
-    : Math.floor(rng() * cols);
-
-  const isNeutral = base.C < NEUTRAL_CHROMA_THRESHOLD;
-
-  // Row offsets vary lightness. Headroom is symmetric distance to the
-  // L_MIN / L_MAX clamps, measured in step units.
-  const stepL = jitter(rng, isNeutral ? NEUTRAL_STEP_L_ROW : STEP_L);
-  const lUpRoom = (L_MAX - base.L) / stepL;
-  const lDownRoom = (base.L - L_MIN) / stepL;
-  const rowDeltaL = assignOffsets(rng, rows, correctRow, stepL, lUpRoom, lDownRoom);
-
-  let colDeltaL = null;
-  let colDeltaC = null;
-  let colDeltaH = null;
-  if (isNeutral) {
-    const stepLcol = jitter(rng, NEUTRAL_STEP_L_COL);
-    // Column lightness uses the row-side headroom too — the combined
-    // (row + col) shift must fit. Subtract the worst-case row shift.
-    const rowMax = Math.max(...rowDeltaL.map(Math.abs));
-    const upRoomCol = Math.max(0, (L_MAX - base.L - rowMax) / stepLcol);
-    const downRoomCol = Math.max(0, (base.L - L_MIN - rowMax) / stepLcol);
-    colDeltaL = assignOffsets(rng, cols, correctCol, stepLcol, upRoomCol, downRoomCol);
-  } else {
-    const stepC = jitter(rng, STEP_C);
-    const stepH = jitter(rng, STEP_H);
-    // Chroma headroom: down is base.C (can't go below zero), up is room
-    // to the gamut boundary at base.L (approximate — actual gamut varies
-    // by L, but hexFromOklch will clamp anything that overshoots).
-    const cMax = maxChromaAt(base.L, base.H);
-    const cUpRoom = Math.max(0, (cMax - base.C) / stepC);
-    const cDownRoom = base.C / stepC;
-    colDeltaC = assignOffsets(rng, cols, correctCol, stepC, cUpRoom, cDownRoom);
-    // Hue can always go either way (no clamp).
-    colDeltaH = assignOffsets(rng, cols, correctCol, stepH, 4, 4);
-  }
-
-  const cells = [];
-  for (let r = 0; r < rows; r++) {
-    const row = [];
-    for (let c = 0; c < cols; c++) {
-      if (r === correctRow && c === correctCol) {
-        row.push({ row: r, col: c, hex: correctHex.toUpperCase(), isCorrect: true });
-        continue;
-      }
-      let L, C, H;
-      if (isNeutral) {
-        L = clamp(base.L + rowDeltaL[r] + colDeltaL[c], L_MIN, L_MAX);
-        C = 0;
-        H = 0;
-      } else {
-        L = clamp(base.L + rowDeltaL[r], L_MIN, L_MAX);
-        C = Math.max(0, base.C + colDeltaC[c]);
-        H = base.H + colDeltaH[c];
-      }
-      row.push({
-        row: r,
-        col: c,
-        hex: hexFromOklch(L, C, H),
-        isCorrect: false,
-      });
+  const ceilingMax = deltaECorrectMaxFor(base);
+  let inflate = 1.0;
+  let best = null;
+  let bestScore = Infinity;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    opts.attempt = attempt;
+    const grid = generateGridOnce(correctHex, opts, inflate);
+    const insp = inspectGrid(grid.cells, correctHex, ceilingMax);
+    if (insp.ok) return grid;
+    if (insp.score < bestScore) {
+      best = grid;
+      bestScore = insp.score;
     }
-    cells.push(row);
+    // Adjust inflate toward whichever bound is more violated. If only the
+    // floor is violated → spread cells wider. If only the ceiling →
+    // contract. If both, the floor wins (better to over-spread than to
+    // have invisible neighbors).
+    if (insp.floorViolation > 0 && insp.floorViolation >= insp.ceilingViolation) {
+      inflate *= INFLATE_PER_ATTEMPT;
+    } else if (insp.ceilingViolation > 0) {
+      inflate /= INFLATE_PER_ATTEMPT;
+    }
   }
-
-  return { cells, correctRow, correctCol, rows, cols };
+  return best;
 }
