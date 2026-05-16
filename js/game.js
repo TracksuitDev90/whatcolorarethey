@@ -25,15 +25,17 @@ const QUAD_MAX_GUESSES = 1;
 const GRID_SIZE = 4;
 export const MAX_SKIPS_PER_MODE = 999;
 
-// The 12 non-corner positions on the 4x4 grid, ordered row-major. The
-// answer rotates through these (corners excluded) so the correct cell
-// can sit at an edge of one axis but never both — eliminates the
-// "corner extreme" failure mode while keeping monotone gradient feel.
+// All 16 positions on the 4x4 grid, ordered row-major. The answer
+// rotates through these across rounds and days, and the grid ramp
+// reorients around whichever cell holds the answer — so a corner
+// answer pulls the gradient diagonally across the board, and a centre
+// answer fans the ramp outward. Corners are safe now that the
+// generator's asymmetric ramp logic handles edge positions cleanly.
 const GRID_POSITIONS = [
-  [0, 1], [0, 2],
+  [0, 0], [0, 1], [0, 2], [0, 3],
   [1, 0], [1, 1], [1, 2], [1, 3],
   [2, 0], [2, 1], [2, 2], [2, 3],
-  [3, 1], [3, 2],
+  [3, 0], [3, 1], [3, 2], [3, 3],
 ];
 
 export function maxGuessesFor(character) {

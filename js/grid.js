@@ -177,18 +177,18 @@ function mulberry32(seed) {
 // difficulty stays roughly constant across characters. Values are interpolated
 // linearly between bins on the OKLCH hue circle.
 const JND_TABLE = [
-  { h:   0, stepL: 0.035, stepC: 0.022, stepH: 9 },  // red
-  { h:  30, stepL: 0.035, stepC: 0.022, stepH: 8 },  // red-orange
+  { h:   0, stepL: 0.035, stepC: 0.027, stepH: 9 },  // red — wider chroma sweep
+  { h:  30, stepL: 0.035, stepC: 0.025, stepH: 8 },  // red-orange
   { h:  60, stepL: 0.037, stepC: 0.022, stepH: 7 },  // orange
-  { h:  90, stepL: 0.040, stepC: 0.025, stepH: 5 },  // yellow — hue invisible, lean on L+C
-  { h: 120, stepL: 0.038, stepC: 0.024, stepH: 6 },  // yellow-green
+  { h:  90, stepL: 0.040, stepC: 0.022, stepH: 5 },  // yellow — hue invisible, lean on L
+  { h: 120, stepL: 0.038, stepC: 0.022, stepH: 6 },  // yellow-green
   { h: 150, stepL: 0.035, stepC: 0.022, stepH: 8 },  // green
   { h: 180, stepL: 0.033, stepC: 0.022, stepH: 9 },  // cyan
   { h: 210, stepL: 0.033, stepC: 0.022, stepH: 9 },  // sky
   { h: 240, stepL: 0.033, stepC: 0.023, stepH: 10 }, // blue
   { h: 270, stepL: 0.033, stepC: 0.022, stepH: 10 }, // violet
-  { h: 300, stepL: 0.034, stepC: 0.022, stepH: 9 },  // magenta
-  { h: 330, stepL: 0.035, stepC: 0.022, stepH: 9 },  // pink
+  { h: 300, stepL: 0.034, stepC: 0.024, stepH: 9 },  // magenta
+  { h: 330, stepL: 0.035, stepC: 0.025, stepH: 9 },  // pink
 ];
 
 // Per-round jitter on each step (±20%) so consecutive rounds don't reuse
@@ -412,47 +412,60 @@ function generateGridOnce(correctHex, opts, inflate) {
   const lDownRoom = (base.L - effLMin) / stepL;
   const rowDeltaL = assignOffsets(stepRng, rows, correctRow, stepL, lUpRoom, lDownRoom);
 
-  // Column axis: chroma + hue. For neutrals (base.C ≈ 0) we synthesize a
-  // small chroma so the column has a perceptual dimension to walk — the
-  // hue gets seeded randomly so two neutrals on the same day don't pick
-  // the same tint direction. Without this, the only column variation
-  // would be lightness, and `rowDeltaL[r] + colDeltaL[c]` linear sums
-  // collide on diagonals (cells coincide on identical L values).
-  const SYNTH_C_FOR_NEUTRAL = 0.018;
-  const colC = isNeutral ? SYNTH_C_FOR_NEUTRAL : base.C;
-  const colH = isNeutral ? posRng() * 360 : base.H;
-  const colStepsSrc = isNeutral
-    ? { stepC: SYNTH_C_FOR_NEUTRAL * 0.9, stepH: 25 }
+  // Column axis: chroma + hue. We anchor on the base hue whenever the
+  // color has ANY chromatic signal (even Bugs Bunny's C=0.008 carries
+  // direction — he's a cool grey, not a warm one), and only seed a
+  // random hue for the absolutely pure-neutral edge case. For low-chroma
+  // colors we synthesize a small chroma so the column has a perceptual
+  // dimension to walk, and the hue step stays modest so decoys don't
+  // drift into a different color family.
+  const SYNTH_C_FLOOR = 0.018;
+  const isLowChroma = base.C < 0.04;
+  const colC = isLowChroma ? Math.max(base.C, SYNTH_C_FLOOR) : base.C;
+  const colH = base.C > 0.002 ? base.H : posRng() * 360;
+  const colStepsSrc = isLowChroma
+    ? { stepC: SYNTH_C_FLOOR * 0.9, stepH: 12 }
     : steps;
   const stepC = jitter(stepRng, colStepsSrc.stepC * lowChromaBoost) * inflate;
-  let stepH = jitter(stepRng, colStepsSrc.stepH) * inflate;
+  // Hue is intentionally NOT inflated. Unlike L and C, hue has no gamut
+  // clamp, so multiplying it by `inflate` just rotates decoys out of the
+  // color family (SpongeBob yellow → mint green, etc.). Whenever the
+  // retry loop needs more spread, it should get it from L and C, not
+  // by abandoning the answer's hue.
+  const stepH = jitter(stepRng, colStepsSrc.stepH);
   const cMax = maxChromaAt(base.L, colH);
+  // Keep decoys in the same color family by capping how far chroma can
+  // drop. For saturated colors (SpongeBob yellow, Courage pink), letting
+  // chroma slide to zero turns decoys into olive/grey — readable as a
+  // different color. A floor at 50% of base chroma preserves family
+  // identity while still giving the column axis room to vary.
+  const cFamilyFloor = isLowChroma ? 0 : base.C * 0.5;
   const cUpRoom = stepC > 0 ? Math.max(0, (cMax - colC) / stepC) : 0;
-  const cDownRoom = stepC > 0 ? colC / stepC : 0;
+  const cDownRoom = stepC > 0 ? Math.max(0, (colC - cFamilyFloor) / stepC) : 0;
   const colDeltaC = stepC > 0
     ? assignOffsets(stepRng, cols, correctCol, stepC, cUpRoom, cDownRoom)
     : new Array(cols).fill(0);
 
-  // Effective chroma step after gamut compression. If the column axis is
-  // gamut-bound (chroma headroom < what stepC asked for), the actual
-  // rank-1 chroma delta can fall below the JND. Compensate by widening
-  // the hue step — hue has no gamut clamp, and at moderate-to-high
-  // chroma a hue offset produces a visible color shift even when chroma
-  // can't move further. Cap at 20° to avoid crossing color families.
-  const effectiveStepC = colDeltaC.length > 1
-    ? Math.abs(colDeltaC[1] - colDeltaC[0])
-    : stepC;
-  const TARGET_RANK_ONE_DE = DELTA_E_PAIR_MIN / 100;
-  const dcEffect = effectiveStepC;
-  if (dcEffect < TARGET_RANK_ONE_DE && colC > 0.01) {
-    const dhEffectNeeded = Math.sqrt(
-      Math.max(0, TARGET_RANK_ONE_DE * TARGET_RANK_ONE_DE - dcEffect * dcEffect)
-    );
-    const requiredStepH = dhEffectNeeded / (colC * Math.PI / 180);
-    if (requiredStepH > stepH) stepH = Math.min(requiredStepH, 20);
-  }
-  // Hue can always go either way (no clamp).
+  // Hue offsets. We deliberately don't widen stepH when chroma is gamut-
+  // bound — boosting hue past its zone value (e.g. yellow's tight 5°)
+  // pushes decoys into the neighboring family (yellow→green for
+  // SpongeBob). Better to accept a slightly tighter rank-1 ΔE than to
+  // misrepresent the color. Hue can rotate either way (no clamp).
   const colDeltaH = assignOffsets(stepRng, cols, correctCol, stepH, 4, 4);
+
+  // Small column lightness offset so cells in the correctRow don't all
+  // share L = base.L. At gamut extremes (#FFFFFF, near-black, very
+  // saturated colors near the chroma ceiling) the chroma+hue column
+  // variation gets clipped, collapsing the correctRow into near-
+  // identical cells. A modest column-L step (≈30% of the row step)
+  // gives each cell in the correctRow its own L value, restoring
+  // perceptual distinction without breaking the gradient feel.
+  const stepLcol = stepL * 0.3;
+  const colDeltaL = assignOffsets(
+    stepRng, cols, correctCol, stepLcol,
+    Math.max(0, (effLMax - base.L - stepL * (rows - 1)) / stepLcol),
+    Math.max(0, (base.L - effLMin - stepL * (rows - 1)) / stepLcol),
+  );
 
   const cells = [];
   for (let r = 0; r < rows; r++) {
@@ -462,7 +475,7 @@ function generateGridOnce(correctHex, opts, inflate) {
         row.push({ row: r, col: c, hex: correctHex.toUpperCase(), isCorrect: true });
         continue;
       }
-      const L = clamp(base.L + rowDeltaL[r], effLMin, effLMax);
+      const L = clamp(base.L + rowDeltaL[r] + colDeltaL[c], effLMin, effLMax);
       const C = Math.max(0, colC + colDeltaC[c]);
       const H = colH + colDeltaH[c];
       row.push({
