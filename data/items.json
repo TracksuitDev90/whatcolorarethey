@@ -697,5 +697,35 @@
     "image": "assets/photos/donatello-mask.png",
     "quadPalette": "tmnt",
     "verified": true
+  },
+  {
+    "id": "aladdin-vest",
+    "type": "item",
+    "name": "Aladdin's vest",
+    "show": "Aladdin",
+    "color": { "hex": "#4D2880", "name": "Aladdin Vest Purple" },
+    "image": "assets/photos/aladdin-vest.png",
+    "quadPalette": "aladdin-vest",
+    "verified": true
+  },
+  {
+    "id": "lard-lad-donut",
+    "type": "item",
+    "name": "Lard Lad Donut",
+    "show": "The Simpsons",
+    "color": { "hex": "#D8318B", "name": "Lard Lad Donut Pink" },
+    "image": "assets/photos/lard-lad-donut.png",
+    "quadPalette": "lard-lad-donut",
+    "verified": true
+  },
+  {
+    "id": "russell-neckerchief",
+    "type": "item",
+    "name": "Russell's neckerchief",
+    "show": "Up",
+    "color": { "hex": "#F65A16", "name": "Russell Neckerchief Orange" },
+    "image": "assets/photos/russell-neckerchief.png",
+    "quadPalette": "russell-neckerchief",
+    "verified": true
   }
 ]

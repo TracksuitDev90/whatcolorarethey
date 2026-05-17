@@ -516,5 +516,48 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Darwin_Watterson",
     "image": "assets/photos/darwin.png",
     "verified": true
+  },
+  {
+    "id": "mushu",
+    "name": "Mushu",
+    "color": { "hex": "#891807", "name": "Mushu Red" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Mushu_(Mulan)",
+    "image": "assets/photos/mushu.png",
+    "verified": true
+  },
+  {
+    "id": "zim",
+    "name": "Zim",
+    "era": "00s",
+    "color": { "hex": "#A8C479", "name": "Zim Green" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Invader_Zim",
+    "image": "assets/photos/zim.png",
+    "verified": true
+  },
+  {
+    "id": "skeeter-valentine",
+    "name": "Skeeter Valentine",
+    "era": "90s",
+    "color": { "hex": "#86E8DE", "name": "Skeeter Teal" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Doug_(TV_series)",
+    "image": "assets/photos/skeeter-valentine.png",
+    "verified": true
+  },
+  {
+    "id": "share-bear",
+    "name": "Share Bear",
+    "era": "80s",
+    "color": { "hex": "#8C78BC", "name": "Share Bear Purple" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Care_Bears",
+    "image": "assets/photos/share-bear.png",
+    "verified": true
+  },
+  {
+    "id": "doc-hudson",
+    "name": "Doc Hudson",
+    "color": { "hex": "#333F6A", "name": "Doc Hudson Navy" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Cars_(franchise)",
+    "image": "assets/photos/doc-hudson.png",
+    "verified": true
   }
 ]
