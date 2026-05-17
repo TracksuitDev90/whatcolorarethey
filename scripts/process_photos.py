@@ -273,6 +273,15 @@ ASSIGNMENTS = {
     "anxiety":                  "IMG_0599.webp",
     "darwin":                   "IMG_0600.webp",
     "donatello-mask":           "IMG_0602.webp",
+    # ---- Newer additions ----
+    "mushu":                    "IMG_0610.webp",
+    "aladdin-vest":             "IMG_0614.webp",
+    "zim":                      "IMG_0616.webp",
+    "lard-lad-donut":           "IMG_0618.webp",
+    "skeeter-valentine":        "IMG_0620.webp",
+    "share-bear":               "IMG_0622.webp",
+    "doc-hudson":               "IMG_0623.webp",
+    "russell-neckerchief":      "IMG_0626.webp",
 }
 
 

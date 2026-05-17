@@ -222,6 +222,34 @@ const PALETTES = {
     '#6FB04A', // green
     '#4A90D9', // blue
   ],
+  // Aladdin's vest is a deep eggplant purple. Distractors are picked from
+  // the warmer half of the wheel — light ruby red, sunset orange-yellow,
+  // and sky blue — so the round reads as a clean pick between four
+  // distinct hue families.
+  'aladdin-vest': [
+    '#4D2880', // Aladdin vest purple (correct, mirrors items.json)
+    '#D94661', // light ruby red
+    '#FFA94D', // sunset yellow
+    '#87CEEB', // sky blue
+  ],
+  // Lard Lad's donut wears the iconic pink frosting. Distractors lean into
+  // donut-shop fare: chocolate brown, blueberry-frosting blue, and the
+  // plain-cake donut yellow.
+  'lard-lad-donut': [
+    '#D8318B', // Lard Lad donut pink (correct, mirrors items.json)
+    '#5D2E0E', // chocolate brown
+    '#3953A4', // blueberry blue
+    '#E1C699', // plain donut yellow
+  ],
+  // Russell's neckerchief is the Wilderness Explorers' orange. Distractors
+  // are uniform-adjacent colours from clearly different hue families —
+  // deep red, grass green, and a sun yellow.
+  'russell-neckerchief': [
+    '#F65A16', // Russell neckerchief orange (correct, mirrors items.json)
+    '#8B0000', // deep red
+    '#4A7C2E', // grass green
+    '#FFD700', // sun yellow
+  ],
 };
 
 const BOX_COUNT = 4;
