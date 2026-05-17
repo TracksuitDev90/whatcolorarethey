@@ -115,6 +115,10 @@ FORCE_COVER = {
     # instead of padding back out to a wide frame around a small subject.
     "IMG_0555.webp",  # Blue Ranger
     "IMG_0558.webp",  # Black Ranger
+    # Shrek source is 16:9 with hands stretched to the edges — isolated path
+    # pads back out to 4:3 with white space above/below. cover_crop fills the
+    # whole frame; the trade-off is the outer edge of each hand gets clipped.
+    "IMG_0378.jpeg",  # Shrek
 }
 
 # Per-image override of the bbox padding fraction used by isolated_subject.
@@ -282,6 +286,10 @@ ASSIGNMENTS = {
     "share-bear":               "IMG_0622.webp",
     "doc-hudson":               "IMG_0623.webp",
     "russell-neckerchief":      "IMG_0626.webp",
+    # ---- Latest characters ----
+    "peter-potamus":            "IMG_0628.webp",
+    "huckleberry-hound":        "IMG_0629.jpeg",
+    "nidoking":                 "IMG_0632.webp",
 }
 
 

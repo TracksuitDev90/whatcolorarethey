@@ -559,5 +559,29 @@
     "wikipediaUrl": "https://en.wikipedia.org/wiki/Cars_(franchise)",
     "image": "assets/photos/doc-hudson.png",
     "verified": true
+  },
+  {
+    "id": "peter-potamus",
+    "name": "Peter Potamus",
+    "color": { "hex": "#68407c", "name": "Peter Potamus Purple" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Peter_Potamus_Show",
+    "image": "assets/photos/peter-potamus.png",
+    "verified": true
+  },
+  {
+    "id": "huckleberry-hound",
+    "name": "Huckleberry Hound",
+    "color": { "hex": "#80d4d1", "name": "Huckleberry Hound Teal" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/The_Huckleberry_Hound_Show",
+    "image": "assets/photos/huckleberry-hound.png",
+    "verified": true
+  },
+  {
+    "id": "nidoking",
+    "name": "Nidoking",
+    "color": { "hex": "#bc93b7", "name": "Nidoking Mauve" },
+    "wikipediaUrl": "https://en.wikipedia.org/wiki/Nidoking",
+    "image": "assets/photos/nidoking.png",
+    "verified": true
   }
 ]
